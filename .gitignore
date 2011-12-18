@@ -2,4 +2,7 @@
 node_modules/
 *.log
 .monitor
+build/*
+public/javascripts/tab-min.js
+public/stylesheets/tab-min.css
 

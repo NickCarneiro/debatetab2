@@ -66,7 +66,7 @@ app.configure('development', function() {
 	}));
 
 	app.get('/tab', function(req, res) {
-		res.render('index', {
+		res.render('tab', {
 			modernizr: "javascripts/libs/modernizr-2.0.6.min.js",
 			jquery: "javascripts/libs/jquery-1.7.1.min.js",
 			title: 'Tab development',
@@ -87,7 +87,7 @@ app.configure('production', function() {
 	app.use(express.static(__dirname + '/public', { maxAge: cacheAge }));
 	app.use(express.errorHandler());
 		app.get('/tab', function(req, res) {
-		res.render('index', {
+		res.render('tab', {
 			modernizr: "javascripts/libs/modernizr-2.0.6.min.js",
 			jquery: "javascripts/libs/jquery-1.7.1.min.js",
 			title: 'Tab production',
