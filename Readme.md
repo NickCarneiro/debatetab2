@@ -1,29 +1,18 @@
 
-# HTML5 Express EJS Boilerplate ("H5EEB")
+# DebateTab2
 
-Get started with a modern boilerplate for [Express](http://expressjs.com)!
+A reboot of the DebateTab project
 
-Everyone has their own boilerplate. Why use this one?
+This project contains the client and server code. It's based on express ejs boilerplate
 
-* No jade or stylus. Use what you know, straight html and css
-* No databases pre-installed. Choose what you want.
-* Recent jQuery (1.7.1)
+## Tabulation
 
-## Requirements
-  * [node](https://github.com/joyent/node)
-  * [npm](https://github.com/isaacs/npm)
+Big front end project that can operate without connectivity. Uses backbone as a framework.
 
-# Quick Start
+### Workflow
+Google Closure is used as a build system.
 
-Coming soon.
+## Registration
 
-# Credits
-
-Forked from https://github.com/niftylettuce/express-icing
-
-# License
-
-Several components to H5EB have different licenses, (e.g. components from [H5BP](https://github.com/paulirish/html5-boilerplate)).
-
-All other work is [The Unlicense](http://unlicense.org/) (Public Domain)
+This is coming later.
 
