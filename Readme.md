@@ -7,6 +7,7 @@ This project contains the client and server code. It's based on express ejs boil
 
 ## Conceptual Integrity
 Goals for this implementation:
+
 * Modularize everything in order to minimize the amount of code in each file. This is a rule of thumb, but it makes editing much simpler.
 
 ## Tabulation

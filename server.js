@@ -67,8 +67,6 @@ app.configure('development', function() {
 
 	app.get('/tab', function(req, res) {
 		res.render('tab', {
-			modernizr: "javascripts/libs/modernizr-2.0.6.min.js",
-			jquery: "javascripts/libs/jquery-1.7.1.min.js",
 			title: 'Tab development',
 			javascripts: ['tab_main.js'],
 			stylesheets: ['bptop.css', '1140.css', 'style.css', 'bpbottom.css']
@@ -88,8 +86,6 @@ app.configure('production', function() {
 	app.use(express.errorHandler());
 		app.get('/tab', function(req, res) {
 		res.render('tab', {
-			modernizr: "javascripts/libs/modernizr-2.0.6.min.js",
-			jquery: "javascripts/libs/jquery-1.7.1.min.js",
 			title: 'Tab production',
 			javascripts: ['tab-min.js'],
 			stylesheets: ['tab-min.css']

@@ -1,0 +1,6 @@
+/*
+=====
+DebateTab
+Author: Nick Carneiro
+=====
+*/
