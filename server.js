@@ -68,8 +68,8 @@ app.configure('development', function() {
 	app.get('/tab', function(req, res) {
 		res.render('tab', {
 			title: 'Tab development',
-			javascripts: ['tab_main.js'],
-			stylesheets: ['bptop.css', '1140.css', 'style.css', 'bpbottom.css']
+			javascripts: ['jquery.tmpl.js','knockout-2.0.0rc.js','tab_main.js'],
+			stylesheets: ['bptop.css', '1140.css', 'tab.css', 'bpbottom.css']
 		});
 	});
 

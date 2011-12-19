@@ -1,3 +1,18 @@
 /* ==|== primary styles =====================================================
    Author: Nick Carneiro
    ========================================================================== */
+body {
+	background: url('/images/bg.png');
+}
+.center {
+
+	margin: 0px auto;
+}
+
+.header_image {
+	display: block;
+	width:548px;
+	background: #fff;
+	padding: 0px 15px 0px 15px;
+	box-shadow: #d5d5d5 0 5px 6px 0;;
+}

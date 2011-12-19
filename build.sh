@@ -1,7 +1,8 @@
 #!/bin/bash
 echo "Building project..."
 #combine javascript
-cat public/javascripts/tab_main.js public/javascripts/plugins.js > build/combined.js
+cat public/javascripts/jquery.tmpl.js public/javascripts/knockout-2.0.0rc.js \
+	public/javascripts/tab_main.js public/javascripts/plugins.js > build/combined.js
 #minify javscript
 java -jar node_modules/node-minify/lib/google_closure_compiler.jar \
 	--js build/combined.js --js_output_file public/javascripts/tab-min.js
