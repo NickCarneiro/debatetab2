@@ -1,6 +1,10 @@
 /* ==|== primary styles =====================================================
    Author: Nick Carneiro
    ========================================================================== */
+
+/*
+Generic styles to be applied generally
+*/
 body {
 	background: url('/images/bg.png');
 }
@@ -9,10 +13,62 @@ body {
 	margin: 0px auto;
 }
 
+.block {
+	background: #fff;
+	box-shadow: #d5d5d5 0 5px 6px 0;
+	margin-bottom: 10px;
+}
+
+
+/*
+specfic structure elements
+*/
+.maincontent{
+	margin-top: 0px;
+}
+
 .header_image {
 	display: block;
 	width:548px;
-	background: #fff;
 	padding: 0px 15px 0px 15px;
-	box-shadow: #d5d5d5 0 5px 6px 0;;
+	
+}
+
+/*
+styles for main menu
+*/
+.menu {
+	font-size: 28px;
+	list-style-type: none;
+	text-align: left;
+	padding-right: 10px;
+	margin-top: -6px;
+}
+
+
+#main_menu > li {
+	width: 100%;
+	margin: 6px 0px 0px 0px;
+	padding: 3px 0px 3px 0px;
+	text-align: left;
+	padding-left: 10px;
+	opacity: .9;
+}
+#main_menu > li:hover {
+	cursor: pointer;
+}
+
+/*
+when a menu item li is selectedm its only class is menu_item_selected. When it is not selected, its class is just menu_item.
+*/
+.menu_item {
+	background-color: #E8E8E8;
+}
+
+.menu_item:hover {
+	background: #F8F8F8;
+}
+
+.menu_item_selected {
+	background-color: #d8d8d8;
 }
