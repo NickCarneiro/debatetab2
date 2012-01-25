@@ -3,9 +3,13 @@ echo "Building project..."
 #combine javascript
 #same order as inclusion in server.js
 cat public/javascripts/jquery.tmpl.js\
-	public/javascripts/knockout-2.0.0rc.js \
+	public/javascripts/underscore.js \
+	public/javascripts/backbone.js \
 	public/javascripts/plugins.js \
 	public/javascripts/tab_main.js \
+	public/javascripts/tab_collections.js \
+	public/javascripts/tab_pairing.js \
+	public/javascripts/tab_views.js \
 	public/javascripts/tab_ui.js \
 	> build/combined.js
 

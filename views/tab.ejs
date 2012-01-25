@@ -26,14 +26,256 @@
 		<!-- end left nav-->
 
 		<!-- begin main content areas. Only one is shown at a time.-->
-		<div id="rounds_container" class="main_container hidden tencol block last">Rounds</div>
-		<div id="teams_container" class="main_container hidden tencol block last">Teams</div>
-		<div id="judges_container" class="main_container hidden tencol block last">Judges</div>
-		<div id="rooms_container" class="main_container hidden tencol block last">Rooms</div>
-		<div id="schools_container" class="main_container hidden tencol block last">Schools</div>
-		<div id="divisions_container" class="main_container hidden tencol block last">Divisions</div>
+		<div id="rounds_container" class="main_container hidden tencol block last">
+			<div id="rounds" class="subcontainer">
+				<div class="top_buttons">
+					<span>Division: </span><select id="rounds_division_select" >
+					</select>
+					<span>Round Number: </span><select id="rounds_round_number_select">
+					</select>
+				</div>
+					
+				<div id="pairing_indicator">
+					Pairing Round. Please wait.
+					<img class="inline_block" src="images/indicator.gif" />
+				</div>
+				<table id="rounds_table">
+				</table>
+				
+				<div class="bottom_buttons">
+					<button id="add_round_button">Add Debate</button>
+					<button id="pair_round_button">Pair Round</button>
+					<button id="print_ballots_button">Print Ballots</button>
+					<button id="print_pairings">Print Pairings</button>
+					<button id="text_pairings_button">Text Pairings</button>
+					<div class="results_container">
+						<button id="print_teams_button">Print Teams</button>
+						<button id="print_speakers_button">Print Speakers</button>
+						<button id="print_breaks_button">Print Breaks</button>
+					</div>
+				</div>
+					
+			</div>
+		</div>
+
+
+		<div id="teams_container" class="main_container hidden tencol block last">
+			<div id="teams" class="subcontainer">
+				<div id="team_form" class="input_form">
+					<h1>Edit Team</h1>
+					<input id="newteam_id" type="hidden" value=""/>
+					<label>
+					Division: <br />
+					<select id="newteam_division">
+					</select>
+					</label> 
+					School: <br />
+					<select id="newteam_school">
+					</select>
+					</label> <br />
+					Competitors:
+					<div id="newteam_competitors">
+							
+					</div>				
+					<label>
+					Team code: <br />
+					<input id="newteam_name" />
+					</label>
+					
+					<label>
+					Stop scheduling: <br />
+					<input id="newteam_stop_scheduling" type="checkbox" />
+					</label>
+
+					<button class="save_button" id="add_team_button">Save</button>
+					<button class="cancel_button" id="cancel_team_button">Cancel</button>
+				</div>	
+						
+				<table id="teams_table">
+				</table>			
+			</div>
+		</div>
+
+		<div id="judges_container" class="main_container hidden tencol block last">
+			<div id="judges" class="subcontainer">
+				
+				<div id="judge_form" class="input_form">
+					<div class="edit_model_box">
+					<input id="newjudge_id" type="hidden" value=""/>
+					<label>
+					Judge Name: <br />
+					<input id="new_judge_name" type="text"/>
+					</label>
+					<label>
+					School Affiliation <br />
+					<select id="newjudge_school">
+					</select>
+					<ul id="newjudge_divisions">
+					</ul>
+					</label>
+					<label>
+					Stop scheduling: <br />
+					<input id="newjudge_stop_scheduling" type="checkbox" />
+					</label>
+					<button class="save_button" id="add_judge_button">Save</button>
+					<button class="cancel_button" id="cancel_judge_button">Cancel</button>
+					</div>
+				</div>
+				
+				<table id="judges_table">
+				</table>
+
+			</div>
+		</div>
+		<div id="rooms_container" class="main_container hidden tencol block last">
+			<div id="rooms" class="subcontainer">
+				
+				<div id="room_form" class="input_form">
+					<div class="edit_model_box">
+					<input id="newroom_id" type="hidden" value=""/>
+					<label>
+					Room Name: <br />
+					<input id="newroom_name" type="text"/>
+					</label> 
+					<label>
+					Division: <br />
+					<select id="newroom_division" type="text">
+					</select>
+					</label> 
+					<label>
+					Stop scheduling: <br />
+					<input id="newroom_stop_scheduling" type="checkbox" />
+					</label>
+					<button class="save_button" id="add_room_button">Save</button>
+					</div>
+				</div>
+				
+				<table id="rooms_table">
+				</table>
+						
+			</div>
+		</div>
+		<div id="schools_container" class="main_container hidden tencol block last">
+			<div id="schools" class="subcontainer">
+				
+				<div id="school_form" class="input_form">
+					<div class="edit_model_overlay" id="school_form_overlay">
+						<div class="edit_model_box">
+						<input id="newschool_id" type="hidden" value=""/>
+						<label>
+						School Name: <br />
+						<input id="newschool_name" />
+						</label> 
+						<button class="save_button" id="add_school_button">Save</button>
+
+						</div>
+					</div>
+				</div>
+				
+				<table id="schools_table">
+				</table>
+				
+				
+			</div>
+		</div>
+		<div id="divisions_container" class="main_container hidden tencol block last">
+			<div id="divisions" class="subcontainer">
+				
+			
+			
+
+			<div id="division_form" class="input_form">
+			
+			<input id="newdiv_id" type="hidden" value=""/>
+				<label>
+					Division Name: <br />
+					<input id="newdiv_division_name" type="text"/>
+				</label> 
+				<label>
+					Competitors per team: <br />
+					<input id="newdiv_comp_per_team" type="text"/>
+				</label> 
+				<label>
+					Flighted rounds: <br />
+					<input id="newdiv_flighted_rounds" class="checkbox" type="checkbox" name="flighted" />
+				</label> 
+				<label>
+					Combine speaker points (Public Forum): <br />
+					<input id="newdiv_combine_speaks" class="checkbox" type="checkbox" />
+				</label> 
+				<label>
+					Break to: <br />
+					<select id="newdiv_break_to">
+						<option value="32">Triple Octofinals</option>
+						<option value="16">Double Octofinals</option>
+						<option value="8">Octofinals</option>
+						<option selected="yes" value="4">Quarterfinals</option>
+						<option value="2">Semifinals</option>
+						<option value="1">Finals</option>
+					</select> 
+				</label> 
+
+				<label>
+					Maximum speaker points: <br />
+					<input id="newdiv_max_speaks" type="text" value="30"/>
+				</label> 
+				<label>
+					Number of prelims: <br />
+					<input id="newdiv_prelims" type="text" value="4"/>
+				</label> 
+				<label>
+					Ballot Type: <br />
+					<select id="newdiv_ballot_type">
+					<option value="TFA_CX">Cross Examination</option>
+					<option value="TFA_LD">Lincoln Douglas</option>
+					<option value="TFA_PF">Public Forum</option>
+					</select>
+				</label> 
+				
+
+				<button class="save_button" id="add_division_button">Save</button>
+
+		
+
+
+			
+			</div>
+				<table id="divisions_table">
+				</table>
+			
+				<br />
+				
+			</div>
+		</div>
 		<div id="settings_container" class="main_container hidden tencol block last">Settings</div>
-		<div id="debug_container" class="main_container hidden tencol block last">Debug</div>
+		<div id="debug_container" class="main_container hidden tencol block last">
+				<div id="debug" class="subcontainer">
+					<button id="toggle_debug">Toggle debug</button><br />
+					<h1>Pairing</h1>
+					<button id="pair_tests">Run Pairing Tests</button><br />
+					<button id="pair_delete_all_rounds">Delete All Rounds</button><br /> <br />
+					<button id="pair_print_pairings">Print all pairings</button>
+
+					<h1>LocalStorage </h1>
+					<button class="save_button" id="save_state">Save state</button> <br />
+					<button id="clear_storage">Clear Storage</button>  <br />
+					<button id="fetch_teams">Fetch Teams</button> <br />
+					<button id="export_tournament">Export Tournament</button> <br /> <br />
+
+					
+					<h1>SMS</h1>
+					
+					Phone Number: <br /><input type="text" id="debug_sms_input_phone"/><br />
+					Message: <br /> <textarea id="debug_sms_input_message"></textarea><br />
+					<button id="single_text">Send Single Text</button> <br /><br />
+				
+					<h1>Backup Data</h1>
+					<button id="export_data">Export tournament data</button> <br />
+					<button id="import_data">Import tournament data</button><br />
+					<textarea id="import_box"></textarea>
+					
+				</div>
+		</div>
 		
 
 
