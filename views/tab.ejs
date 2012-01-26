@@ -62,7 +62,7 @@
 		<div id="teams_container" class="main_container hidden tencol block last">
 			<div id="teams" class="subcontainer">
 				<div id="team_form" class="input_form">
-					<h1>Edit Team</h1>
+					
 					<input id="newteam_id" type="hidden" value=""/>
 					<label>
 					Division: <br />
@@ -91,6 +91,7 @@
 					<button class="cancel_button" id="cancel_team_button">Cancel</button>
 				</div>	
 						
+				<span>Division: </span><select id="teams_division_select"></select>
 				<table id="teams_table">
 				</table>			
 			</div>
@@ -259,10 +260,7 @@
 					<h1>LocalStorage </h1>
 					<button class="save_button" id="save_state">Save state</button> <br />
 					<button id="clear_storage">Clear Storage</button>  <br />
-					<button id="fetch_teams">Fetch Teams</button> <br />
-					<button id="export_tournament">Export Tournament</button> <br /> <br />
-
-					
+				
 					<h1>SMS</h1>
 					
 					Phone Number: <br /><input type="text" id="debug_sms_input_phone"/><br />

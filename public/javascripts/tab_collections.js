@@ -181,7 +181,8 @@ model.Division = Backbone.Model.extend({
 		schedule		: [] //array of round info objects that contain a round_number and powermatching_method
 	} ,
 	initialize: function(){
-		if(!this.id == undefined){
+		
+		if(this.id === undefined){
 			this.set({
 				id: new ObjectId().toString()
 			});
@@ -516,6 +517,7 @@ collection.emptyCollections = function(){
 	collection.judges.reset();
 	collection.rooms.reset();
 	collection.rounds.reset();
+	localStorage.clear();
 }
 
 collection.teamsInDivision = function(division){
@@ -528,79 +530,141 @@ collection.teamsInDivision = function(division){
 	return teamcount;
 }
 
+//generates and sets team code from for given @team model
+collection.generateTeamCode = function(team){
+	var competitors = team.get("competitors");
+	var school = team.get("school");
+	if(school === undefined){
+		throw Exception("Cannot create team code for a team with no school.");
+	}
+	var school_name = school.get("school_name").substring(0,16);
+	var team_code = school_name;
+	//case 1: 1 competitor. Use initials like
+	//Nick Carneiro => Round Rock NC
+	if(competitors.length === 1){
+		var whole_name = competitors[0].name;
+		var names = whole_name.split(" ");
+		if(names.length >= 2){
+			
+			team_code += " " + names[0].substr(0,1) + names[1].substr(0,1);
+		}
+	} else if(competitors.length >=2){		
+		var whole_name = competitors[1].name	//TODO: fix indexing, should work for
+		var names = whole_name.split(" ");				//any number of competitors
+		var last_name = names[names.length-1];
+
+		var whole_name_2 = competitors[0].name;
+		var names_2 = whole_name_2.split(" ");
+		var last_name_2 = names_2[names_2.length-1];
+
+		team_code += " " + last_name.substr(0,1).toUpperCase() 
+			+ last_name_2.substr(0,1).toUpperCase();
+		
+	} else {
+	
+		//can't generate team code
+		team_code = school_name + " XX";
+
+	}
+
+	team.set({team_code: team_code});
+}
 
 //deletes EVERYTHING and replaces with joy import
 collection.importJoyFile = function(joy_file){
-	var joy = joy_file.split("\n");
-	console.log(joy.length);
-	if(joy[0] != "Divisions"){
-		return "Not a valid Joy of Tournaments JOT_Debate.txt file.";
+	try {
+		var joy = joy_file.split("\n");
+		if(joy[0] != "Divisions"){
+			return "Not a valid Joy of Tournaments JOT_Debate.txt file.";
+		}
+		//map joy id divisions to our division models
+		var divisions = {}; 
+		var schools = {};
+		
+		collection.emptyCollections();
+
+		var section = "";
+		$.each(joy, function(i, line){
+
+			//keep track of what section we're in
+			if(line === "Divisions"){
+				section = "Divisions";
+				return true;
+			} else if(line === "Schools"){
+				section = "Schools";
+				return true;
+			} else if(line === "Teams"){
+				section = "Teams";
+				return true;
+			} else if(line === "Judges"){
+				section = "Judges";
+				return true;
+			}
+
+			if(section === "Divisions"){
+				var joy_division = collection.parseDivisionLine(line);
+				//console.dbg(joy_division);
+				var division = new model.Division();
+				division.set({division_name: joy_division.name});
+				collection.divisions.add(division);
+				division.save();
+				divisions[joy_division.number] = division;
+			} else if(section === "Schools"){
+				var joy_school = collection.parseSchoolLine(line);
+				//remove "high school" from school name
+				joy_school.name = joy_school.name.replace(/high school/gi, "").trim();
+				var school = new model.School();
+				school.set({school_name: joy_school.name});
+				collection.schools.add(school);
+				school.save();
+				schools[joy_school.number] = school;
+			} else if(section === "Teams"){
+				var joy_team = collection.parseTeamLine(line);
+				var team = new model.Team();
+				team.set({division: divisions[joy_team.division_number], school: schools[joy_team.school_number]});
+				
+				var competitors = [];
+				$.each(joy_team.names, function(i, name){
+					competitors.push({name: name});
+				});
+				team.set({competitors: competitors});
+				//generate team code
+				collection.generateTeamCode(team);
+				collection.teams.add(team);
+				team.save();
+			} else if(section === "Judges"){
+				var joy_judge = collection.parseJudgeLine(line);
+				var judge = new model.Judge();
+				var judge_divisions = [];
+
+				//convert division numbers to actual division model references
+				$.each(joy_judge.division_numbers, function(i, div_num){
+					judge_divisions.push(divisions[div_num]);
+				});
+				judge.set({name: joy_judge.name});
+				judge.set({divisions: judge_divisions});
+				judge.set({school: schools[joy_judge.school_number]});
+				collection.judges.add(judge);
+				judge.save();
+			}
+
+
+		});
+
+		//TODO: 
+		//check competitors per team for each division
+		//check if any teams have duplicate team codes in same division
+
+		$("#import_box").val("");
+		console.dbg("Imported JOT tournament data.");
+		console.dbg("Divisions: " + collection.divisions.length);
+		console.dbg("Schools: " + collection.schools.length);
+		console.dbg("Teams: " + collection.teams.length);
+		console.dbg("Judges: " + collection.judges.length);
+	} catch (e){
+		console.log("Failed to import JOT tournament data.")
+		console.log(e.stack);
 	}
-	//map joy id divisions to our division models
-	var divisions = {}; 
-	var schools = {};
-	
-	collection.emptyCollections();
-
-	var section = "";
-	$.each(joy, function(i, line){
-
-		//keep track of what section we're in
-		if(line === "Divisions"){
-			section = "Divisions";
-			return true;
-		} else if(line === "Schools"){
-			section = "Schools";
-			return true;
-		} else if(line === "Teams"){
-			section = "Teams";
-			return true;
-		} else if(line === "Judges"){
-			section = "Judges";
-			return true;
-		}
-
-		if(section === "Divisions"){
-			var joy_division = collection.parseDivisionLine(line);
-			console.log(joy_division);
-			var division = new model.Division({division_name: joy_division.name});
-			collection.divisions.add(division);
-			divisions[joy_division.number] = division;
-		} else if(section === "Schools"){
-			var joy_school = collection.parseSchoolLine(line);
-			console.log(joy_school);
-			var school = new model.School({school_name: joy_school.name});
-			collection.schools.add(school);
-			schools[joy_school.number] = school;
-		} else if(section === "Teams"){
-			var joy_team = collection.parseTeamLine(line);
-			console.log(joy_team);
-			var team = new model.Team();
-			team.set({division: divisions[joy_team.division_number], school: schools[joy_team.school_number]});
-			var competitors = [];
-			$.each(joy_team.names, function(i, name){
-				competitors.push({name: name});
-			});
-			team.set({competitors: competitors});
-			collection.teams.add(team);
-		} else if(section === "Judges"){
-			var joy_judge = collection.parseJudgeLine(line);
-			var judge = new model.Judge();
-			var judge_divisions = [];
-
-			//convert division numbers to actual division model references
-			$.each(joy_judge.division_numbers, function(i, div_num){
-				judge_divisions.push(divisions[div_num]);
-			});
-			judge.set({divisions: judge_divisions});
-			judge.set({school: schools[joy_judge.school_number]});
-			collection.judges.add(judge);
-		}
-
-
-	});
-
-	//check competitors per team for each division
 }
 
 //parses a line like this:
@@ -610,12 +674,14 @@ collection.parseJudgeLine = function(line){
 	var before_star = line.split("*")[0];
 	var cols = before_star.split(";");
 	$.each(cols, function(i, col){
-		if(collection.isAlpha(col.charAt(0))){
-			joy_judge.name = col;
-		} else if(col.charAt(0) === "#"){
-			joy_judge.school_number = col.substring(1).trim();
-		} else if(collection.isNumeric(col)){
-			joy_judge.division_numbers.push(col);
+		l = col.trim();
+		
+		if(collection.isAlpha(l.charAt(0))){
+			joy_judge.name = l;
+		} else if(l.charAt(0) === "#"){
+			joy_judge.school_number = l.substring(1).trim();
+		} else if(l.charAt(0) === "$"){
+			joy_judge.division_numbers.push(l.substr(1));
 		}
 	});
 	return joy_judge;
@@ -624,13 +690,13 @@ collection.parseJudgeLine = function(line){
 
 collection.parseTeamLine = function(line){
 	joy_team = {division_number: "", names: [], school_number: ""};
-
+	joy_team.division_number = line.substring(1,2);
 	var team_arr = line.split(";");
 	$.each(team_arr, function(i, value){
 		l = value.trim();
 		if(l.charAt(0) === "$"){
-			//got division number
-			joy_team.division_number = l.substring(1);
+			//skip the first chunk
+			
 		} else if(collection.isAlpha(l.charAt(0))){
 			//got a competitor's name
 			joy_team.names.push(l);
@@ -644,6 +710,7 @@ collection.parseTeamLine = function(line){
 
 	return joy_team;
 }
+
 //gets number and name from a string like: "$$2VLD" 
 collection.parseDivisionLine = function(line){
 	var joy_division = {};
@@ -656,11 +723,10 @@ collection.parseDivisionLine = function(line){
 			break;
 		}
 		if(collection.isNumeric(line.charAt(i))){
-			number += line.charCodeAt(i);
+			number += line.charAt(i);
 		}
 	}
 	joy_division.number = number;
-
 	//get the name
 	var name = "";
 	for(var i = line.length - 1; i >= 0; i--){
@@ -694,6 +760,7 @@ collection.parseSchoolLine = function(line){
 		} else if(section === "space") {
 			if(line.charAt(i) != " "){
 				section = "name"
+				name+= line.charAt(i);
 			}
 		} else {
 			name += line.charAt(i);

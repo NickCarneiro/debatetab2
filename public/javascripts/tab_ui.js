@@ -101,7 +101,7 @@ $("#clear_storage").click(function(){
 				'Yes'	: {
 					
 					'class'	: 'blue',
-					'action': localStorage.clear
+					'action': collection.emptyCollections,
 				},
 				'No'	: {
 					'class'	: 'gray',
@@ -176,7 +176,7 @@ $("#single_text").click(function(){
 
 
 //load debug status on page load. off by default
-tab.debug = false;
+tab.debug = true;
 if(localStorage["debug"] != undefined){
 
 	tab.debug = localStorage["debug"] === "true" ? true: false;

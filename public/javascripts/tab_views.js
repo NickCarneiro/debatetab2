@@ -81,7 +81,9 @@ view.TeamTable = Backbone.View.extend({
 		"change #newteam_division": "showCompetitors",
 		"focus #newteam_name": "generateTeamName",
 		"keyup #newteam_name":		"keyupTeamName",
-		"click #toggle_team_form": "showNewForm"
+		"click #toggle_team_form": "showNewForm",
+		"change #teams_division_select" : "render",
+
 	} ,
 	initialize: function(){
 		_.bindAll(this, "render", "addTeam", "appendTeam", 
@@ -99,11 +101,49 @@ view.TeamTable = Backbone.View.extend({
 		collection.divisions.bind("reset", this.render, this);
 		collection.divisions.bind("reset", this.showCompetitors, this);
 		collection.schools.bind("reset", this.render, this);
-		
+
+		collection.divisions.bind("add", this.renderDivisionSelect, this);
+		this.renderDivisionSelect();
 		this.render();
 		
 	} ,
 
+	render: function(){
+		//clear everything and re-render from collections
+		this.clearView();
+		//populate table
+		var division_id = $("#teams_division_select").val();
+		var division = collection.getDivisionFromId(division_id);
+		_(collection.teams.models).each(function(team){ // for pre-existing teams
+			
+			if(team.get("division") === division){
+				this.appendTeam(team);
+			}
+        	
+    	}, this);
+
+    	//populate form
+    	_(collection.divisions.models).each(function(division){ // pre-existing divisions
+        	this.addDivSelect(division);
+    	}, this);
+    	_(collection.schools.models).each(function(school){ // pre-existing schools
+        	this.addSchoolSelect(school);
+    	}, this);
+
+	} ,
+	renderDivisionSelect: function(){
+		$("#teams_division_select").empty();
+		collection.divisions.each(function(division){ // in case collection is not empty
+        	this.appendDivisionOption(division);
+    	}, this);
+	} ,
+	appendDivisionOption: function(division){
+		var divOptionView = new view.DivisionOption({
+			model: division
+		});
+		$("#teams_division_select", this.el).append(divOptionView.render().el);
+		
+	} ,
 	showNewForm: function(){
 		//team controls
 		$("#team_form_overlay").fadeToggle();
@@ -219,23 +259,7 @@ view.TeamTable = Backbone.View.extend({
 		$("#newteam_division").empty();
 		$("#newteam_school").empty();
 	} ,
-	render: function(){
-		//clear everything and re-render from collections
-		this.clearView();
-		//populate table
-		_(collection.teams.models).each(function(team){ // for pre-existing teams
-        	this.appendTeam(team);
-    	}, this);
-
-    	//populate form
-    	_(collection.divisions.models).each(function(division){ // pre-existing divisions
-        	this.addDivSelect(division);
-    	}, this);
-    	_(collection.schools.models).each(function(school){ // pre-existing schools
-        	this.addSchoolSelect(school);
-    	}, this);
-
-	} ,
+	
 
 	renderSearch: function(results){
 		$("#teams_table").html("");
@@ -432,9 +456,11 @@ view.Judge = Backbone.View.extend({
 	} ,
 	showEditForm: function(){
 		//populate form with existing values
+		this.clearEditForm();
 		$("#newjudge_id").val(this.model.get("id"));
 		$("#new_judge_name").val(this.model.get("name"));
 		$("#newjudge_school").val(this.model.get("school") === undefined ? "no_affiliation" : this.model.get("school").get("id")); 	
+		
 		var div = this.model.get("divisions");
 		
 		$("#newjudge_divisions").children().each(function(i, li){
@@ -454,7 +480,15 @@ view.Judge = Backbone.View.extend({
 		$("#newjudge_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
 		$("#judge_form_overlay").fadeIn();
 	} ,
+	
+	clearEditForm: function(){
+		$("#newjudge_id").val("");
+		$("#new_judge_name").val("");
+		//$("#newjudge_school").val("");
+		$("#newjudge_divisions").find("input").attr("checked", false);
+		$("#newjudge_stop_scheduling").prop("checked", false);
 
+	} ,
 	remove: function(judge){
 		var judge = this.model;
 		$.confirm({
@@ -546,7 +580,7 @@ view.JudgeTable = Backbone.View.extend({
 		$("#newjudge_id").val("");
 		$("#new_judge_name").val("");
 		//$("#newjudge_school").val("");
-		//$("#newjudge_divisions").find("input").attr("checked", false);
+		$("#newjudge_divisions").find("input").attr("checked", false);
 		$("#newjudge_stop_scheduling").prop("checked", false);
 
 	} ,
@@ -575,7 +609,6 @@ view.JudgeTable = Backbone.View.extend({
 			}
 		});
 		
-		$(".edit_model_overlay").fadeOut();
 		if(id.length > 0){
 			var judge = collection.getJudgeFromId(id);
 			judge.set({
