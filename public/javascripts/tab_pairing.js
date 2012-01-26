@@ -6,15 +6,6 @@ BEGIN: Define Pairing Functions
 
 // all functions for tab below this point
 
-//returns true if round has already been paired
-pairing.alreadyPaired = function(round_number, division){
-	for(var i = 0; i < collection.rounds.length; i++){
-		if(collection.rounds.at(i).get("division") === division && collection.rounds.at(i).get("round_number") === round_number){
-			return true;
-		}
-	}
-	return false;
-}
 
 pairing.prelimRoundValid = function (team1, team2, round){
 		//this case is for round 1 or a tournament with no power matching
@@ -292,6 +283,7 @@ pairing.roundCount = function(round_number){
 };
 
 pairing.printRecords = function(division){
+	collection.teams.sort();
 	$.each(collection.divisions, function(index){
 		var div = collection.divisions.at(index);
 		if(division === div || division === undefined){
@@ -314,27 +306,7 @@ pairing.printRecords = function(division){
 }
 
 
-//returns true if @team is already on the pairing for the specified round
-pairing.alreadyPairedTeam = function(team, round_number, division){
-	var already_paired = false;
-	collection.rounds.each(function(round, index){
-		//skip rounds in other divisions and round numbers
-		if(round.get("round_number") != round_number){
-			return true;
-		}
-		if(round.get("division") != division){
-			return true;
-		}
 
-		if(round.get("team1") === team || round.get("team2") === team){
-			already_paired = true;
-
-			//break from loop
-			return false;
-		}
-	});
-	return already_paired;
-}
 
 //returns true if two teams have already debated each other in prelims
 pairing.alreadyDebated = function(team1, team2, round_number){
