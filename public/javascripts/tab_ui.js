@@ -122,6 +122,11 @@ $("#import_data").click(function(){
 	collection.import(json);
 });	
 
+$("#import_joy_data").click(function(){
+	var joy_data = $("#import_box").val().trim();
+	collection.importJoyFile(joy_data);
+});	
+
 $("#pair_delete_all_rounds").click(function(){
 	
 	$.confirm({

@@ -324,8 +324,8 @@ collection.restoreReferences = function(){
 			
 			//for each attribute, see if it has an id.
 			$.each(elem.attributes, function(attr_name, attr){
-				
-				if(attr.id != undefined){
+				//console.log(attr);
+				if(attr != null && attr.id != undefined){
 					var model = collection.getModelFromId(attr.id);
 					//if we found a model for the id, replace the object copy with the model reference
 					if(model != undefined && typeof model.attributes === "object"){
@@ -481,7 +481,7 @@ collection.exportAll = function(){
 
 };
 
-
+//used to import native JSON format
 collection.import = function(json){
 	//delete all existing data
 	collection.emptyCollections();
@@ -527,6 +527,203 @@ collection.teamsInDivision = function(division){
 	}
 	return teamcount;
 }
+
+
+//deletes EVERYTHING and replaces with joy import
+collection.importJoyFile = function(joy_file){
+	var joy = joy_file.split("\n");
+	console.log(joy_array.length);
+	if(joy[0] != "Divisions"){
+		return "Not a valid Joy of Tournaments JOT_Debate.txt file.";
+	}
+	//map joy id divisions to our division models
+	var divisions = {}; 
+	var schools = {};
+	
+	collection.emptyCollections();
+
+	var section = "";
+	$.each(joy, function(i, line){
+
+		//keep track of what section we're in
+		if(line === "Divisions"){
+			section = "Divisions";
+			return true;
+		} else if(line === "Schools"){
+			section = "Schools";
+			return true;
+		} else if(line === "Teams"){
+			section = "Teams";
+			return true;
+		} else if(line === "Judges"){
+			section = "Judges";
+			return true;
+		}
+
+		if(section === "Divisions"){
+			var joy_division = collection.parseDivisionLine(line);
+			console.log(joy_division);
+			var division = new model.Division({division_name: joy_division.name});
+			collection.divisions.add(division);
+			divisions[joy_division.number] = division;
+		} else if(section === "Schools"){
+			var joy_school = collection.parseSchoolLine(line);
+			console.log(joy_school);
+			var school = new model.School({school_name: joy_school.name});
+			collection.schools.add(school);
+			schools[joy_school.number] = school;
+		} else if(section === "Teams"){
+			var joy_team = collection.parseTeamLine(line);
+			console.log(joy_team);
+			var team = new model.Team();
+			team.set({division: divisions[joy_team.division_number], school: schools[joy_team.school_number]});
+			var competitors = [];
+			$.each(joy_team.names, function(i, name){
+				competitors.push({name: name});
+			});
+			team.set({competitors: competitors});
+			collection.teams.add(team);
+		} else if(section === "Judges"){
+			var joy_judge = collection.parseJudgeLine(line);
+			var judge = new model.Judge();
+			var judge_divisions = [];
+
+			//convert division numbers to actual division model references
+			$.each(joy_judge.division_numbers, function(i, div_num){
+				judge_divisions.push(divisions[div_num]);
+			});
+			judge.set({divisions: judge_divisions});
+			judge.set({school: schools[joy_judge.school_number]});
+			collection.judges.add(judge);
+		}
+
+
+	});
+
+	//check competitors per team for each division
+}
+
+//parses a line like this:
+// "%1009   ;Klepper, Mark; #21161 ;$1;$2;$5;*ALL,*Y;+PF only; Days: Fri"
+collection.parseJudgeLine = function(line){
+	joy_judge = {division_numbers: [], school_number: "", name: ""};
+	var before_star = line.split("*")[0];
+	var cols = before_star.split(";");
+	$.each(cols, function(i, col){
+		if(collection.isAlpha(col.charAt(0))){
+			joy_judge.name = col;
+		} else if(col.charAt(0) === "#"){
+			joy_judge.school_number = col.substring(1).trim();
+		} else if(collection.isNumeric(col)){
+			joy_judge.division_numbers.push(col);
+		}
+	});
+	return joy_judge;
+		
+};
+
+collection.parseTeamLine = function(line){
+	joy_team = {division_number: "", names: [], school_number: ""};
+
+	var team_arr = line.split(";");
+	$.each(team_arr, function(i, value){
+		l = value.trim();
+		if(l.charAt(0) === "$"){
+			//got division number
+			joy_team.division_number = l.substring(1);
+		} else if(collection.isAlpha(l.charAt(0))){
+			//got a competitor's name
+			joy_team.names.push(l);
+		} else if(l.chartAt(0) === "#"){
+			//got school number
+			joy_team.school_number = l.substring(1);
+		} else {
+			throw Exception("Unrecognized character in Team line.");
+		}
+	});
+
+	return joy_team;
+}
+//gets number and name from a string like: "$$2VLD" 
+collection.parseDivisionLine = function(line){
+	var joy_division = {};
+
+	//get the number
+	var number = "";
+	for(var i = 0; i < line.length; i++){
+		if(number.length > 1){
+			//set artificial ceiling of 9 divisions for now.
+			break;
+		}
+		if(collection.isNumeric(line.charAt(i))){
+			number += line.charCodeAt(i);
+		}
+	}
+	joy_division.number = number;
+
+	//get the name
+	var name = "";
+	for(var i = line.length - 1; i >= 0; i--){
+		if(collecion.isNumeric(line.charAt(i))){
+			break;
+		} else {
+			name = line.charAt(i) + name;
+		}
+		
+	}
+
+	joy_division.name = name;
+	return joy_division;
+};
+
+collection.parseSchoolLine = function(line){
+	if(line.charAt(0) != "#"){
+		throw Exception("Invalid school line in joy file.");
+	}
+	var joy_school = {};
+	var section = "numbers";
+	var number = "";
+	var name = "";
+	for(var i = 1; i < line.length; i++){
+		if(section === "numbers"){
+			if(collection.isNumeric(line.charAt(i))){
+				number += line.charAt(i);
+			} else {
+				section = "space";
+			}
+		} else if(section === "space") {
+			if(line.charAt(i) != " "){
+				section = "name"
+			}
+		} else {
+			name += line.charAt(i);
+		}
+	}
+
+	joy_school.number = number;
+	joy_school.name = name;
+	return joy_school;
+}
+
+//returns true if char is a string of 0-9
+collection.isNumeric = function(char){
+	if(char.charCodeAt(0) >= 48 && char.charCodeAt(0) <= 57){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+collection.isAlpha = function(char){
+	var lower = char.toLowerCase();
+	if(lower.charCodeAt(0) >= 97 && lower.charCodeAt(0) <= 122){
+		return true;
+	} else {
+		return false;
+	}
+}
+
+
 /*
 =========================================
 Initialize Backbone Collections

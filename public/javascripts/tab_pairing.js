@@ -679,7 +679,7 @@ pairing.pairPrelim = function(round_number, division, options){
 		console.dbg("total teams: " + total_teams);
 		console.dbg("unpaired teams: " + unpaired_teams.length);
 		//find a place for unpaired teams
-		pairing.pairRemainingTeams(round_number, division, unpaired_teams);
+		pairing.pairRemainingTeams(round_number, division, unpaired_teams, options);
 		
 		//make sure no team has had more than 1 bye
 		pairing.fixRepeatedByes(round_number, division);
@@ -781,12 +781,13 @@ pairing.pairPrelim = function(round_number, division, options){
 	
 }
 
-pairing.pairRemainingTeams = function(round_number, division, unpaired_teams){
+pairing.pairRemainingTeams = function(round_number, division, unpaired_teams, options){
 	
-	//if it's just one team, give it a bye
+	
 	if(unpaired_teams.length === 0){
 		//woohoo! everyone is on the pairing.
 	} else if(unpaired_teams.length === 1){
+		//if it's just one team, give it a bye
 		console.dbg("creating a bye round because one team was left unpaired.");
 		var round = new model.Round({round_number: parseInt(round_number), division: division, team1: unpaired_teams[0]});
 		collection.rounds.add(round);
@@ -837,6 +838,8 @@ pairing.pairRemainingTeams = function(round_number, division, unpaired_teams){
 
 
 		});
+	} else {
+		throw Exception("More than 2 unpaired teams.");
 	}
 
 }
