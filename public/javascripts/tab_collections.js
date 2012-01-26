@@ -532,7 +532,7 @@ collection.teamsInDivision = function(division){
 //deletes EVERYTHING and replaces with joy import
 collection.importJoyFile = function(joy_file){
 	var joy = joy_file.split("\n");
-	console.log(joy_array.length);
+	console.log(joy.length);
 	if(joy[0] != "Divisions"){
 		return "Not a valid Joy of Tournaments JOT_Debate.txt file.";
 	}
@@ -634,7 +634,7 @@ collection.parseTeamLine = function(line){
 		} else if(collection.isAlpha(l.charAt(0))){
 			//got a competitor's name
 			joy_team.names.push(l);
-		} else if(l.chartAt(0) === "#"){
+		} else if(l.charAt(0) === "#"){
 			//got school number
 			joy_team.school_number = l.substring(1);
 		} else {
@@ -664,7 +664,7 @@ collection.parseDivisionLine = function(line){
 	//get the name
 	var name = "";
 	for(var i = line.length - 1; i >= 0; i--){
-		if(collecion.isNumeric(line.charAt(i))){
+		if(collection.isNumeric(line.charAt(i))){
 			break;
 		} else {
 			name = line.charAt(i) + name;
