@@ -42,10 +42,7 @@ pairing.prelimRoundValid = function (team1, team2, round){
 		}
 	}
 }
-//sort teams in descending order of wins
-pairing.sortTeams = function(){
-	collection.teams.sort();
-}
+
 
 pairing.compareTeams = function(team){
 	//comparison function used when sorting teams
@@ -174,17 +171,33 @@ pairing.deleteRound = function(round_number, division){
 }
 
 //generate random results for specified round
-pairing.simulateRound = function(round_number){
+pairing.simulateResults = function(round_number, division){
 	//generate results for specified round
-	for(var i = 0; i < collection.rounds.length; i++){
-		if(collection.rounds.at(i).get("round_number") === round_number){	
-		
+	$.each(collection.rounds, function(k){
+		var round = collection.rounds.at(k)
+			if(round.get("round_number") === round_number && round.get("division") === division){	
 			
 			//result is 0 thru 3
-			collection.rounds.at(i).set({result: Math.floor(Math.random() * 4)});
+			round.set({result: Math.floor(Math.random() * 4)});
+
+			//TODO: set speaker points and ranks
+
 		}
-	}
+	});
 }
+
+pairing.runSimulation = function(){
+	$.each(collection.divisions, function(i){
+		var division = collection.divisions.at(i);
+		for(var j = 1; j < 3; j++){
+			pairing.simulateResults(j, division);
+		}
+		
+	});
+	pairing.updateRecords();
+	pairing.printRecords();
+};
+
 
 
 //set the sides in a debate round by setting Round.aff to 0 (team1) or 1 (team2)
@@ -257,6 +270,15 @@ pairing.setSides = function(round_number, division){
 	
 }
 
+pairing.setFlip = function(round_number, division){
+	$.each(collection.rounds, function(i){
+		var round = collection.rounds.at(i);
+		if(round.get("round_number") === round_number && round.get("division") === division){
+			round.set({aff: "flip"});
+		}
+	});
+};
+
 //return number of debates scheduled for @round_number
 pairing.roundCount = function(round_number){
 	var count = 0;
@@ -270,20 +292,25 @@ pairing.roundCount = function(round_number){
 };
 
 pairing.printRecords = function(division){
-
-	console.log("############## TEAM RECORDS IN " + division.get("division_name") + " ###############");
-	for(var i = 0; i < collection.teams.length; i++){
-		if(collection.teams.at(i).get("division") != division){
-			continue;
-		}
-		var padding = 20 - collection.teams.at(i).get("team_code").length;
-			var spaces = "";
-			for(var j = 0; j < padding; j++){
-				spaces = spaces + " ";
+	$.each(collection.divisions, function(index){
+		var div = collection.divisions.at(index);
+		if(division === div || division === undefined){
+			
+			console.log("############## TEAM RECORDS IN " + div.get("division_name") + " ###############");
+			for(var i = 0; i < collection.teams.length; i++){
+				if(collection.teams.at(i).get("division") != div){
+					continue;
+				}
+				var padding = 20 - collection.teams.at(i).get("team_code").length;
+					var spaces = "";
+					for(var j = 0; j < padding; j++){
+						spaces = spaces + " ";
+					}
+				console.log(collection.teams.at(i).get("team_code") + " : " +  
+					spaces + collection.teams.at(i).get("wins") + "-" + collection.teams.at(i).get("losses"));
 			}
-		console.log(collection.teams.at(i).get("team_code") + " : " +  
-			spaces + collection.teams.at(i).get("wins") + "-" + collection.teams.at(i).get("losses"));
-	}	
+		}
+	});
 }
 
 
@@ -512,18 +539,20 @@ pairing.alreadyHadBye = function(team, round_number, division){
 pairing.pairUilPrelim = function(round_number, division){
 	
 
-	pairing.updateRecords(division);
-	pairing.sortTeams(division);
+	pairing.updateRecords();
 	pairing.printRecords(division);
 	pairing.deleteRound(round_number, division);
 
 	if(round_number < 3){
 		//no power match
-		pairing.pairRandomRound(round_number, division);
+		pairing.pairPrelim(round_number, division);
 
 
 	} else if(round_number === 3){
 		//powermatch and flip
+		pairing.pairPrelim(round_number, division, {powermatch: true, flip: true});
+	} else {
+		console.log(typeof round_number);
 	}
 
 }
@@ -573,7 +602,7 @@ pairing.getSideConstraints = function(round_number, division){
 		//skip irrelevant rounds
 		var team = collection.teams.at(i);
 
-		if(round.get("round_number") >= round_number || team.get("division") != division){
+		if(team.get("division") != division){
 			return true;
 		}
 		if(team.get("aff_debates") > team.get("neg_debates")){
@@ -587,7 +616,7 @@ pairing.getSideConstraints = function(round_number, division){
 }
 
 //The big daddy pairing function for non-powermatched rounds
-pairing.pairRandomRound = function(round_number, division){
+pairing.pairPrelim = function(round_number, division, options){
 	if(round_number > 1){
 		//worry about side constraints
 
@@ -622,6 +651,14 @@ pairing.pairRandomRound = function(round_number, division){
 		console.dbg("total teams to pair: " + total_teams);
 
 		var already_paired = {};
+
+		var powermatch = options === undefined ? false : options.powermatch;
+		if(powermatch === true){
+			collection.teams.sort();
+		} else {
+			collection.teams.models = _.shuffle(collection.teams.models);
+		}
+
 		//match up desired aff teams with desired neg teams
 		$.each(desired_aff, function(i, team1){
 			//skip teams already on pairing
@@ -645,7 +682,7 @@ pairing.pairRandomRound = function(round_number, division){
 				if(pairing.prelimRoundValid(team1, team2)){
 					
 					//put both teams in round
-					var round = new model.Round({division: division, round_number: round_number});
+					var round = new model.Round({division: division, round_number: parseInt(round_number)});
 					round.set({team1: team1});
 					round.set({team2: team2});
 					round.set({aff: 0});
@@ -667,23 +704,33 @@ pairing.pairRandomRound = function(round_number, division){
 		//because the two remaining teams could not debate
 
 		var unpaired_teams = pairing.getUnpairedTeams(already_paired, division);
-
+		console.dbg("total teams: " + total_teams);
+		console.dbg("unpaired teams: " + unpaired_teams.length);
 		//find a place for unpaired teams
 		pairing.pairRemainingTeams(round_number, division, unpaired_teams);
 		
 		//make sure no team has had more than 1 bye
 		pairing.fixRepeatedByes(round_number, division);
 
+		var flip = options === undefined ? false : options.flip;
+		if(flip === true){
+			pairing.setFlip(round_number, division);
+		} else {
+			pairing.setSides(round_number, division);
+		}
 		
 		pairing.pairRooms(round_number, division);
 		pairing.pairJudges(round_number, division);
 
-	} else {
+	} else { //first round. don't worry about side constraints
 		
 	
 	var total_teams = collection.teamsInDivision(division);
 	var total_rounds = Math.ceil(total_teams / 2);
+	
 	collection.teams.models = _.shuffle(collection.teams.models);
+	
+	
 
 	console.log("Total teams: " + total_teams);
 	console.log("Creating total rounds: " + total_rounds);
@@ -726,7 +773,7 @@ pairing.pairRandomRound = function(round_number, division){
 			if(pairing.prelimRoundValid(team1, team2)){
 				
 				//put both teams in round
-				var round = new model.Round({division: division, round_number: round_number});
+				var round = new model.Round({division: division, round_number: parseInt(round_number)});
 				round.set({team1: team1});
 				round.set({team2: team2});
 				collection.rounds.add(round);
@@ -762,14 +809,14 @@ pairing.pairRandomRound = function(round_number, division){
 	
 }
 
-pairing.pairRemainingTeams = function(round, division, unpaired_teams){
+pairing.pairRemainingTeams = function(round_number, division, unpaired_teams){
 	
 	//if it's just one team, give it a bye
 	if(unpaired_teams.length === 0){
 		//woohoo! everyone is on the pairing.
 	} else if(unpaired_teams.length === 1){
 		console.dbg("creating a bye round because one team was left unpaired.");
-		var round = new model.Round({round_number: round_number, division: division, team1: unpaired_teams[0]});
+		var round = new model.Round({round_number: parseInt(round_number), division: division, team1: unpaired_teams[0]});
 		collection.rounds.add(round);
 	} else if (unpaired_teams.length === 2){
 		//2 unpaired teams. find rounds for them
@@ -790,7 +837,7 @@ pairing.pairRemainingTeams = function(round, division, unpaired_teams){
 				console.dbg("splitting up " + team1.get("team_code") + " : " + team2.get("team_code"));
 				console.dbg("created: " + team1.get("team_code") + " : " + unpaired_teams[0].get("team_code"));
 				console.dbg("created: " + team2.get("team_code") + " : " + unpaired_teams[1].get("team_code"));
-				var new_round = new model.Round({round_number: round_number, 
+				var new_round = new model.Round({round_number: parseInt(round_number), 
 					division: division,
 					team1: team1,
 					team2: unpaired_teams[0]
@@ -804,7 +851,7 @@ pairing.pairRemainingTeams = function(round, division, unpaired_teams){
 				console.dbg("splitting up " + team1.get("team_code") + " : " + team2.get("team_code"));
 				console.dbg("created: " + team1.get("team_code") + " : " + unpaired_teams[1].get("team_code"));
 				console.dbg("created: " + team2.get("team_code") + " : " + unpaired_teams[0].get("team_code"));
-				var new_round = new model.Round({round_number: round_number, 
+				var new_round = new model.Round({round_number: parseInt(round_number), 
 					division: division,
 					team1: team1,
 					team2: unpaired_teams[1]
@@ -844,199 +891,9 @@ pairing.getUnpairedTeams = function(already_paired, division){
 
 	return unpaired;
 }
-//used for round 3 of a UIL or any powermatch in general.
-//hi-hi powermatch. does not do hi-low within brackets
-pairing.pairPowerMatch = function(round_number, division, flip){
-	//TODO: account for teams in multiple divisions
-	var paired = [];
-	//O(n^2) method of pairing teams
-	for(var i = 0; i < collection.teams.length - 1; i++){
-
-		//skip team if it's already paired
-		if(paired.indexOf(collection.teams.at(i)) != -1){
-			continue;
-		}
-		//skip team if it isn't in this division
-		if(collection.teams.at(i).get("division") != division){
-			continue;
-		}
-
-		for(var j = i; j < collection.teams.length; j++){
-
-			//skip team if it's already paired
-			if(paired.indexOf(collection.teams.at(j)) != -1){
-				continue;
-			}
-			//skip team if it isn't in this division
-			if(collection.teams.at(j).get("division") != division){
-				continue;
-			}
-			//console.log("comparing " + collection.teams.at(i).get("team_code") + " and " + collection.teams.at(j).get("team_code"));
-			if(pairing.prelimRoundValid(collection.teams.at(i), collection.teams.at(j), round_number)){
-				var round = new model.Round();
-				round.set({"team1": collection.teams.at(i)});
-				round.set({"team2": collection.teams.at(j)});
-				round.set({"round_number": round_number});
-				round.set({"division": division});
-				collection.rounds.add(round);
-				//keep track of teams that have been paired
-				paired.push(collection.teams.at(i));
-				paired.push(collection.teams.at(j));
-				//go to next team to pair
-				break;
-			} else {
-				//console.log("pair invalid: " + teams[i].name + " " + teams[j].name);
-			}
-		}
-	}
-
-	//array of models
-	var unpaired = [];
-	//count unpaired teams
-	for(var i = 0; i < collection.teams.length; i++){
-		//ignore teams not in this division
-		if(collection.teams.at(i).get("division") != division){
-			continue;
-		}
-		if(paired.indexOf(collection.teams.at(i)) === -1){
-			//team has not been paired
-
-			//create a round with only one team
-			//but only if we don't have the desired amount of rounds created
-			if(pairing.roundCount(round_number) < total_rounds){
-				var round = new model.Round();
-				round.set({"team1": collection.teams.at(i)});
-				round.set({"round_number": round_number});
-				round.set({"division": division});
-				paired.push(collection.teams.at(i));
-				collection.rounds.add(round);
-
-			} else {
-				unpaired.push(collection.teams.at(i));
-
-			}
-
-		}
-
-
-	}
-
-	var byes = 0;
-	for(var k = 0; k < collection.rounds.length; k++){
-		//This addresses byes in  order that they appear
-		if(collection.rounds.at(k).get("team2") === undefined){
-			if(collection.rounds.at(k).get("round_number") === round_number){
-				byes++;
-			}
-
-		}
-	}
-
-	if(unpaired.length > 0){
-		console.log(unpaired.length + " teams were left unpaired:");
-		//print out unpared teams
-		for(var i = 0; i < unpaired.length; i++){
-			console.log(unpaired[i].get("team_code"));
-		}
-	}
 
 
 
-	//if there are an even number of teams OR
-	//there are an odd number but more than 1 is unpaired, fix pairings
-	if((collection.teams.length % 2 === 0  && unpaired.length > 0 ) || unpaired.length > 1 || byes > 1){
-		console.log("fixing broken power match");
-		//rounds are in order of best to worst
-		//unpaired in unsorted are also in order of best to worst. 
-
-		//now we have some teams with no opponents sitting at the bottom of the pairing
-			// as well as some unpaired teams
-
-			for(var i = 0; i < unpaired.length; i++){
-
-				console.log("trying to pair unpaired team " + unpaired[i].get("team_code"));
-				//find the first bye round
-				var bye;
-				for(var k = 0; k < collection.rounds.length; k++){
-					//This addresses byes in  order that they appear
-					if(collection.rounds.at(k).get("team2") === undefined){
-						bye = collection.rounds.at(k);
-					}
-				}
-
-				if(bye === undefined){
-					console.log("FATAL ERROR: bye is undefined");
-					//can't fix this here
-					break;
-				}
-				//need to find two sets of teams that are compatible.
-				for(var j = collection.rounds.length - 1; j >= 0; j--){
-					//skip previous rounds
-					if(!collection.rounds.at(j).get("round_number") === round_number){
-						console.log("round number is " + collection.rounds.at(j).get("round_number") 
-							+ " and desired is " + round_number);
-						continue;
-					}
-					//skip rounds not in this division
-					if(collection.rounds.at(j).get("division") != division){
-						continue;
-					}
-
-					//console.log("check round for swap: " + collection.rounds.at(j).get("team1").get("team_code") + " " 
-					//	+ collection.rounds.at(j).get("team2").get("team_code"));
-					//console.log(bye);
-					if(pairing.prelimRoundValid(collection.rounds.at(j).get("team1"), unpaired[i]) 
-						&& pairing.prelimRoundValid(bye.get("team1"), collection.rounds.at(j).get("team2"))){
-						//replace bye team with already paired team2
-						bye.set({"team2": collection.rounds.at(j).get("team2")});
-						// and replace team2 with unpaired team
-						collection.rounds.at(j).set({"team2": unpaired[i]});
-
-						console.log("moving " + bye.get("team2").get("team_code") + " and adding " + unpaired[i].get("team_code") );
-						break; // go to next unpaired team
-					}	
-				}
-		}
-
-
-	}
-}
-
-
-/*
-Creates round models for specified round_number and division.
-*/
-pairing.pairRound = function(round_number, division){
-	pairing.updateRecords(division);
-	pairing.sortTeams(division);
-	pairing.printRecords(division);
-	
-	pairing.deleteRound(round_number, division);
-
-	var total_teams = collection.teamsInDivision(division);
-	var total_rounds = Math.ceil(total_teams / 2);
-
-	if(round_number === 1){
-
-		pairing.pairRandomRound(round_number, division);
-	} else {
-		pairing.pairPowerMatch(round_number, division, false);
-	}
-
-	//count and print number of rounds
-	var round_count = 0;
-	for(var i = 0; i < collection.rounds.length; i++){
-		//console.log(collection.rounds.at(i).get("team1").get("team_code"));
-		if(collection.rounds.at(i).get("round_number") === round_number){
-			round_count++;
-		}
-	}
-
-	pairing.fixRepeatedByes(round_number, division);
-	pairing.setSides(round_number, division);
-	pairing.pairRooms(round_number, division);
-	pairing.pairJudges(round_number, division);
-}
 
 
 pairing.pairJudges = function(round_number, division){

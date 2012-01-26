@@ -357,6 +357,33 @@ collection.restoreReferences = function(){
 		console.log(e.message + " " + e.stack);
 	}
 
+	//convert results, round numbers, sides back to integers. 
+	//stop scheduling to boolean
+	//convert speaker points back to floats
+	$.each(collection.rounds, function(i){
+		var round = collection.rounds.at(i);
+		var round_number = round.get("round_number");
+		if(typeof round_number === "string"){
+			round.set({round_number: parseInt(round_number)});
+		}
+
+		var aff = round.get("aff");
+		if(typeof aff === "string"){
+			round.set({aff: parseInt(aff)});
+		}
+
+		var result = round.get("result");
+		if(typeof result === "string"){
+			round.set({result: parseInt(result)});
+		}
+
+		var stop_scheduling = round.get("stop_scheduling");
+		if(stop_scheduling === "true"){
+			round.set({stop_scheduling: true});
+		}
+
+	});
+
 }
 
 //iterate over every collection, looking for a model with the id

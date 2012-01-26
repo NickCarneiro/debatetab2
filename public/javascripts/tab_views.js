@@ -1105,7 +1105,7 @@ view.RoundTable = Backbone.View.extend({
 		
 		collection.rounds.bind("add", this.appendRound);
 		collection.rounds.bind("reset", this.render, this);
-		collection.rounds.bind("change", this.render, this);
+		collection.rounds.bind("change", this.renderRounds, this);
 
 		collection.divisions.bind("change", this.renderDivisionSelect, this);
 		collection.divisions.bind("reset", this.renderDivisionSelect, this);
@@ -1455,7 +1455,8 @@ view.RoundTable = Backbone.View.extend({
 
 		var div_id = $("#rounds_division_select").val();
 		var div = collection.getDivisionFromId(div_id);
-		var round_number = $("#rounds_round_number_select").val();
+		var round_number = parseInt($("#rounds_round_number_select").val());
+
 		//check if round has already been paired.
 		var already_paired = pairing.alreadyPaired(round_number, div);
 		if(already_paired === true){
@@ -1534,6 +1535,14 @@ view.RoundTable = Backbone.View.extend({
 
     	this.renderDivisionSelect();
     	this.renderRoundNumberSelect();
+    	this.filterDivisions();
+	} ,
+
+	renderRounds: function(){
+		$("#rounds_table").empty();
+		_(collection.rounds.models).each(function(round){ // in case collection is not empty
+        	this.appendRound(round);
+    	}, this);
     	this.filterDivisions();
 	} ,
 
