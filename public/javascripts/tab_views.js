@@ -374,7 +374,8 @@ view.Team = Backbone.View.extend({
 		var competitors = this.model.get("competitors");
 		for(var i = 0; i < competitors.length; i++){
 			$("#newteam_competitors").append('Name: <input class="newteam_competitor" type="text" value="' + competitors[i].name + '"/> <br />');
-			$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" value="' + competitors[i].phone_number + '"/> <br /> <br />');
+			var phone_number = competitors[i].phone_number || "";
+			$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" value="' + phone_number + '"/> <br /> <br />');
 		}
 
 
@@ -480,7 +481,7 @@ view.Judge = Backbone.View.extend({
 		$("#newjudge_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
 		$("#judge_form_overlay").fadeIn();
 	} ,
-	
+
 	clearEditForm: function(){
 		$("#newjudge_id").val("");
 		$("#new_judge_name").val("");
@@ -547,6 +548,7 @@ view.JudgeTable = Backbone.View.extend({
 		_.bindAll(this, "render", "addJudge", "appendJudge", "addSchoolSelect");
 		
 		collection.judges.bind("add", this.appendJudge);
+		collection.divisions.bind("remove", this.render);
 		collection.schools.bind("add", this.addSchoolSelect);
 		collection.divisions.bind("add", this.addDivisionCheckbox);
 
@@ -571,7 +573,7 @@ view.JudgeTable = Backbone.View.extend({
 		}
 	} ,
 	render: function(){
-
+		$("#judges_table").html("");
 		_(collection.judges.models).each(function(judge){ // in case collection is not empty
         	this.appendJudge(judge);
     	}, this);
@@ -1819,14 +1821,14 @@ view.Division = Backbone.View.extend({
 	remove: function(division){
 		var division = this.model;
 		$.confirm({
-			'title'		: 'Delete Round',
+			'title'		: 'Delete Division',
 			'message'	: 'You are about to delete a division <br />It cannot be restored at a later time! Continue?',
 			'buttons'	: {
 				'Yes'	: {
 					'model': division,
 					'class'	: 'blue',
 					'action': function(model){
-						model.destroy();
+						collection.deleteDivision(model);
 						}
 					},
 					'No'	: {
@@ -1970,3 +1972,31 @@ view.DivisionTable = Backbone.View.extend({
 	}
 	
 });
+
+view.showMessageDialog = function(message){
+	$("#message_dialog_message").text(message);
+	$("#message_dialog").dialog({ buttons: [
+	    {
+	        text: "Ok",
+	        click: function() { $(this).dialog("close"); }
+	    }
+	] });
+}
+
+//called to show a list of nonfatal warnings, like not having enough rooms.
+view.showWarningsDialog = function(){
+	var warnings = "";
+	$.each(tab.warnings, function(i, warning){
+		warnings += warning + "<br />";
+	})
+	$("#warnings_dialog_message").html(warnings);
+
+	tab.warnings = [];
+	$("#warnings_dialog").dialog({ buttons: [
+	    {
+	        text: "Ok",
+	        click: function() { $(this).dialog("close"); }
+	    }
+	] });
+}
+

@@ -515,16 +515,26 @@ pairing.pairUilPrelim = function(round_number, division){
 	pairing.printRecords(division);
 	pairing.deleteRound(round_number, division);
 
-	if(round_number < 3){
-		//no power match
-		pairing.pairPrelim(round_number, division);
+	try{
+		if(round_number < 3){
+			//no power match
+			pairing.pairPrelim(round_number, division);
 
 
-	} else if(round_number === 3){
-		//powermatch and flip
-		pairing.pairPrelim(round_number, division, {powermatch: true, flip: true});
-	} else {
-		console.log(typeof round_number);
+		} else if(round_number === 3){
+			//powermatch and flip
+			pairing.pairPrelim(round_number, division, {powermatch: true, flip: true});
+		} else {
+			console.log(typeof round_number);
+		}
+
+		if(tab.warnings.length > 0){
+			view.showWarningsDialog();
+		}
+	} catch(e){
+		//show error dialog
+		console.log(e);
+		view.showMessageDialog(e);
 	}
 
 }
@@ -713,7 +723,10 @@ pairing.pairPrelim = function(round_number, division, options){
 	
 	$.each(collection.teams, function(i){
 		var team1 = collection.teams.at(i);
-		
+		//skip team2 if not in division
+		if(team1.get("division") != division){
+			return true;
+		}
 		//skip teams already on pairing
 		if(already_paired[team1.id] != undefined){
 			return true;
@@ -734,6 +747,10 @@ pairing.pairPrelim = function(round_number, division, options){
 			}
 
 			if(team2.get("stop_scheduling") === true){
+				return true;
+			}
+			//skip team2 if not in division
+			if(team2.get("division") != division){
 				return true;
 			}
 			//skip team2 if already debated
@@ -839,7 +856,8 @@ pairing.pairRemainingTeams = function(round_number, division, unpaired_teams, op
 
 		});
 	} else {
-		throw Exception("More than 2 unpaired teams.");
+		//
+		throw "More than 2 unpaired teams.";
 	}
 
 }
@@ -876,7 +894,8 @@ pairing.pairJudges = function(round_number, division){
 	collection.judges.models = _.shuffle(collection.judges.models);
 	//copy judges into working array
 	var paired_judges = [];
-	
+	//count rounds that we could not find a judge for
+	var no_judge = 0;
 
 	for(var i = 0; i < collection.rounds.length; i++){
 		if(collection.rounds.at(i).get("division") != division 
@@ -914,6 +933,19 @@ pairing.pairJudges = function(round_number, division){
 
 		}
 
+		//check if we successfully paired a judge
+		if(collection.rounds.at(i).get("team1") != undefined &&
+			collection.rounds.at(i).get("team2") != undefined){
+			//if the round is not a bye and it has no judge
+			if(collection.rounds.at(i).get("judge") === undefined){
+				no_judge++;
+			}
+		}
+
+	}
+
+	if(no_judge > 0){
+		tab.warnings.push("Unable to find a judge for " + no_judge + " rounds.");
 	}
 }
 
@@ -978,14 +1010,14 @@ pairing.pairRooms = function(round_number, division){
 				room = rooms.pop();
 				collection.rounds.at(i).set({room: room});
 			} else {
-				console.log("WARNING: Needed another room.")
+				console.dbg("WARNING: Needed another room.")
 			}
 
 
 		}
 
 		if(room_count < round_count){
-			console.log("WARNING: Only had " + room_count + " rooms. Needed " + round_count);
+			tab.warnings.push("WARNING: Only had " + room_count + " rooms. Needed " + round_count);
 		}
 	} else {
 		//construct associative array of team1's and rooms.
@@ -1104,7 +1136,15 @@ pairing.requiredRooms = function(division){
 	return Math.floor(teams / 2);
 }
 
-
+//returns true if round has already been paired
+pairing.alreadyPaired = function(round_number, division){
+	for(var i = 0; i < collection.rounds.length; i++){
+		if(collection.rounds.at(i).get("division") === division && collection.rounds.at(i).get("round_number") === round_number){
+			return true;
+		}
+	}
+	return false;
+}
 
 /*
 =========================================

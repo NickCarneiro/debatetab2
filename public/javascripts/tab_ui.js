@@ -33,6 +33,9 @@ $(function(){
 		
 	});
 
+	//dialogs
+	$(".dialog").hide();
+
 	
 });	
 

@@ -2,7 +2,8 @@
 echo "Building project..."
 #combine javascript
 #same order as inclusion in server.js
-cat public/javascripts/jquery.tmpl.js\
+cat public/javascripts/jquery.tmpl.js \
+	public/jquery-ui-1.8.17.custom.min.js \
 	public/javascripts/underscore.js \
 	public/javascripts/backbone.js \
 	public/javascripts/plugins.js \
@@ -22,6 +23,7 @@ cat public/stylesheets/bptop.css \
 	public/stylesheets/1140.css \
 	public/stylesheets/tab.css \
 	public/stylesheets/bpbottom.css \
+	public/jquery-ui-1.8.17.custom.css \
 	> build/combined.css
 #minify css
 java -jar node_modules/node-minify/lib/yuicompressor-2.4.6.jar \

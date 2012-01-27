@@ -8,7 +8,8 @@ Author: Nick Carneiro
 
 
 var tab = {
-	debug: false
+	debug: false,
+	warnings: []
 };
 //one var per declaration helps protect against accidental globals
 var model = {};

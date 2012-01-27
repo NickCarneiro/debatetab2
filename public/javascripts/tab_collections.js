@@ -535,7 +535,7 @@ collection.generateTeamCode = function(team){
 	var competitors = team.get("competitors");
 	var school = team.get("school");
 	if(school === undefined){
-		throw Exception("Cannot create team code for a team with no school.");
+		throw "Cannot create team code for a team with no school.";
 	}
 	var school_name = school.get("school_name").substring(0,16);
 	var team_code = school_name;
@@ -568,6 +568,45 @@ collection.generateTeamCode = function(team){
 	}
 
 	team.set({team_code: team_code});
+}
+
+//delete all references to a division and then delete the division itself
+collection.deleteDivision = function(division){
+	//delete associated rooms
+	$.each(collection.rooms, function(i){
+		var room = collection.rooms.at(i);
+		if(room.get("division") === division){
+			room.destroy();
+		}
+	});
+	//delete judge references to division
+	$.each(collection.judges, function(i){
+		var judge = collection.judges.at(i);
+		var divs = judge.get("divisions");
+		//console.log(divs);
+		var new_divs = [];
+		$.each(divs, function(j, div){
+
+			if(division != div){
+				//console.log("saving division:" + div.get("division_name"));
+				new_divs.push(div);
+			}
+		});
+
+		judge.set({divisions: new_divs});
+		judge.save();
+	})
+	//delete all teams in division
+	console.log(collection.teams.length);
+	collection.teams.each(function(team){
+
+		if(team.get("division") === division){
+			team.destroy();
+		}
+	});
+
+	//and finally, delete the division model itself
+	division.destroy();
 }
 
 //deletes EVERYTHING and replaces with joy import
@@ -672,6 +711,11 @@ collection.importJoyFile = function(joy_file){
 collection.parseJudgeLine = function(line){
 	joy_judge = {division_numbers: [], school_number: "", name: ""};
 	var before_star = line.split("*")[0];
+	var divisions = before_star.match(/\$./g);
+	$.each(divisions, function(i, div){
+		var div_number = div.substr(1,1);
+		joy_judge.division_numbers.push(div_number);
+	});
 	var cols = before_star.split(";");
 	$.each(cols, function(i, col){
 		l = col.trim();
@@ -680,8 +724,6 @@ collection.parseJudgeLine = function(line){
 			joy_judge.name = l;
 		} else if(l.charAt(0) === "#"){
 			joy_judge.school_number = l.substring(1).trim();
-		} else if(l.charAt(0) === "$"){
-			joy_judge.division_numbers.push(l.substr(1));
 		}
 	});
 	return joy_judge;
@@ -704,7 +746,7 @@ collection.parseTeamLine = function(line){
 			//got school number
 			joy_team.school_number = l.substring(1);
 		} else {
-			throw Exception("Unrecognized character in Team line.");
+			throw "Unrecognized character in Team line.";
 		}
 	});
 
@@ -744,7 +786,7 @@ collection.parseDivisionLine = function(line){
 
 collection.parseSchoolLine = function(line){
 	if(line.charAt(0) != "#"){
-		throw Exception("Invalid school line in joy file.");
+		throw "Invalid school line in joy file.";
 	}
 	var joy_school = {};
 	var section = "numbers";
