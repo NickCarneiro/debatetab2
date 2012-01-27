@@ -534,7 +534,6 @@ view.Judge = Backbone.View.extend({
 });
 
 		
-		//$('.simpledialog').simpleDialog();
 
 
 view.JudgeTable = Backbone.View.extend({
@@ -1039,21 +1038,21 @@ view.Round = Backbone.View.extend({
 		var div_id = $("#rounds_division_select").val();
 		var division = collection.getDivisionFromId(div_id);
 		//empty out existing rooms and judges
-		$("#editround_judge").html("");
-		$("#editround_room").html("");
+		$("#edit_round_judge").html("");
+		$("#edit_round_room").html("");
 		for(var i = 0; i < collection.rooms.length; i++){
 			//skip irrelevant rooms
 			if(collection.rooms.at(i).get("division") != division){
 				continue;
 			}
-			$("#editround_room").append('<option value="'+collection.rooms.at(i).get("id")+'">'
+			$("#edit_round_room").append('<option value="'+collection.rooms.at(i).get("id")+'">'
 				+ collection.rooms.at(i).get("name") +'</option>');
 
 		}
 
 		for(var i = 0; i < collection.judges.length; i++){
 			
-			$("#editround_judge").append('<option value="'+collection.judges.at(i).get("id")+'">'
+			$("#edit_round_judge").append('<option value="'+collection.judges.at(i).get("id")+'">'
 				+ collection.judges.at(i).get("name") +'</option>');
 
 		}
@@ -1061,8 +1060,8 @@ view.Round = Backbone.View.extend({
 	} ,
 	populateTeamSelects: function(){
 		//empty out existing teams
-		$("#editround_team1_code").html("");
-		$("#editround_team2_code").html("");
+		$("#left_team_select").html("");
+		$("#right_team_select").html("");
 
 		var div_id = $("#rounds_division_select").val();
 		var division = collection.getDivisionFromId(div_id);
@@ -1073,22 +1072,22 @@ view.Round = Backbone.View.extend({
 				continue;
 			}
 
-			$("#editround_team1_code").append('<option value="'+collection.teams.at(i).get("id")+'">'
+			$("#left_team_select").append('<option value="'+collection.teams.at(i).get("id")+'">'
 				+ collection.teams.at(i).get("team_code") +'</option>');
 
-			$("#editround_team2_code").append('<option value="'+collection.teams.at(i).get("id")+'">'
+			$("#right_team_select").append('<option value="'+collection.teams.at(i).get("id")+'">'
 			+ collection.teams.at(i).get("team_code") +'</option>');
 		}
 
 		//add BYE teams to both
-		$("#editround_team1_code").append('<option value="-1">BYE</option>');
-		$("#editround_team2_code").append('<option value="-1">BYE</option>');
+		$("#edit_round_team1_code").append('<option value="-1">BYE</option>');
+		$("#edit_round_team2_code").append('<option value="-1">BYE</option>');
 
 	} ,
 	showEditForm: function(){
 		//populate form with existing values
 		//populate team 1 competitors
-		$("#editround_id").val(this.model.get("id"));
+		$("#edit_round_dialog").data("round_id", this.model.get("id"));
 		this.populateTeamSelects();
 		this.populateRoomsAndJudges();
 		view.roundTable.drawForm(this.model);
@@ -1105,8 +1104,12 @@ result can be: 0 - 7:
 		7 DOUBLE_FORFEIT
 */
 		
-		$(".edit_model_overlay").css("height", $(document).height());
-		$("#round_form_overlay").fadeIn();
+		//show dialog
+		$( "#edit_round_dialog").dialog({
+			width: 700,
+			title: "Edit Round ",
+			modal: true
+		});
 	} ,
 });
 
@@ -1115,24 +1118,21 @@ view.RoundTable = Backbone.View.extend({
 	el: $("#rounds") , // attaches `this.el` to an existing element.
 	events: {
 		
-		"keyup #rounds_search": "search",
 		"click #pair_round_button" : "pairRoundConfirm",
 		"click #print_ballots_button" : "printBallots",
 		
 		"change #rounds_division_select" : "renderRoundNumberSelect",
 		"change #rounds_round_number_select" : "filterDivisions",
-		"click button#save_round_button": "editRound",
+		"click button#save_round_button": "saveRound",
 		"click #add_round_button": "addEmptyRound",
-		"change #editround_team1_code": "changeTeam",
-		"change #editround_team2_code": "changeTeam",
-		"change #editround_judge": "changeJudge",
-		"change #editround_room": "changeRoom",
-		"click #editround_swap_sides": "swapSides",
-		"click #print_pairings": "printPairingsPrompt",
-		"click #print_pairings_confirm": "printPairings",
-		"click #print_teams_button": "printTeams",
-		"click #text_pairings_button": "textPairingsPrompt",
-		"click #text_pairings_confirm": "textPairings"
+		"change #left_team_select": "changeTeam",
+		"change #right_team_select": "changeTeam",
+		//can't get these to fire
+		"change #edit_round_judge": "changeJudge",
+		"change #edit_round_room": "changeRoom",
+		"click #edit_round_swap": "swapSides",
+		//
+	
 
 	} ,
 	initialize: function(){
@@ -1262,7 +1262,7 @@ view.RoundTable = Backbone.View.extend({
 		
 	} ,
 	swapSides: function(){
-		var round_id = $("#editround_id").val();
+		var round_id = $("#edit_round_dialog").data("round_id");
 		var round = collection.getRoundFromId(round_id);
 		var aff = round.get("aff");
 		if(aff == 0){
@@ -1274,9 +1274,10 @@ view.RoundTable = Backbone.View.extend({
 		this.drawForm(round);
 	} ,
 	changeJudge: function(){
+		console.log("changing judge");
 		var judge_id = $("#editround_judge").val();
 		var judge = collection.getJudgeFromId(judge_id);
-		var round_id = $("#editround_id").val();
+		var round_id = $("#edit_round_dialog").data("round_id");
 		var round = collection.getRoundFromId(round_id);
 		round.set({judge: judge});
 		round.save();
@@ -1285,7 +1286,7 @@ view.RoundTable = Backbone.View.extend({
 	changeRoom: function(){
 		var room_id = $("#editround_room").val();
 		var room = collection.getRoomFromId(room_id);
-		var round_id = $("#editround_id").val();
+		var round_id = $("#edit_round_dialog").data("round_id");
 		var round = collection.getRoundFromId(round_id);
 		round.set({room: room});
 		round.save();
@@ -1293,26 +1294,14 @@ view.RoundTable = Backbone.View.extend({
 	} ,
 	changeTeam: function(){
 		//update edit round form to reflect new team
-		var aff_id = $("#editround_team1_code").val();
+		var aff_id = $("#left_team_select").val();
 		var aff = collection.getTeamFromId(aff_id);
-		var neg_id = $("#editround_team2_code").val();
+		var neg_id = $("#right_team_select").val();
 		var neg = collection.getTeamFromId(neg_id);
-		var round_id = $("#editround_id").val();
+		var round_id = $("#edit_round_dialog").data("round_id");
 		var round = collection.getRoundFromId(round_id);
 
-		
-
-		if(aff === undefined){
-			//create bye teams if necessary
-			var bye_team = new model.Team();
-			bye_team.set({team_code: "BYE"});
-			aff = bye_team;
-		}
-		if(neg === undefined){
-			var bye_team = new model.Team();
-			bye_team.set({team_code: "BYE"});
-			neg = bye_team;
-		}
+	
 
 		if(round.get("aff") == 0){
 			round.set({team1: aff, team2: neg});
@@ -1337,70 +1326,71 @@ view.RoundTable = Backbone.View.extend({
 			neg = round.get("team1");
 		}
 
-					
+		var aff_id = aff.get("id");
+		var neg_id = neg.get("id");
 		
 		//draw left side of form (aff)
 		var competitors = aff.get("competitors");
 		if(competitors != undefined){
 			//clear out existing form data
-			$("#editround_team1 > .competitors").html('');
-			var aff_id = aff.get("team_code") === "BYE" ? -1 : aff.get("id");
-			$("#editround_team1_code").val(aff_id);
-			$("#editround_team1_id").text(aff_id);
+			$("#left_team_container").html('');
+			
+			$("#left_team_select").val(aff_id);
+			
 
 			var points = round.get("aff_points") || []; 
 			for(var i = 0; i < competitors.length; i++){
 				
 				var speaks = (points[i] === undefined ? "" : points[i].speaks);
 				var rank = (points[i] === undefined ? "" : points[i].rank);
-				var competitor_input = competitors[i].name + 
-					'<br /> Points: <input class="editround_speaks" value="'+ speaks +'"/> ' +
-					'Rank: <input class="editround_ranks" value="'+ rank +'"/> <br />';
+				var competitor_input = '<span class="competitor_name">' + competitors[i].name + "</span>" + 
+					'<br /> Points: <input class="edit_round_speaks" value="'+ speaks +'"/> ' +
+					'Rank: <input class="edit_round_ranks" value="'+ rank +'"/> <br />';
 
-				$("#editround_team1 > .competitors").append(competitor_input);
+				$("#left_team_container").append(competitor_input);
 			}
 
 		} else {
 			//no competitors? team1 must have been a bye
-			$("#editround_team1_code").text("BYE");
+			$("#left_team_select").val("-1");
 		}
 
-
 		//draw right side of form
-		competitors = neg.get("competitors");
+
+		var competitors = neg.get("competitors");
 		if(competitors != undefined){
 			//clear out existing form data
-			$("#editround_team2 > .competitors").html('');
-			//id of -1 means BYE
-			var neg_id = neg.get("team_code") === "BYE" ? -1 : neg.get("id");
-			$("#editround_team2_code").val(neg_id);
-			$("#editround_team2_id").text(neg_id);
+			$("#right_team_container").html('');
+			
+			$("#right_team_select").val(neg_id);
+			
 
 			var points = round.get("neg_points") || []; 
 			for(var i = 0; i < competitors.length; i++){
 				
 				var speaks = (points[i] === undefined ? "" : points[i].speaks);
 				var rank = (points[i] === undefined ? "" : points[i].rank);
-				var competitor_input = competitors[i].name + 
-					'<br /> Points: <input class="editround_speaks" value="'+ speaks +'"/> ' +
-					'Rank: <input class="editround_ranks" value="'+ rank +'"/> <br />';
+				var competitor_input = '<span class="competitor_name">' + competitors[i].name + '</span>' +
+					'<br /> Points: <input class="edit_round_speaks" value="'+ speaks +'"/> ' +
+					'Rank: <input class="edit_round_ranks" value="'+ rank +'"/> <br />';
 
-				$("#editround_team2 > .competitors").append(competitor_input);
+				$("#right_team_container").append(competitor_input);
 			}
 
 		} else {
 			//no competitors? team1 must have been a bye
-			$("#editround_team2_code").text("BYE");
+			$("#left_team_select").val(-1);
 		}
+		
 
 		//select correct room and judge from dropdowns
 		var judge_id = round.get("judge") === undefined ? "-1" : round.get("judge").get("id");
-		$("#editround_judge").val(judge_id);
+		$("#edit_round_judge").val(judge_id);
 		var room_id = round.get("room") === undefined ? "-1" : round.get("room").get("id");
-		$("#editround_room").val(room_id);
+		$("#edit_round_room").val(room_id);
 		//populate result box
 		
-		$("#editround_result_select").val(round.get("result"));
+		$("#edit_round_result").val(round.get("result"));
 
 	} ,
 	addEmptyRound: function(){
@@ -1417,34 +1407,34 @@ view.RoundTable = Backbone.View.extend({
 		round.set({"team2": bye_team});
 		collection.rounds.add(round);
 	} ,
-	editRound: function(){
+	saveRound: function(){
 		//verify speaker points
-		var team1_id = $("#editround_team1_code").val();
-		var team2_id = $("#editround_team2_code").val();
+		var team1_id = $("#left_team_select").val();
+		var team2_id = $("#right_team_select").val();
 		var team1 = collection.getTeamFromId(team1_id);
 		var team2 = collection.getTeamFromId(team2_id);
-		var round_id = $("#editround_id").val();
+		var round_id = $("#edit_round_dialog").data("round_id");
 		var round = collection.getRoundFromId(round_id);
-		var result = $("#editround_result_select").val();
+		var result = $("#edit_round_result").val();
 		//construct points object for each row in the form
 		var aff_points = [];
 		var i = 0;
-		$("#editround_team1 > .competitors").children().each(function(){
-			if($(this).hasClass("editround_speaks")){
+		$("#left_team_container").children().each(function(){
+			if($(this).hasClass("edit_round_speaks")){
 				aff_points.push({speaks: $(this).val(), rank: ""});
 				i++;
-			} else if($(this).hasClass("editround_ranks")){
+			} else if($(this).hasClass("edit_round_ranks")){
 				aff_points[i-1].rank = $(this).val();
 			}
 		});
 
 		var neg_points = [];
 		var i = 0;
-		$("#editround_team2 > .competitors").children().each(function(){
-			if($(this).hasClass("editround_speaks")){
+		$("#right_team_container").children().each(function(){
+			if($(this).hasClass("edit_round_speaks")){
 				neg_points.push({speaks: $(this).val(), rank: ""});
 				i++;
-			} else if($(this).hasClass("editround_ranks")){
+			} else if($(this).hasClass("edit_round_ranks")){
 				neg_points[i-1].rank = $(this).val();
 			}
 		});
@@ -1455,9 +1445,7 @@ view.RoundTable = Backbone.View.extend({
 		round.save()
 		//speaker points are stored in the round model in aff_points, and neg_points
 
-		//hide form
-		//$(".edit_model_overlay").fadeOut();
-		//clear form
+		$("#edit_round_dialog").dialog("close");
 	} ,
 	printBallots: function(){
 		var div_id = $("#rounds_division_select").val();

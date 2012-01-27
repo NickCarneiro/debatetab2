@@ -385,6 +385,13 @@ collection.restoreReferences = function(){
 
 	});
 
+	$.each(collection.rooms, function(i){
+		var room = collection.rooms.at(i);
+		if(room.get("stop_scheduling") === "true"){
+			room.set({stop_scheduling: true});
+		}
+	});
+
 }
 
 //iterate over every collection, looking for a model with the id

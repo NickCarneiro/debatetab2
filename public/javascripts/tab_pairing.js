@@ -945,7 +945,8 @@ pairing.pairJudges = function(round_number, division){
 	}
 
 	if(no_judge > 0){
-		tab.warnings.push("Unable to find a judge for " + no_judge + " rounds.");
+		var round = no_judge > 1 ? "rounds" : "round";
+		tab.warnings.push("Unable to find a judge for " + no_judge + " " + round + ".");
 	}
 }
 
@@ -979,7 +980,7 @@ pairing.pairRooms = function(round_number, division){
 	//put all available rooms into an array.
 	var rooms = [];
 	for(var i = 0; i < collection.rooms.length; i++){
-		if(collection.rooms.at(i).get("division") === division){
+		if(collection.rooms.at(i).get("division") === division && collection.rooms.at(i).get("stop_scheduling") != true){
 			rooms.push(collection.rooms.at(i));
 		}
 	}
@@ -999,6 +1000,7 @@ pairing.pairRooms = function(round_number, division){
 				|| collection.rounds.at(i).get("round_number") != round_number){
 				continue;
 			}
+
 			//don't give byes a room
 			if(collection.rounds.at(i).get("team1") === undefined ||
 				collection.rounds.at(i).get("team2") === undefined){

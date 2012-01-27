@@ -13,6 +13,51 @@ body {
 	margin: 0px auto;
 }
 
+#edit_round_top_div select{
+  display: inline-block;
+  margin: 10px;
+  font-size: 20px;
+  height: 30px;
+}
+.edit_round_dialog button{
+  display: inline-block;
+}
+
+.edit_round_dialog select{
+  margin: 10px;
+}
+
+.edit_round_dialog{
+  text-align: center;
+}
+.edit_round_speaks{
+  width: 50px;
+  font-size: 16px;
+  margin: 10px;
+}
+
+.edit_round_ranks{
+  width: 30px;
+  font-size: 16px;
+}
+
+.competitor_name {
+  font-weight: bold;
+}
+#edit_round_result{
+  display: block;
+  width: 200px;
+  margin: 0px auto;
+  font-size: 20px;
+  height: 30px;
+}
+
+.edit_round_team {
+  font-size: 16px;
+  display: inline-block;
+  margin: 10px 25px 0px 25px;
+  text-align: left;
+}
 #import_box {
   width: 600px;
   height: 200px;
@@ -107,13 +152,26 @@ ul {
   border-bottom: solid 1px #eee;
   width: 100%; 
 }
-.bottom_buttons{
-  margin-top: 20px;
 
-}
 .top_buttons > button{
   height: 40px;
   margin: 0px 5px 0px 0px;
+}
+
+
+.bottom_buttons{
+  border-top: 1px solid #eee;
+  margin-top: 20px;
+  padding-top: 10px;
+  text-align: center;
+}
+
+.bottom_buttons button{
+  display: inline-block;
+  height: 30px;
+  font-size: 20px;
+  margin: 0px 10px 0px 10px;
+  width: 150px;
 }
 
 

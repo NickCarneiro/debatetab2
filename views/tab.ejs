@@ -28,6 +28,7 @@
 		<!-- begin main content areas. Only one is shown at a time.-->
 		<div id="rounds_container" class="main_container hidden tencol block last">
 			<div id="rounds" class="subcontainer">
+				
 				<div class="top_buttons">
 					<span>Division: </span><select id="rounds_division_select" >
 					</select>
@@ -45,17 +46,47 @@
 				<div class="bottom_buttons">
 					<button id="add_round_button">Add Debate</button>
 					<button id="pair_round_button">Pair Round</button>
-					<button id="print_ballots_button">Print Ballots</button>
-					<button id="print_pairings">Print Pairings</button>
-					<button id="text_pairings_button">Text Pairings</button>
-					<div class="results_container">
-						<button id="print_teams_button">Print Teams</button>
-						<button id="print_speakers_button">Print Speakers</button>
-						<button id="print_breaks_button">Print Breaks</button>
+					
+				
+				</div>
+
+
+				
+			</div>
+
+			<div id="edit_round_dialog" class="dialog edit_round_dialog">
+
+					<div id="edit_round_top_div">Judge: <select id="edit_round_judge"></select>
+					 Room: <select id="edit_round_room"></select></div>
+					
+					<div id="edit_round_right" class="edit_round_team">
+						<label for="left_team_select">Affirmative</label><select id="left_team_select"></select>
+						<div id="left_team_container">
+						</div>
+					</div>
+					<div id="edit_round_right" class="edit_round_team">
+						<label for="right_team_select">Negative</label><select id="right_team_select"></select>
+						<div id="right_team_container">
+						</div>
+					</div>
+					<select id="edit_round_result">
+						<option value="0">Aff Win Neg Loss</option> 
+						<option value="1">Aff BYE Neg Forfeit</option> 
+						<option value="2">Neg Win Aff Loss</option> 
+						<option value="3">Neg BYE Aff Forfeit</option> 
+						<option value="4">Double Win</option> 
+						<option value="5">Double Loss</option> 
+						<option value="6">Double Bye</option> 
+						<option value="7">Double Forfeit</option> 
+					</select>
+					
+					<div class="bottom_buttons">
+						<button id="edit_round_save">Save</button>
+						<button id="edit_round_cancel">Cancel</button>
+						<button id="edit_round_swap">Swap Sides</button>
+						
 					</div>
 				</div>
-					
-			</div>
 		</div>
 
 
@@ -288,22 +319,3 @@
 	<div id="warnings_dialog_message"></div>
 </div>
 
-<div id="edit_round_dialog" class="dialog">
-	<div id="edit_round_judge_div"><select id="edit_round_judge"></select></div>
-	<div class="edit_round_team">
-		<labelfor="left_team_select">Affirmative</label><select id="left_team_select"></select>
-		<div id="left_team_container">
-		</div>
-	</div>
-	<div class="edit_round_team">
-		<labelfor="right_team_select">Negative</label><select id="right_team_select"></select>
-		<div id="right_team_container">
-		</div>
-	</div>
-	<br />
-	<select id="edit_round_result"></select>
-	<button id="edit_round_save">Save</button>
-	<div class="bottom_buttons">
-		<button id="edit_round_swap">Swap Sides</button>
-	</div>
-</div>

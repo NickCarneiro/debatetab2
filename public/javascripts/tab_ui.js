@@ -208,4 +208,35 @@ $("#pair_print_pairings").click(function(){
 
 });
 
+
+/*
+=========================================
+Edit round event bindings
+=========================================
+*/	
+$("#edit_round_swap").click(function(){
+	console.log("swapping sides");
+	view.roundTable.swapSides();
+})
+
+$("#edit_round_cancel").click(function(){
+	$("#edit_round_dialog").dialog("close");
+});
+
+$("#edit_round_judge").change(function(){
+	view.roundTable.changeJudge();
+});
+
+$("#left_team_select, #right_team_select").live("change", function(){
+	view.roundTable.changeTeam();
+});
+
+$("#edit_round_room").live("change", function(){
+	view.roundTable.changeRoom();
+});
+
+$("#edit_round_save").click(function(){
+	view.roundTable.saveRound();
+});
+
 });
