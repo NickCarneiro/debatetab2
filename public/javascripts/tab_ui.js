@@ -208,4 +208,37 @@ $("#pair_print_pairings").click(function(){
 
 });
 
+$("#save_to_database").click(function(){
+	var tourneyData = {};
+	tourneyData.divisions = collection.divisions;
+	tourneyData.teams = collection.teams;
+	tourneyData.schools = collection.schools;
+	tourneyData.judges = collection.judges;
+	tourneyData.rooms = collection.rooms;
+	tourneyData.rounds = collection.rounds;
+	tourneyData.tourney_id = 12812;	//date of tourney
+	
+	var export_string = JSON.stringify(tourneyData,"",'\t');
+	console.log(export_string);
+	
+	$.post('/saveTourney', {tourneyData: export_string},
+		function(data){
+				
+		
+		});
+
+});
+
+
+$("#get_from_database").click(function(){
+
+	$.get('/getTourney', function(data){
+		
+		collection.import(data);
+		
+	});
+
+});
+
+
 });

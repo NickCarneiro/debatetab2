@@ -18,14 +18,15 @@ var express = require('express'),
 		sys = require('util'),
 		mime = require('mime'),
 		cleanCSS = require('clean-css'),
-		app = module.exports = express.createServer();
+		app = module.exports = express.createServer(),
+		db = require('mongojs').connect("mongodb://localhost/test", ["TournamentData"]);
 
 
 /*===========================================================================
 	SETTINGS
 ============================================================================= */
 
-var port = 3003,
+var port = 3001,
 		cacheAge = 60000 * 60 * 24 * 365,
 		logs = {
 			set: false,
@@ -154,6 +155,39 @@ app.get('/', function(req, res) {
 		javascripts: [],
 		stylesheets: []
 	});
+});
+
+app.post('/saveTourney',function(req,res){
+
+		res.send("success");
+		
+		db.TournamentData.find({tourney_id: 12812},function(err,doc){
+			if(doc.length> 0)
+			{
+				db.TournamentData.update({tourney_id: 12812},JSON.parse(req.body.tourneyData));
+			}
+			else
+			{
+				db.TournamentData.insert(JSON.parse(req.body.tourneyData));
+			}
+		});	
+});
+
+app.get('/getTourney',function(req,res){
+
+	db.TournamentData.find({tourney_id: 12812},function(err,doc){
+			
+			if(doc.length> 0)
+			{
+				res.send(doc);
+			}
+			else
+			{
+				res.send("does not exist");
+			}
+		});	
+		
+
 });
 
 /*===========================================================================
