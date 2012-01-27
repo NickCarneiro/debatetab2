@@ -383,6 +383,8 @@ collection.restoreReferences = function(){
 			round.set({stop_scheduling: true});
 		}
 
+
+
 	});
 
 	$.each(collection.rooms, function(i){
@@ -391,6 +393,13 @@ collection.restoreReferences = function(){
 			room.set({stop_scheduling: true});
 		}
 	});
+
+	$.each(collection.divisions, function(i){
+		var division = collection.divisions.at(i);
+		if(division.get("flighted_rounds") == true){
+			division.set({flighted_rounds: true});
+		}
+	})
 
 }
 
@@ -580,8 +589,7 @@ collection.generateTeamCode = function(team){
 //delete all references to a division and then delete the division itself
 collection.deleteDivision = function(division){
 	//delete associated rooms
-	$.each(collection.rooms, function(i){
-		var room = collection.rooms.at(i);
+	collection.rooms.each(function(room){
 		if(room.get("division") === division){
 			room.destroy();
 		}

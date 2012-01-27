@@ -9,8 +9,11 @@ Author: Nick Carneiro
 
 var tab = {
 	debug: false,
-	warnings: []
+	warnings: [],
+	tournament_id: undefined
 };
+
+
 //one var per declaration helps protect against accidental globals
 var model = {};
 var view = {};
@@ -45,8 +48,37 @@ console.dbg = function(message){
 	}
 }
 
+
+//load debug status on page load. off by default
+tab.debug = true;
+if(localStorage["debug"] != undefined){
+
+	tab.debug = localStorage["debug"] === "true" ? true: false;
+	//console.log("debug mode is " + tab.debug);
+}
+
 //functions to manipulate the interface and ui state
 var ui = {};
 
+var Exception = function(message){
+	this.message = message;
+}
+
+
+//set tournament id
+if(localStorage["tournament_id"] != undefined){
+	console.dbg("tournament_id was loaded from localStorage")
+	tab.tournament_id = localStorage["tournament_id"]
+}
+else if($("#tournament_id").html().trim() != ""){
+	console.log("tournament id was found in #tournament_id div");
+	tab.tournament_id = $("#tournament_id").html().trim();
+} else {
+	console.dbg("generating new tournament id");
+	tab.tournaent_id = (new ObjectId()).toString()
+}
+console.dbg("setting tournament_id in localstorage to " + tab.tournament_id);
+localStorage["tournament_id"] = tab.tournament_id;
+console.dbg(tab.tournament_id);
 
 

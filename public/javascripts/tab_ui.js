@@ -95,6 +95,8 @@ Debug event bindings
 
 $(function(){
 
+
+$("#debug_tournament_id").html("Tournament ID: " + tab.tournament_id);
 $("#clear_storage").click(function(){
 
 	$.confirm({
@@ -178,13 +180,7 @@ $("#single_text").click(function(){
 });
 
 
-//load debug status on page load. off by default
-tab.debug = true;
-if(localStorage["debug"] != undefined){
 
-	tab.debug = localStorage["debug"] === "true" ? true: false;
-	//console.log("debug mode is " + tab.debug);
-}
 
 $("#toggle_debug").click(function(){
 	tab.debug = !(tab.debug);
@@ -238,5 +234,6 @@ $("#edit_round_room").live("change", function(){
 $("#edit_round_save").click(function(){
 	view.roundTable.saveRound();
 });
+
 
 });

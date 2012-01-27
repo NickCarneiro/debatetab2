@@ -2,12 +2,16 @@
 	<!-- begin header -->
 	<div class="twelvecol">
 		<div class="header_image block center">
-			<img src="images/logo.png" alt="DebateTab logo, Advancing academic competition"/>
+			<img src="/images/logo.png" alt="DebateTab logo, Advancing academic competition"/>
 		</div>
 	</div>
 	<!-- end header -->
 
-
+	<div id="tournament_id" style="display:none;">
+	<% if(locals.tournament_id){ %>
+		<%= tournament_id %>
+	<% } %>
+	</div>
 	<div class="row maincontent">
 
 		<!-- begin left nav-->
@@ -34,13 +38,14 @@
 					</select>
 					<span>Round Number: </span><select id="rounds_round_number_select">
 					</select>
+					Remaining ballots: <span id="remaining_ballots"></span>
 				</div>
 					
 				<div id="pairing_indicator">
 					Pairing Round. Please wait.
-					<img class="inline_block" src="images/indicator.gif" />
+					<img class="inline_block" src="/images/indicator.gif" />
 				</div>
-				<table id="rounds_table">
+				<table id="rounds_table" class="large_table">
 				</table>
 				
 				<div class="bottom_buttons">
@@ -70,6 +75,7 @@
 						</div>
 					</div>
 					<select id="edit_round_result">
+						<option value="-1"></option>
 						<option value="0">Aff Win Neg Loss</option> 
 						<option value="1">Aff BYE Neg Forfeit</option> 
 						<option value="2">Neg Win Aff Loss</option> 
@@ -79,7 +85,8 @@
 						<option value="6">Double Bye</option> 
 						<option value="7">Double Forfeit</option> 
 					</select>
-					
+					<label id="lpw_label" for="edit_round_lpw">Low point win: </label><input type="checkbox" id="edit_round_lpw" /> 
+					<span id="edit_round_error"></span>
 					<div class="bottom_buttons">
 						<button id="edit_round_save">Save</button>
 						<button id="edit_round_cancel">Cancel</button>
@@ -282,6 +289,7 @@
 		<div id="settings_container" class="main_container hidden tencol block last">Settings</div>
 		<div id="debug_container" class="main_container hidden tencol block last">
 				<div id="debug" class="subcontainer">
+					<div id="debug_tournament_id"></div>
 					<button id="toggle_debug">Toggle debug</button><br />
 					<h1>Pairing</h1>
 					<button id="pair_tests">Run Pairing Tests</button><br />

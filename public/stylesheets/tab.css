@@ -44,14 +44,32 @@ body {
 .competitor_name {
   font-weight: bold;
 }
+
+.roundrow{
+  cursor: pointer;
+}
+
 #edit_round_result{
-  display: block;
+  display: inline-block;
   width: 200px;
-  margin: 0px auto;
   font-size: 20px;
   height: 30px;
 }
 
+#edit_round_lpw{
+  display: inline-block;
+}
+
+#lpw_label{
+  display:inline-block;
+}
+
+#edit_round_error{
+  margin-top: 10px;
+  display: block;
+  color: #8f0000;
+  font-size: 16px;
+}
 .edit_round_team {
   font-size: 16px;
   display: inline-block;
@@ -63,6 +81,10 @@ body {
   height: 200px;
 }
 
+#debug_tournament_id{
+  font-size: 30px;
+  margin: 10px;
+}
 #debug button{
   padding: 10px;
   font-size: 16px;
@@ -119,6 +141,23 @@ styles for main menu
 	cursor: pointer;
 }
 
+tr {
+  border: 1px solid #fff;
+  padding: 5px;
+}
+
+tr:hover{
+  border: 1px solid #000;
+}
+
+.roundrow:hover {
+  background-color: #eee;
+}
+
+.entered{
+  background-color: #ddd;
+}
+
 /*
 when a menu item li is selectedm its only class is menu_item_selected. When it is not selected, its class is just menu_item.
 */
@@ -136,8 +175,12 @@ when a menu item li is selectedm its only class is menu_item_selected. When it i
 
 table{
 	margin-top: 15px;
+  
 }
 
+.large_table{
+  width: 100%;
+}
 td{
 	padding: 5px;
 }
@@ -147,6 +190,8 @@ ul {
 }
 
 .top_buttons{
+  margin-left: 10px;
+  margin-top: 10px;
   margin-bottom: 10px; 
   padding-bottom: 10px;
   border-bottom: solid 1px #eee;

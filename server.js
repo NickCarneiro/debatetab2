@@ -67,11 +67,22 @@ app.configure('development', function() {
 
 	app.get('/tab', function(req, res) {
 		res.render('tab', {
-			title: 'Tab development',
+			title: 'Debate Tab | Development',
 			javascripts: ['jquery.tmpl.js','jquery-ui-1.8.17.custom.min.js', 'underscore.js', 
 			'backbone.js', 'plugins.js','tab_main.js', 
 			'tab_collections.js', 'tab_pairing.js', 'tab_views.js', 'tab_ui.js'],
 			stylesheets: ['bptop.css', '1140.css', 'tab.css', 'bpbottom.css', 'jquery-ui-1.8.17.custom.css']
+		});
+	});
+
+	app.get('/tab/:id', function(req, res) {
+		res.render('tab', {
+			title: 'Debate Tab | Development',
+			javascripts: ['jquery.tmpl.js','jquery-ui-1.8.17.custom.min.js', 'underscore.js', 
+			'backbone.js', 'plugins.js','tab_main.js', 
+			'tab_collections.js', 'tab_pairing.js', 'tab_views.js', 'tab_ui.js'],
+			stylesheets: ['bptop.css', '1140.css', 'tab.css', 'bpbottom.css', 'jquery-ui-1.8.17.custom.css'],
+			tournament_id: req.params.id
 		});
 	});
 
@@ -87,11 +98,19 @@ app.configure('production', function() {
 	app.use(express.static(__dirname + '/public', { maxAge: cacheAge }));
 	app.use(express.errorHandler());
 		app.get('/tab', function(req, res) {
-		res.render('tab', {
-			title: 'Tab production',
-			javascripts: ['tab-min.js'],
-			stylesheets: ['tab-min.css']
+			res.render('tab', {
+				title: 'DebateTab',
+				javascripts: ['tab-min.js'],
+				stylesheets: ['tab-min.css']
+			});
 		});
+		app.get('/tab/:id/', function(req, res) {
+			res.render('tab', {
+				title: 'DebateTab',
+				javascripts: ['tab-min.js'],
+				stylesheets: ['tab-min.css'],
+				tournament_id: req.params.id
+			});
 	});
 });
 

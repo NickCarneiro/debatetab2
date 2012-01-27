@@ -780,7 +780,7 @@ view.RoomTable = Backbone.View.extend({
 	clearEditForm: function(){
 		$("#newroom_id").val("");
 		$("#newroom_name").val("");
-		$("#newroom_division").val("");
+		//$("#newroom_division").val("");
 		$("#newroom_stop_scheduling").prop("checked", false);
 
 	} ,
@@ -961,9 +961,9 @@ view.StatsArea = Backbone.View.extend({
 view.Round = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
-      'click td.remove': 'remove',
-      'click td.roundrow': 'showEditForm'
-    },  
+		'click td.remove': 'remove',
+		'click td.roundrow': 'showEditForm'
+	},  
 
 
 	initialize: function(){
@@ -1025,13 +1025,17 @@ view.Round = Backbone.View.extend({
 		}
 		var div_name = this.model.get("division").get("division_name");
 		var num = this.model.get("round_number");
-		$(this.el).html('<td class="roundrow">' + aff + '</td> <td class="roundrow">' + neg + '</td><td class="roundrow">'+judge+
-			'</td><td class="roundrow">'+room+'</td><td class="roundrow">' + div_name + '</td><td class="remove"><button>Remove</button></td>');
+		var row_class = this.model.get("result") === undefined ? "roundrow" : "roundrow entered";
+		$(this.el).html('<td class="'+row_class+'">' + aff + '</td> <td class="'+row_class+'">' 
+			+ neg + '</td><td class="'+row_class+'">'+judge+
+			'</td><td class="' + row_class + '">'+room+'</td><td class="' + row_class + '">' 
+			+ div_name + '</td><td class="remove"><button>Remove</button></td>');
 		return this; //required for chainable call, .render().el
 	} ,
 	unrender: function(){
 		$(this.el).remove();
 	},
+
 	
 	//fills the rooms and judges selects on the edit round form
 	populateRoomsAndJudges: function(){
@@ -1080,8 +1084,8 @@ view.Round = Backbone.View.extend({
 		}
 
 		//add BYE teams to both
-		$("#edit_round_team1_code").append('<option value="-1">BYE</option>');
-		$("#edit_round_team2_code").append('<option value="-1">BYE</option>');
+		$("#left_team_select").append('<option value="-1">BYE</option>');
+		$("#right_team_select").append('<option value="-1">BYE</option>');
 
 	} ,
 	showEditForm: function(){
@@ -1326,11 +1330,11 @@ view.RoundTable = Backbone.View.extend({
 			neg = round.get("team1");
 		}
 
-		var aff_id = aff.get("id");
-		var neg_id = neg.get("id");
+		var aff_id = aff === undefined ? -1 : aff.get("id");
+		var neg_id = neg === undefined ? -1 : neg.get("id");
 		
 		//draw left side of form (aff)
-		var competitors = aff.get("competitors");
+		var competitors = aff === undefined ? undefined : aff.get("competitors");
 		if(competitors != undefined){
 			//clear out existing form data
 			$("#left_team_container").html('');
@@ -1357,7 +1361,7 @@ view.RoundTable = Backbone.View.extend({
 
 		//draw right side of form
 
-		var competitors = neg.get("competitors");
+		var competitors = neg === undefined ? undefined : neg.get("competitors");
 		if(competitors != undefined){
 			//clear out existing form data
 			$("#right_team_container").html('');
@@ -1407,45 +1411,108 @@ view.RoundTable = Backbone.View.extend({
 		round.set({"team2": bye_team});
 		collection.rounds.add(round);
 	} ,
+
+
 	saveRound: function(){
-		//verify speaker points
-		var team1_id = $("#left_team_select").val();
-		var team2_id = $("#right_team_select").val();
-		var team1 = collection.getTeamFromId(team1_id);
-		var team2 = collection.getTeamFromId(team2_id);
-		var round_id = $("#edit_round_dialog").data("round_id");
-		var round = collection.getRoundFromId(round_id);
-		var result = $("#edit_round_result").val();
-		//construct points object for each row in the form
-		var aff_points = [];
-		var i = 0;
-		$("#left_team_container").children().each(function(){
-			if($(this).hasClass("edit_round_speaks")){
-				aff_points.push({speaks: $(this).val(), rank: ""});
-				i++;
-			} else if($(this).hasClass("edit_round_ranks")){
-				aff_points[i-1].rank = $(this).val();
+		try {
+			//verify speaker points
+			var team1_id = $("#left_team_select").val();
+			var team2_id = $("#right_team_select").val();
+			var team1 = collection.getTeamFromId(team1_id);
+			var team2 = collection.getTeamFromId(team2_id);
+			var round_id = $("#edit_round_dialog").data("round_id");
+			var round = collection.getRoundFromId(round_id);
+			var result = $("#edit_round_result").val();
+			
+			var max_speaks = round.get("division").get("max_speaks");
+			if(max_speaks === undefined){
+				max_speaks = 30;
 			}
-		});
-
-		var neg_points = [];
-		var i = 0;
-		$("#right_team_container").children().each(function(){
-			if($(this).hasClass("edit_round_speaks")){
-				neg_points.push({speaks: $(this).val(), rank: ""});
-				i++;
-			} else if($(this).hasClass("edit_round_ranks")){
-				neg_points[i-1].rank = $(this).val();
+			var comp_per_team = round.get("division").get("comp_per_team");
+			if(comp_per_team === undefined){
+				comp_per_team = 2;
 			}
-		});
-		round.set({"aff_points": aff_points});
-		round.set({"neg_points": neg_points});
-		round.set({"result": result});
+			var max_rank = comp_per_team * 2;
+			//construct points object for each row in the form
+			var aff_points = [];
+			var i = 0;
+			$("#left_team_container").children().each(function(){
+				if($(this).hasClass("edit_round_speaks")){
+					if($(this).val() > max_speaks){
+						throw new Exception("Entered speaker point value was greater than max speaks for this division.");
+					}
+					if($(this).val() == ""){
+						throw new Exception("Empty speaker points");
+					}
+					aff_points.push({speaks: $(this).val(), rank: ""});
+					i++;
+				} else if($(this).hasClass("edit_round_ranks")){
+					if($(this).val() == ""){
+						throw new Exception("Empty rank");
+					} else if($(this).val() > max_rank){
+						throw new Exception("Rank exceeded maximum rank.");
+					}
+					aff_points[i-1].rank = $(this).val();
+					
+				}
+			});
 
-		round.save()
-		//speaker points are stored in the round model in aff_points, and neg_points
+			var neg_points = [];
+			var i = 0;
+			$("#right_team_container").children().each(function(){
+				if($(this).hasClass("edit_round_speaks")){
+					if($(this).val() > max_speaks){
+						throw new Exception("Entered speaker point value was greater than max speaks for this division.");
+					}
+					if($(this).val() == ""){
+						throw new Exception("Empty speaker points");
+					}
+					neg_points.push({speaks: $(this).val(), rank: ""});
+					i++;
+				} else if($(this).hasClass("edit_round_ranks")){
+					if($(this).val() == ""){
+						throw new Exception("Empty rank");
+					} else if($(this).val() > max_rank){
+						throw new Exception("Rank exceeded maximum rank.");
+					}
+					neg_points[i-1].rank = $(this).val();
+				}
+			});
+			//check for unconfirmed LPW
+			var total_neg_points = 0;
+			$.each(neg_points, function(i, points){
+				total_neg_points += parseInt(points.speaks);
+			})
+			var total_aff_points = 0;
+			$.each(aff_points, function(i, points){
+				total_aff_points += parseInt(points.speaks);
+			})
+			/*
+			console.log(result);
+			console.log(total_aff_points);
+			console.log(total_neg_points);
+			*/
+			if((result == 0 && total_aff_points < total_neg_points) || (result == 2 && total_neg_points < total_aff_points)){
+				if($("#edit_round_lpw").attr("checked") === undefined){
+					throw new Exception("Unconfirmed LPW");
+				}
+			}
+			round.set({"aff_points": aff_points});
+			round.set({"neg_points": neg_points});
+			if(result == -1){
+				round.set({"result": undefined});
+			} else {
+				round.set({"result": result});
+			}
+			
+			$("#edit_round_error").text("");
+			round.save()
+			//speaker points are stored in the round model in aff_points, and neg_points
 
-		$("#edit_round_dialog").dialog("close");
+			$("#edit_round_dialog").dialog("close");
+		} catch(e){
+			$("#edit_round_error").text(e.message);
+		}
 	} ,
 	printBallots: function(){
 		var div_id = $("#rounds_division_select").val();
@@ -1559,6 +1626,8 @@ view.RoundTable = Backbone.View.extend({
     	this.renderDivisionSelect();
     	this.renderRoundNumberSelect();
     	this.filterDivisions();
+
+    	//update total rounds
 	} ,
 
 	renderRounds: function(){
@@ -1598,12 +1667,20 @@ view.RoundTable = Backbone.View.extend({
 	renderSearch: function(results){
 		$("#rounds_table").html("");
 
+		var remaining_ballots = 0;
 		results.each(function(result){
+			if(result.get("result") === undefined){
+				remaining_ballots++;
+			}
 			var roundView = new view.Round({
 				model: result
 			});
 			$("#rounds_table", this.el).append(roundView.render().el);
 		});
+
+		$("#remaining_ballots").text(remaining_ballots);
+
+		//update remaining round coun
 		return this;
 	} 
 	
@@ -1796,7 +1873,7 @@ view.Division = Backbone.View.extend({
 		$("#newdiv_id").val(this.model.get("id"));
 		$("#newdiv_division_name").val(this.model.get("division_name"));
 		$("#newdiv_comp_per_team").val(this.model.get("comp_per_team"));
-		$("#newdiv_flighted_rounds").val(this.model.get("flighted_rounds"));
+		$("#newdiv_flighted_rounds").attr("checked", this.model.get("flighted_rounds"));
 		$("#newdiv_combine_speaks").val(this.model.get("combine_speaks"));
 		$("#newdiv_break_to").val(this.model.get("break_to"));
 		$("#newdiv_max_speaks").val(this.model.get("max_speaks"));
@@ -1861,7 +1938,7 @@ view.DivisionTable = Backbone.View.extend({
 		$("#newdiv_id").val("");
 		$("#newdiv_division_name").val("");
 		$("#newdiv_comp_per_team").val("");
-		$("#newdiv_flighted_rounds").val(false);
+		$("#newdiv_flighted_rounds").attr("checked", false);
 		$("#newdiv_combine_speaks").val(false);
 		$("#newdiv_break_to").val("4");
 		$("#newdiv_max_speaks").val("30");
@@ -1878,13 +1955,13 @@ view.DivisionTable = Backbone.View.extend({
 		var division_name = $("#newdiv_division_name").val();
 		var comp_per_team = parseInt($("#newdiv_comp_per_team").val(), 10);
 		//TODO: verify that this boolean works
-		var flighted_rounds = new Boolean($("#newdiv_flighted_rounds").val());
+		var flighted_rounds = Boolean($("#newdiv_flighted_rounds").attr("checked"));
 		var break_to = $("#newdiv_break_to").val();
 		var max_speaks = parseInt($("#newdiv_max_speaks").val());
 		var prelims = parseInt($("#newdiv_prelims").val());
 		var schedule = [];
 		var ballot_type = $("#newdiv_ballot_type").val();
-		var combine_speaks = new Boolean($("#newdiv_combine_speaks").val());
+		var combine_speaks = Boolean($("#newdiv_combine_speaks").val());
 
 		for(var i = 0; i < prelims; i++){
 			var num = i + 1;
