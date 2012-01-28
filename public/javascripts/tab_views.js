@@ -83,7 +83,8 @@ view.TeamTable = Backbone.View.extend({
 		"keyup #newteam_name":		"keyupTeamName",
 		"click #toggle_team_form": "showNewForm",
 		"change #teams_division_select" : "render",
-		"click #print_teams" : "printTeams"
+		"click #print_teams" : "printTeams",
+		"click #print_speakers" : "printSpeakers"
 
 	} ,
 	initialize: function(){
@@ -122,6 +123,21 @@ view.TeamTable = Backbone.View.extend({
 			view.showMessageDialog(e.message);
 		}
 		
+	} ,
+
+	printSpeakers: function(){
+		var division_id = $("#teams_division_select").val();
+		var division = collection.getDivisionFromId(division_id);
+		
+		try {
+
+			pairing.updateRecords();
+			forms.printSpeakers(division);
+			
+		} catch(e){
+			console.log(e);
+			view.showMessageDialog(e.message);
+		}
 	} ,
 	render: function(){
 		//clear everything and re-render from collections
@@ -1171,6 +1187,19 @@ view.RoundTable = Backbone.View.extend({
 		
 	} ,
 
+	printBoxes: function(){
+		var div_id = $("#rounds_division_select").val();
+		var division = collection.getDivisionFromId(div_id);
+
+		try {
+			forms.printBoxes(division);
+		} catch(e){
+			console.log(e);
+			view.showMessageDialog(e.message);
+		}
+		
+	} ,
+
 	displayWinner: function(){
 		//put winner's name in box above save button
 		
@@ -1299,7 +1328,7 @@ view.RoundTable = Backbone.View.extend({
 	} ,
 	changeJudge: function(){
 		console.log("changing judge");
-		var judge_id = $("#editround_judge").val();
+		var judge_id = $("#edit_round_judge").val();
 		var judge = collection.getJudgeFromId(judge_id);
 		var round_id = $("#edit_round_dialog").data("round_id");
 		var round = collection.getRoundFromId(round_id);
@@ -1549,6 +1578,7 @@ view.RoundTable = Backbone.View.extend({
 			
 			$("#edit_round_error").text("");
 			$("#selected_winner").html("");
+			$("#edit_round_lpw").attr("checked", false);
 			round.save()
 			//speaker points are stored in the round model in aff_points, and neg_points
 
@@ -1960,7 +1990,7 @@ view.Division = Backbone.View.extend({
 view.DivisionTable = Backbone.View.extend({
 	el: $("#divisions") , // attaches `this.el` to an existing element.
 	events: {
-		"click #add_division_button": "addDivision" 
+		"click #add_division_button": "addDivision"
 	} ,
 	initialize: function(){
 		_.bindAll(this, "render", "addDivision", "appendDivision");
@@ -1976,6 +2006,8 @@ view.DivisionTable = Backbone.View.extend({
         	this.appendDivision(division);
     	}, this);
 	} ,
+
+	
 	clearEditForm: function(){
 		$("#newdiv_id").val("");
 		$("#newdiv_division_name").val("");

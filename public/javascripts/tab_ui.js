@@ -215,9 +215,14 @@ $("#edit_round_swap").click(function(){
 	view.roundTable.swapSides();
 })
 
+$("#print_boxes").click(function(){
+	view.roundTable.printBoxes();
+})
+
 $("#edit_round_cancel").click(function(){
 	$("#edit_round_error").html("");
 	$("#selected_team_winnder").html("");
+	$("#edit_round_lpw").attr("checked", false);
 	$("#edit_round_dialog").dialog("close");
 });
 

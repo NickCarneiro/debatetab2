@@ -44,6 +44,18 @@ pairing.debate2name["4"] = "quarterfinals";
 pairing.debate2name["2"] = "semifinals";
 pairing.debate2name["1"] = "finals";
 
+pairing.result_types = {
+	"0": "AFF Win Neg Loss",
+	"1": "AFF BYE Neg Forfeit",
+	"2": "Neg Win Aff Loss",
+	"3": "Neg BYE Aff Forfeit",
+	"4": "Double Win",
+	"5": "Double Loss",
+	"6": "Double BYE",
+	"7": "Double Forfeit"
+
+}
+
 //debug console
 console.dbg = function(message){
 	if(tab.debug === true){

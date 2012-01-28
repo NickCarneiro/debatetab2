@@ -292,6 +292,9 @@ collection.Rounds = Backbone.Collection.extend({
 					return false;
 				}
 			}));
+		} ,
+		comparator: function(round){
+			return round.get("round_number");
 		}
 });	
 
@@ -859,7 +862,7 @@ collection.isAlpha = function(char){
 	}
 }
 
-
+//comparator function for sorting teams
 collection.sortTeams = function(team1, team2){
 
 	//see uil constitution
@@ -887,6 +890,22 @@ collection.sortTeams = function(team1, team2){
 				return 0;
 				tab.warnings.push("Two teams were tied on wins, speaks, and adjusted speaks.");
 			}
+		}
+	}
+}
+
+collection.sortSpeakers = function(speaker1, speaker2){
+	if(speaker1.adjusted_points > speaker2.adjusted_points){
+		return -1;
+	} else if(speaker2.adjusted_points > speaker1.adjusted_points){
+		return 1
+	} else {
+		if(speaker1.total_points > speaker2.total_points){
+			return -1;
+		} else if(speaker2.total_points > speaker1.total_points){
+			return 1
+		} else {
+			return 0;
 		}
 	}
 }
