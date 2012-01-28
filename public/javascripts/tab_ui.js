@@ -95,6 +95,8 @@ Debug event bindings
 
 $(function(){
 
+
+$("#debug_tournament_id").html("Tournament ID: " + '<a href="/tab/'+tab.tournament_id+'">' + tab.tournament_id + '</a>');
 $("#clear_storage").click(function(){
 
 	$.confirm({
@@ -178,13 +180,7 @@ $("#single_text").click(function(){
 });
 
 
-//load debug status on page load. off by default
-tab.debug = true;
-if(localStorage["debug"] != undefined){
 
-	tab.debug = localStorage["debug"] === "true" ? true: false;
-	//console.log("debug mode is " + tab.debug);
-}
 
 $("#toggle_debug").click(function(){
 	tab.debug = !(tab.debug);
@@ -207,6 +203,7 @@ $("#pair_print_pairings").click(function(){
 	}
 
 });
+
 
 $("#save_to_database").click(function(){
 	var tourneyData = {};
@@ -246,6 +243,42 @@ $("#validate_round").click(function(){
 		division = $("#rounds_division_select").val();
 		pairing.validateRounds(round_number, division);
 		console.log("clicked");
+
+
+/*
+=========================================
+Edit round event bindings
+=========================================
+*/	
+$("#edit_round_swap").click(function(){
+	console.log("swapping sides");
+	view.roundTable.swapSides();
+})
+
+$("#edit_round_cancel").click(function(){
+	$("#edit_round_error").html("");
+	$("#edit_round_dialog").dialog("close");
+});
+
+$("#edit_round_judge").change(function(){
+	view.roundTable.changeJudge();
+});
+
+$("#left_team_select, #right_team_select").live("change", function(){
+	view.roundTable.changeTeam();
+});
+
+$("#edit_round_room").live("change", function(){
+	view.roundTable.changeRoom();
+});
+
+$("#edit_round_save").click(function(){
+	view.roundTable.saveRound();
+});
+
+$("#edit_round_result").change(function(){
+	view.roundTable.displayWinner()
+
 });
 
 

@@ -13,11 +13,82 @@ body {
 	margin: 0px auto;
 }
 
+.table_container{
+  height: 390px;
+  overflow-y: scroll;
+}
+#edit_round_top_div select{
+  display: inline-block;
+  margin: 10px;
+  font-size: 20px;
+  height: 30px;
+}
+.edit_round_dialog button{
+  display: inline-block;
+}
+
+.edit_round_dialog select{
+  margin: 10px;
+}
+
+.edit_round_dialog{
+  text-align: center;
+}
+.edit_round_speaks{
+  width: 50px;
+  font-size: 16px;
+  margin: 10px;
+}
+
+.edit_round_ranks{
+  width: 30px;
+  font-size: 16px;
+}
+
+.competitor_name {
+  font-weight: bold;
+}
+
+.roundrow{
+  cursor: pointer;
+}
+
+#edit_round_result{
+  display: inline-block;
+  width: 200px;
+  font-size: 20px;
+  height: 30px;
+}
+
+#edit_round_lpw{
+  display: inline-block;
+}
+
+#lpw_label{
+  display:inline-block;
+}
+
+#edit_round_error{
+  margin-top: 10px;
+  display: block;
+  color: #8f0000;
+  font-size: 16px;
+}
+.edit_round_team {
+  font-size: 16px;
+  display: inline-block;
+  margin: 10px 25px 0px 25px;
+  text-align: left;
+}
 #import_box {
   width: 600px;
   height: 200px;
 }
 
+#debug_tournament_id{
+  font-size: 30px;
+  margin: 10px;
+}
 #debug button{
   padding: 10px;
   font-size: 16px;
@@ -41,7 +112,7 @@ specfic structure elements
 
 .header_image {
 	display: block;
-	width:548px;
+	width:300px;
 	padding: 0px 15px 0px 15px;
 	
 }
@@ -74,6 +145,23 @@ styles for main menu
 	cursor: pointer;
 }
 
+tr {
+  border: 1px solid #fff;
+  padding: 5px;
+}
+
+tr:hover{
+  border: 1px solid #000;
+}
+
+.roundrow:hover {
+  background-color: #eee;
+}
+
+.entered{
+  background-color: #ddd;
+}
+
 /*
 when a menu item li is selectedm its only class is menu_item_selected. When it is not selected, its class is just menu_item.
 */
@@ -91,8 +179,12 @@ when a menu item li is selectedm its only class is menu_item_selected. When it i
 
 table{
 	margin-top: 15px;
+  
 }
 
+.large_table{
+  width: 100%;
+}
 td{
 	padding: 5px;
 }
@@ -102,18 +194,36 @@ ul {
 }
 
 .top_buttons{
+  margin-left: 10px;
+  margin-top: 10px;
   margin-bottom: 10px; 
   padding-bottom: 10px;
   border-bottom: solid 1px #eee;
   width: 100%; 
 }
-.bottom_buttons{
-  margin-top: 20px;
 
-}
 .top_buttons > button{
-  height: 40px;
-  margin: 0px 5px 0px 0px;
+   display: inline-block;
+  height: 30px;
+  font-size: 20px;
+  margin: 0px 10px 0px 10px;
+  width: 150px;
+}
+
+
+.bottom_buttons{
+  border-top: 1px solid #eee;
+  margin-top: 20px;
+  padding-top: 10px;
+  text-align: center;
+}
+
+.bottom_buttons button{
+  display: inline-block;
+  height: 30px;
+  font-size: 20px;
+  margin: 0px 10px 0px 10px;
+  width: 150px;
 }
 
 

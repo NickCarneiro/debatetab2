@@ -12,6 +12,7 @@ cat public/javascripts/jquery.tmpl.js \
 	public/javascripts/tab_pairing.js \
 	public/javascripts/tab_views.js \
 	public/javascripts/tab_ui.js \
+	public/javascripts/tab_forms.js \
 	> build/combined.js
 
 #minify javscript

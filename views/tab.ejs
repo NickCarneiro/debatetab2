@@ -2,12 +2,16 @@
 	<!-- begin header -->
 	<div class="twelvecol">
 		<div class="header_image block center">
-			<img src="images/logo.png" alt="DebateTab logo, Advancing academic competition"/>
+			<img src="/images/logo.png" alt="DebateTab logo, Advancing academic competition"/>
 		</div>
 	</div>
 	<!-- end header -->
 
-
+	<div id="tournament_id" style="display:none;">
+	<% if(locals.tournament_id){ %>
+		<%= tournament_id %>
+	<% } %>
+	</div>
 	<div class="row maincontent">
 
 		<!-- begin left nav-->
@@ -28,35 +32,71 @@
 		<!-- begin main content areas. Only one is shown at a time.-->
 		<div id="rounds_container" class="main_container hidden tencol block last">
 			<div id="rounds" class="subcontainer">
+				
 				<div class="top_buttons">
-					<span>Division: </span><select id="rounds_division_select" >
+					<span>Division: </span><select id="rounds_division_select">
 					</select>
 					<span>Round Number: </span><select id="rounds_round_number_select">
 					</select>
+					Remaining ballots: <span id="remaining_ballots"></span>
+				</div>
+				<div class="top_buttons">
+					<button id="add_round_button">Add Debate</button>
+					<button id="pair_round_button">Pair Round</button>
+					<button id="print_ballots_button">Print Ballots</button>
+					<button id="print_pairings_button">Print Pairings</button>
+					<button id="validate_round">Validate Round</button>
 				</div>
 					
 				<div id="pairing_indicator">
 					Pairing Round. Please wait.
-					<img class="inline_block" src="images/indicator.gif" />
+					<img class="inline_block" src="/images/indicator.gif" />
 				</div>
-				<table id="rounds_table">
-				</table>
+				<div class="table_container">
+					<table id="rounds_table" class="large_table">
+					</table>
+				</div>
 				
-				<div class="bottom_buttons">
-					<button id="add_round_button">Add Debate</button>
-					<button id="pair_round_button">Pair Round</button>
-					<button id="print_ballots_button">Print Ballots</button>
-					<button id="print_pairings">Print Pairings</button>
-					<button id="text_pairings_button">Text Pairings</button>
-					<div class="results_container">
-						<button id="print_teams_button">Print Teams</button>
-						<button id="print_speakers_button">Print Speakers</button>
-						<button id="print_breaks_button">Print Breaks</button>
-						<button id="validate_round">Validate Round</button>
+		
+			</div>
+
+			<div id="edit_round_dialog" class="dialog edit_round_dialog">
+
+					<div id="edit_round_top_div">Judge: <select id="edit_round_judge"></select>
+					 Room: <select id="edit_round_room"></select></div>
+					
+					<div id="edit_round_right" class="edit_round_team">
+						<label for="left_team_select">Affirmative</label><select id="left_team_select"></select>
+						<div id="left_team_container">
+						</div>
+					</div>
+					<div id="edit_round_right" class="edit_round_team">
+						<label for="right_team_select">Negative</label><select id="right_team_select"></select>
+						<div id="right_team_container">
+						</div>
+					</div>
+					<select id="edit_round_result">
+						<option value="-1"></option>
+						<option value="0">Aff Win Neg Loss</option> 
+						<option value="1">Aff BYE Neg Forfeit</option> 
+						<option value="2">Neg Win Aff Loss</option> 
+						<option value="3">Neg BYE Aff Forfeit</option> 
+						<option value="4">Double Win</option> 
+						<option value="5">Double Loss</option> 
+						<option value="6">Double Bye</option> 
+						<option value="7">Double Forfeit</option> 
+					</select>
+
+					<label id="lpw_label" for="edit_round_lpw">Low point win: </label><input type="checkbox" id="edit_round_lpw" /> 
+					<div id="selected_winner"></div>
+					<span id="edit_round_error"></span>
+					<div class="bottom_buttons">
+						<button id="edit_round_save">Save</button>
+						<button id="edit_round_cancel">Cancel</button>
+						<button id="edit_round_swap">Swap Sides</button>
+
 					</div>
 				</div>
-					
-			</div>
 		</div>
 
 
@@ -93,8 +133,14 @@
 				</div>	
 						
 				<span>Division: </span><select id="teams_division_select"></select>
+				<div class="top_buttons">
+					<button id="print_teams">Print Teams</button>
+				</div>
+				<div class="table_container">
+				
 				<table id="teams_table">
-				</table>			
+				</table>		
+				</div>	
 			</div>
 		</div>
 
@@ -123,9 +169,10 @@
 					<button class="cancel_button" id="cancel_judge_button">Cancel</button>
 					</div>
 				</div>
-				
+				<div class="table_container">
 				<table id="judges_table">
 				</table>
+				</div>
 
 			</div>
 		</div>
@@ -151,9 +198,10 @@
 					<button class="save_button" id="add_room_button">Save</button>
 					</div>
 				</div>
-				
+				<div class="table_container">
 				<table id="rooms_table">
 				</table>
+				</div>
 						
 			</div>
 		</div>
@@ -173,10 +221,10 @@
 						</div>
 					</div>
 				</div>
-				
+				<div class="table_container">
 				<table id="schools_table">
 				</table>
-				
+				</div>
 				
 			</div>
 		</div>
@@ -242,6 +290,7 @@
 
 			
 			</div>
+
 				<table id="divisions_table">
 				</table>
 			
@@ -252,6 +301,7 @@
 		<div id="settings_container" class="main_container hidden tencol block last">Settings</div>
 		<div id="debug_container" class="main_container hidden tencol block last">
 				<div id="debug" class="subcontainer">
+					<div id="debug_tournament_id"></div>
 					<button id="toggle_debug">Toggle debug</button><br />
 					<h1>Pairing</h1>
 					<button id="pair_tests">Run Pairing Tests</button><br />
@@ -290,22 +340,174 @@
 	<div id="warnings_dialog_message"></div>
 </div>
 
-<div id="edit_round_dialog" class="dialog">
-	<div id="edit_round_judge_div"><select id="edit_round_judge"></select></div>
-	<div class="edit_round_team">
-		<labelfor="left_team_select">Affirmative</label><select id="left_team_select"></select>
-		<div id="left_team_container">
-		</div>
-	</div>
-	<div class="edit_round_team">
-		<labelfor="right_team_select">Negative</label><select id="right_team_select"></select>
-		<div id="right_team_container">
-		</div>
-	</div>
-	<br />
-	<select id="edit_round_result"></select>
-	<button id="edit_round_save">Save</button>
-	<div class="bottom_buttons">
-		<button id="edit_round_swap">Swap Sides</button>
-	</div>
+<div id="ballot_css" style="display: none;">
+body{
+margin-left:5%;
+margin-right:5%;
+text-align: center;
+}
+
+#dTabLogo{
+}
+
+#ballotLabel{
+	display:inline-block;
+	font-weight:bold;
+	
+	
+}
+
+#roundNumber{
+display:inline;
+width:50px;
+font-size:1.0em;
+margin-right:60px;
+
+}
+
+#room{
+display:inline;
+width:50px;
+font-size:1.0em;
+margin-right:60px;
+}
+
+#flip{
+display:inline;
+font-size:1em;
+font-weight:bold;
+}
+
+#judgeName{
+
+float:right;
+font-size:26px;
+}
+
+
+
+#instr{
+height:1em;
+
+}
+
+
+#affPointsLabel{
+margin-left:255px;
+display:inline;
+}
+#affRanksLabel{
+margin-left:0.7%;
+display:inline;
+}
+#negPointsLabel{
+margin-left:300px;
+display:inline;
+}
+#negRanksLabel{
+margin-left:0.7%;
+display:inline;
+}
+
+#affPointsLabelLD{
+margin-left:305px;
+display:inline;
+}
+#negPointsLabelLD{
+margin-left:333px;
+display:inline;
+}
+
+
+#firstAff{
+	display:inline;
+	margin-right:50px;
+}
+#firstNeg{
+	display:inline;
+}
+
+#secondAff{
+	display:inline;
+	margin-right:45px;
+}
+#secondNeg{
+	display:inline;
+}
+
+#instr2{
+	font-size:0.8em;
+}
+
+#instr3{
+	font-weight:bold;
+	text-decoration:underline;
+}
+
+#decision{
+	display:block;
+	text-align:center;
+	margin-top:500px;
+
+}
+
+#circleOne{
+	display:inline;
+	margin-left:400px;
+
+
+}
+
+#tCodeLabel{
+	display:inline;
+	margin-left:145px;
+
+}
+#sigArea{
+	display:inline;
+	margin-right:250px;
+
+}
+#schoolAffiliation{
+	display:inline;
+
+}
+#sigLabel{
+	float:left;			
+	width:130px;
+	margin-right:360px;
+}
+
+#schoolAffLabel{
+	/*using display:inline was causing probems with page break*/
+	page-break-after:always;
+	page-break-inside: avoid;
+}
+
+.pairing_container{
+	display: inline-block;
+	text-align: left;
+	font-family: sans-serif;
+	margin-bottom: 20px
+}
+
+td{
+	padding: 5px 10px 0px 10px;
+
+}
+.flight_title{
+	display: inline-block;
+}
+
+#pairing_division_name{
+	font-size: 40px;
+}
+
+#pairing_round_number{
+	font-size: 20px;
+}
+
+.table_header{
+	font-weight: bold;
+}
 </div>
