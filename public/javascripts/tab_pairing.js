@@ -57,7 +57,8 @@ pairing.updateRecords = function(){
 			if(collection.rounds.at(j).getWinner() === collection.teams.at(i)){
 				var new_wins = collection.teams.at(i).get("wins") + 1;
 				collection.teams.at(i).set({wins: new_wins});
-			} else if(collection.rounds.at(j).getLoser() === collection.teams.at(i)){
+			}
+			if(collection.rounds.at(j).getLoser() === collection.teams.at(i)){
 				var new_losses = collection.teams.at(i).get("losses") + 1;
 				collection.teams.at(i).set({losses: new_losses});
 			}

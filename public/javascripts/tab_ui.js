@@ -96,7 +96,7 @@ Debug event bindings
 $(function(){
 
 
-$("#debug_tournament_id").html("Tournament ID: " + tab.tournament_id);
+$("#debug_tournament_id").html("Tournament ID: " + '<a href="/tab/'+tab.tournament_id+'">' + tab.tournament_id + '</a>');
 $("#clear_storage").click(function(){
 
 	$.confirm({
@@ -216,6 +216,7 @@ $("#edit_round_swap").click(function(){
 })
 
 $("#edit_round_cancel").click(function(){
+	$("#edit_round_error").html("");
 	$("#edit_round_dialog").dialog("close");
 });
 
@@ -233,6 +234,10 @@ $("#edit_round_room").live("change", function(){
 
 $("#edit_round_save").click(function(){
 	view.roundTable.saveRound();
+});
+
+$("#edit_round_result").change(function(){
+	view.roundTable.displayWinner()
 });
 
 

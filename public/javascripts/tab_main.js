@@ -21,6 +21,9 @@ var view = {};
 var router = {};
 var collection = {};
 
+//functions for generating ballots, boxes, pairings, breaks, brackets
+var forms = {};
+
 //contains helpful functions for pairing rounds
 var pairing = {};
 pairing.name2debate = {};
@@ -75,7 +78,7 @@ else if($("#tournament_id").html().trim() != ""){
 	tab.tournament_id = $("#tournament_id").html().trim();
 } else {
 	console.dbg("generating new tournament id");
-	tab.tournaent_id = (new ObjectId()).toString()
+	tab.tournament_id = (new ObjectId()).toString();
 }
 console.dbg("setting tournament_id in localstorage to " + tab.tournament_id);
 localStorage["tournament_id"] = tab.tournament_id;

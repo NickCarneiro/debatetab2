@@ -13,6 +13,10 @@ body {
 	margin: 0px auto;
 }
 
+.table_container{
+  height: 390px;
+  overflow-y: scroll;
+}
 #edit_round_top_div select{
   display: inline-block;
   margin: 10px;
@@ -108,7 +112,7 @@ specfic structure elements
 
 .header_image {
 	display: block;
-	width:548px;
+	width:300px;
 	padding: 0px 15px 0px 15px;
 	
 }
@@ -199,8 +203,11 @@ ul {
 }
 
 .top_buttons > button{
-  height: 40px;
-  margin: 0px 5px 0px 0px;
+   display: inline-block;
+  height: 30px;
+  font-size: 20px;
+  margin: 0px 10px 0px 10px;
+  width: 150px;
 }
 
 

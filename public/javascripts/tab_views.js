@@ -83,6 +83,7 @@ view.TeamTable = Backbone.View.extend({
 		"keyup #newteam_name":		"keyupTeamName",
 		"click #toggle_team_form": "showNewForm",
 		"change #teams_division_select" : "render",
+		"click #print_teams" : "printTeams"
 
 	} ,
 	initialize: function(){
@@ -107,7 +108,11 @@ view.TeamTable = Backbone.View.extend({
 		this.render();
 		
 	} ,
-
+	printTeams: function(){
+		var division_id = $("#teams_division_select").val();
+		var division = collection.getDivisionFromId(division_id);
+		forms.printTeams(division);
+	} ,
 	render: function(){
 		//clear everything and re-render from collections
 		this.clearView();
@@ -1124,11 +1129,13 @@ view.RoundTable = Backbone.View.extend({
 		
 		"click #pair_round_button" : "pairRoundConfirm",
 		"click #print_ballots_button" : "printBallots",
-		
+		"click #print_pairings_button" : "printPairings",
 		"change #rounds_division_select" : "renderRoundNumberSelect",
 		"change #rounds_round_number_select" : "filterDivisions",
+		"change #edit_round_result" : "displayWinner",
 		"click button#save_round_button": "saveRound",
 		"click #add_round_button": "addEmptyRound",
+
 		"change #left_team_select": "changeTeam",
 		"change #right_team_select": "changeTeam",
 		//can't get these to fire
@@ -1154,6 +1161,27 @@ view.RoundTable = Backbone.View.extend({
 		
 	} ,
 
+	displayWinner: function(){
+		//put winner's name in box above save button
+		
+		var result = $("#edit_round_result").val();
+		if(result == 0 || result == 1){
+			//aff win
+			var winner = $("#left_team_select").val();
+
+		} else if(result == 2 || result == 3){
+			//neg win
+			var winner = $("#right_team_select").val();
+		}
+
+		if(winner != "-1"){
+			winner = collection.getTeamFromId(winner);
+			if(winner != undefined){
+				winner = winner.get("team_code");
+			}
+		}
+		$("#selected_winner").text(winner || "");
+	} ,
 	textPairingsPrompt: function(){
 		$("#text_pairings_details").fadeIn();
 	} ,
@@ -1237,32 +1265,12 @@ view.RoundTable = Backbone.View.extend({
 		pairing.updateRecords(division);
 		pdf.generateTeams(division);
 	} ,
-	printPairingsPrompt: function(){
-		$("#print_pairings_details").fadeIn();
-	} ,
+	
 	printPairings: function(){
 		var div_id = $("#rounds_division_select").val();
 		var division = collection.getDivisionFromId(div_id);
 		var round_number = $("#rounds_round_number_select").val();
-		var start = $("#print_pairings_start").val();
-		var message = $("#print_pairings_message").val();
-		var headers = {
-			tournament_name: 'Round Rock HS Tournament',
-			date: '11/18/11',
-			round_number: round_number,
-			start_time_text: start,
-			message: message,
-			division: division
-		};
-
-		var titles = [ 
-				"Affirmative",
-				"Negative",
-				"Judge",
-				"Room"
-		];
-		
-	    pdf.generatePairingSheet(headers,titles, round_number, division);
+		forms.generatePairings(round_number, division);
 		
 	} ,
 	swapSides: function(){
@@ -1516,18 +1524,14 @@ view.RoundTable = Backbone.View.extend({
 	} ,
 	printBallots: function(){
 		var div_id = $("#rounds_division_select").val();
-		var div = collection.getDivisionFromId(div_id);
+		var division = collection.getDivisionFromId(div_id);
 		var round_number = $("#rounds_round_number_select").val();
-		var ballot_type = div.get("ballot_type");
-		if(ballot_type === "TFA_CX"){
-			pdf.generateCXBallot(round_number, div);
-		} else if(ballot_type === "TFA_LD"){
-			pdf.generateLDBallot(round_number, div);
-		} else if(ballot_type === "TFA_PF") {
-			pdf.generatePFBallot(round_number, div);
-		} else {
-			console.log("FATAL ERROR: unrecognized ballot type.")
+		try {
+			forms.printBallots(round_number, division);
+		} catch(e){
+			view.showMessageDialog(e.message);
 		}
+		
 		
 	},
 	pairRound: function(round_number, division){

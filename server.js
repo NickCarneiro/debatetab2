@@ -65,23 +65,41 @@ app.configure('development', function() {
 		showStack      : true
 	}));
 
+	var dev_scripts = [
+		'jquery.tmpl.js',
+		'jquery-ui-1.8.17.custom.min.js', 
+		'underscore.js', 
+		'backbone.js', 
+		'plugins.js',
+		'tab_main.js', 
+		'tab_collections.js', 
+		'tab_pairing.js', 
+		'tab_views.js', 
+		'tab_ui.js', 
+		'tab_forms.js'
+	];
+
+	var dev_styles = [
+		'bptop.css', 
+		'1140.css', 
+		'tab.css', 
+		'bpbottom.css', 
+		'jquery-ui-1.8.17.custom.css'
+	];
+
 	app.get('/tab', function(req, res) {
 		res.render('tab', {
 			title: 'Debate Tab | Development',
-			javascripts: ['jquery.tmpl.js','jquery-ui-1.8.17.custom.min.js', 'underscore.js', 
-			'backbone.js', 'plugins.js','tab_main.js', 
-			'tab_collections.js', 'tab_pairing.js', 'tab_views.js', 'tab_ui.js'],
-			stylesheets: ['bptop.css', '1140.css', 'tab.css', 'bpbottom.css', 'jquery-ui-1.8.17.custom.css']
+			javascripts: dev_scripts,
+			stylesheets: dev_styles
 		});
 	});
 
 	app.get('/tab/:id', function(req, res) {
 		res.render('tab', {
 			title: 'Debate Tab | Development',
-			javascripts: ['jquery.tmpl.js','jquery-ui-1.8.17.custom.min.js', 'underscore.js', 
-			'backbone.js', 'plugins.js','tab_main.js', 
-			'tab_collections.js', 'tab_pairing.js', 'tab_views.js', 'tab_ui.js'],
-			stylesheets: ['bptop.css', '1140.css', 'tab.css', 'bpbottom.css', 'jquery-ui-1.8.17.custom.css'],
+			javascripts: dev_scripts,
+			stylesheets: dev_styles,
 			tournament_id: req.params.id
 		});
 	});

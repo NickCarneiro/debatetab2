@@ -155,6 +155,7 @@ model.Round = Backbone.Model.extend({
 		if(this.get("result") === undefined){
 			return false;
 		} else if(this.get("result") == 0 || this.get("result") == 1){
+			//aff won
 			return this.get("aff") == 0 ? this.get("team2") : this.get("team1");
 		} else if(this.get("result") == 2 || this.get("result") == 3){
 			return this.get("aff") == 0 ? this.get("team1") : this.get("team2"); 
@@ -215,9 +216,19 @@ collection.Teams = Backbone.Collection.extend({
 	} ,
 	//keep sorted in descending order of wins
 	//overwrite this to change method of ranking for TFA vs UIL vs NFL or other league rules
+	
 	comparator : function(team){
+		//var sort_string = team.get("wins").toString() + team.get("total_speaks").toString() +  
 		return team.get("wins") * -1;
 	} ,
+	
+	/*
+	comparator: function(team){
+		return team.get("team_code");
+	},
+	*/
+
+
 	localStorage: new Store("Teams")
 });	
 
