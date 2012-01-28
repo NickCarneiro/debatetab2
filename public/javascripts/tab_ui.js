@@ -243,7 +243,7 @@ $("#validate_round").click(function(){
 		division = $("#rounds_division_select").val();
 		pairing.validateRounds(round_number, division);
 		console.log("clicked");
-
+});
 
 /*
 =========================================
