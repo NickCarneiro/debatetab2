@@ -217,16 +217,18 @@ collection.Teams = Backbone.Collection.extend({
 	//keep sorted in descending order of wins
 	//overwrite this to change method of ranking for TFA vs UIL vs NFL or other league rules
 	
+	/*
 	comparator : function(team){
-		//var sort_string = team.get("wins").toString() + team.get("total_speaks").toString() +  
+
 		return team.get("wins") * -1;
 	} ,
+	*/
 	
-	/*
+	
 	comparator: function(team){
 		return team.get("team_code");
 	},
-	*/
+	
 
 
 	localStorage: new Store("Teams")
@@ -858,6 +860,38 @@ collection.isAlpha = function(char){
 	}
 }
 
+
+collection.sortTeams = function(team1, team2){
+
+	//see uil constitution
+	//http://www.uiltexas.org/files/academics/manuals/sm_manual12_cx.pdf
+	//wins, total speaks, adjusted speaks, ranks, opposition win/loss
+	var sort_string = team.get("wins").toString() + team.get("total_speaks").toString() + team.get("adjusted_speaks");
+
+	//check wins
+	if(team1.get("wins") > team2.get("wins")){
+		return 1;
+	} else if(team2.get("wins") > team1.get("wins")){
+		return -1
+	} else {
+		//wins were the same. check total speaks
+		if(team1.get("total_speaks") > team2.get("total_speaks")){
+			return 1;
+		} else if(team2.get("total_speaks") > teams1.get("total_speaks")){
+			return -1
+		} else {
+			//total speaks were the same. check adjusted speaks
+			if(team1.get("adjusted_speaks") > team2.get("adjusted_speaks")){
+				return 1;
+			} else if(team2.get("adjusted_speaks") > team1.get("adjusted_speaks")){
+				return -1;
+			} else {
+				return 0;
+				tab.warnings.push("Two teams were tied on wins, speaks, and adjusted speaks.");
+			}
+		}
+	}
+}
 
 /*
 =========================================
