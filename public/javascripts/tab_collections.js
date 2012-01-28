@@ -501,11 +501,11 @@ collection.import = function(json){
 		for(var i = 0; i < col.length; i++){
 			//create model
 			console.log(col[i]);
-
 			var m = new Backbone.Model(col[i]);			//importing does not work for teams,rooms,judges
 			//push into appropriate collection;			//since teams also has the division object, backbone
 			collection[index].add(m);					//doesnt store all properties of that nested object
-			m.save();									//so get division_name etc don't work, throwing an error
+			m.save();									//so get division_name etc don't work, maybe?
+			console.log(collection[index]);
 		}
 	});
 	

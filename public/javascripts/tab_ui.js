@@ -240,5 +240,13 @@ $("#get_from_database").click(function(){
 
 });
 
+$("#validate_round").click(function(){
+		
+		round_number = $("#rounds_round_number_select").val();
+		division = $("#rounds_division_select").val();
+		pairing.validateRounds(round_number, division);
+		console.log("clicked");
+});
+
 
 });

@@ -1146,6 +1146,81 @@ pairing.alreadyPaired = function(round_number, division){
 	return false;
 }
 
+pairing.validateRounds = function(round_number, division){
+
+	var bye_count = 0;
+	console.log(round_number);
+	division = collection.getDivisionFromId(division);
+
+	$.each(collection.rounds, function(i){
+		
+		var round = collection.rounds.at(i);
+		var judge = round.get("judge");
+
+			if(round.get("division") != division){		//skip irrelevant rounds and divisions
+				return true;
+			}
+			if(round.get("round_number") != round_number){
+				return true;
+			}
+			
+			//checking if judge allowed to judge both teams
+			if(!pairing.canJudge(round.get("team1"), round.get("team2"), round.get("judge"), round_number, division)){
+				tab.warnings.push(round.get("judge") + "already judged");
+				return true;
+			}
+			
+			//checking if round has a room
+			if(round.get("room") === undefined)
+			{	
+				tab.warnings.push("No room scheduled");
+				return true;
+			}
+			
+			//checking if teams have not debated before
+			if(alreadyDebated(round.get("team1"), round.get("team2"), round_number))
+			{
+				tab.warnings.push(round.get("team1").get("team_name") + "and" + round.get("team2").get("team_name") + "have already debated");
+				return true;
+			}
+			
+			//checking if same team scheduled multiple times in same round
+			var team1 = round.get("team1");
+			var team2 = round.get("team2");
+			$.each(collection.rounds, function(j){
+			
+				if(round.get("division") == division && round.get("round_number") == round_number && (team1 === collection.rounds.at(j).get("team1") || team1 === collection.rounds.at(j).get("team2")))
+				{
+					tab.warnings.push(team1.get("team_name") + "schedule more than once in same round");
+				}
+				if(round.get("division") == division && round.get("round_number") == round_number && (team2 === collection.rounds.at(j).get("team1") || team2 === collection.rounds.at(j).get("team2")))
+				{
+					tab.warnings.push(team2.get("team_name") + "schedule more than once in same round");
+				}
+			});
+			
+			//checking for more than one BYE
+			if(team1.get("team_code") === "BYE" || team2.get("team_code") === "BYE" )
+			{
+				bye_count++;
+			}
+			if(bye_count > 1)
+			{
+				tab.warnings.push("More than 1 bye in same round");
+			}
+			
+			//Show all warnings
+			if(tab.warnings.length > 0){
+				view.showWarningsDialog();
+			}
+			console.log(tab.warnings.length);
+
+	});
+	
+	return false;
+}
+
+
 /*
 =========================================
 END: Define Pairing Functions
