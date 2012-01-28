@@ -292,7 +292,8 @@ forms.printTeams = function(division){
 		teams.push(team);
 	});
 
-	teams.sort(collection.sortTeams)
+	teams.sort(collection.sortTeams);
+
 	var css = $("#ballot_css").html();
 	var export_string = '<html>'+
 		'<head>	'	+
@@ -302,10 +303,21 @@ forms.printTeams = function(division){
 		css +
 		'</style>' +
 		'</head>'+
-		'<body><table>';
+		'<body><div id="pairing_division_name">'+ division.get("division_name") +'</div>'+
 
-		export_string += '</table>'; //close pairing_container
-		export_string += "</body></html>";
+		'<table>' +
+		'<tr><td>Team Code</td><td>Record</td><td>Total Points</td><td>Adjusted Points</td></tr>';
+	
+	$.each(teams, function(i, team){
+		export_string += '<tr><td>' + team.get("team_code") + '</td><td>'+ team.get("wins") + '-' +team.get("losses") +'</td>' +
+			'<td>' + team.get("total_speaks") + '</td><td>' + team.get("adjusted_speaks") + '</td>'+
+			'</tr>';
+	});
+	export_string += '</table>'; //close pairing_container
+	export_string += "</body></html>";
+
+	var uri = 'data:text/html;charset="UTF-8",' + encodeURIComponent(export_string);
+	window.open(uri,'Teams');
 }
 
 

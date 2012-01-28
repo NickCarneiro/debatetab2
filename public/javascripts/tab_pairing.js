@@ -42,6 +42,99 @@ pairing.compareTeams = function(team){
 
 }
 
+//called by update records.
+//loops through speaks array and sums them.
+//sets total_speaks and adjusted_speaks
+pairing.updateSpeaks = function(){
+	$.each(collection.teams, function(i){
+		var team = collection.teams.at(i);
+		var speaks = team.get("speaks");
+		var all_points = [];
+
+		var total_points = 0;
+		var adjusted_points = 0;
+		//copy speaker points into another array that we can sort
+		$.each(speaks, function(j, point){
+			all_points.push(point);
+		});
+
+		//if any round has a zero, that means it was a bye. average the other rounds.
+		var division = team.get("division");
+		if(division.get("comp_per_team") == 1){
+			//ld
+			var total = 0;
+			$.each(all_points, function(j, point){
+				total += parseFloat(point);
+			});
+
+			var avg = total / all_points.length;
+			//insert average for any bye rounds
+			$.each(all_points, function(j, point){
+				if(point == 0){
+					all_points[j] = avg;
+				}
+			});
+		} else {
+			//cx or pf. 
+			/*
+			0 John's speaks
+			1 Jack's speaks
+			2 John's speaks
+			3 Jack
+			4 John 
+			5 Jack
+			*/
+
+			var speaker1 = 0;
+			var speaker2 = 0;
+			$.each(all_points, function(j, point){
+				if(j % 2 === 0){
+					speaker1 += parseFloat(point);
+				} else {
+					speaker2 += parseFloat(point)
+				}
+				
+			});
+
+			var speaker1_avg = speaker1 / (all_points.length / 2);
+			var speaker2_avg = speaker2 / (all_points.length / 2);
+
+			//insert average for any bye rounds
+			$.each(all_points, function(j, point){
+				if(j % 2 === 0){
+					if(point == 0){
+						all_points[j] = speaker1_avg;
+					}
+				} else {
+					if(point == 0){
+						all_points[j] = speaker2_avg;
+					}
+				}
+				
+			});
+
+
+		}
+
+		all_points.sort();
+
+		
+
+		//TODO check what high lows means
+		$.each(all_points, function(j, point){
+			total_points += parseFloat(point);
+
+			//array is sorted. to drop high lows, skip first and last
+			if(j < all_points.length - 1 && j > 0){
+				adjusted_points += parseFloat(point);
+			}
+		});
+
+		team.set({"total_points": total_points, adjusted_points: adjusted_points});
+
+	});
+}
+
 //iterates over round collection and sets wins, losses in each team model
 //in the teams collection
 pairing.updateRecords = function(){
@@ -80,7 +173,7 @@ pairing.updateRecords = function(){
 				collection.teams.at(i).set({"speaks": new_speaks});
 				collection.teams.at(i).set({"ranks": new_ranks});
 			
-			} else if(collection.rounds.at(j).get("team1") === collection.teams.at(i) 
+			} else if(collection.rounds.at(j).get("team1") === collection.teams.at(i)
 				&& collection.rounds.at(j).get("aff") == 1 
 				||collection.rounds.at(j).get("team2") === collection.teams.at(i) 
 				&& collection.rounds.at(j).get("aff") == 0 ){
@@ -134,6 +227,8 @@ pairing.updateRecords = function(){
 		collection.teams.at(i).save();
 
 	}
+
+	pairing.updateSpeaks();
 }
 
 pairing.deleteAllRounds = function(){
@@ -283,8 +378,10 @@ pairing.roundCount = function(round_number){
 	return count;
 };
 
+
 pairing.printRecords = function(division){
 	collection.teams.sort();
+	//
 	$.each(collection.divisions, function(index){
 		var div = collection.divisions.at(index);
 		if(division === div || division === undefined){

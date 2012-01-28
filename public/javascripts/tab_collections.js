@@ -137,20 +137,19 @@ model.Round = Backbone.Model.extend({
 	//returns winning team, false if no winner
 	getWinner: function(){
 		//if round is a bye, the real team is the winner.
-		if(this.get("team1") === undefined){
-			return this.get("team2");
-		} else if(this.get("team2") === undefined){
-			return this.get("team1");
-		} else if(this.get("result") === undefined){
+		if(this.get("result") === undefined){
 			return false;
 		} else if(this.get("result") == 0 || this.get("result") == 1){
+			//aff won
 			return this.get("aff") == 0 ? this.get("team1") : this.get("team2");
 		} else if(this.get("result") == 2 || this.get("result") == 3){
+			//neg won
 			return this.get("aff") == 0 ? this.get("team2") : this.get("team1"); 
 		} else {
 			con.write("fatal error: invalid round result: " + this.get("result"));
 		}
 	},
+
 	getLoser: function(){
 		if(this.get("result") === undefined){
 			return false;
@@ -866,25 +865,24 @@ collection.sortTeams = function(team1, team2){
 	//see uil constitution
 	//http://www.uiltexas.org/files/academics/manuals/sm_manual12_cx.pdf
 	//wins, total speaks, adjusted speaks, ranks, opposition win/loss
-	var sort_string = team.get("wins").toString() + team.get("total_speaks").toString() + team.get("adjusted_speaks");
 
 	//check wins
 	if(team1.get("wins") > team2.get("wins")){
-		return 1;
+		return -1;
 	} else if(team2.get("wins") > team1.get("wins")){
-		return -1
+		return 1
 	} else {
 		//wins were the same. check total speaks
 		if(team1.get("total_speaks") > team2.get("total_speaks")){
-			return 1;
-		} else if(team2.get("total_speaks") > teams1.get("total_speaks")){
-			return -1
+			return -1;
+		} else if(team2.get("total_speaks") > team1.get("total_speaks")){
+			return 1
 		} else {
 			//total speaks were the same. check adjusted speaks
 			if(team1.get("adjusted_speaks") > team2.get("adjusted_speaks")){
-				return 1;
-			} else if(team2.get("adjusted_speaks") > team1.get("adjusted_speaks")){
 				return -1;
+			} else if(team2.get("adjusted_speaks") > team1.get("adjusted_speaks")){
+				return 1;
 			} else {
 				return 0;
 				tab.warnings.push("Two teams were tied on wins, speaks, and adjusted speaks.");

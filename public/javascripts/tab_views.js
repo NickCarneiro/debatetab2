@@ -111,7 +111,17 @@ view.TeamTable = Backbone.View.extend({
 	printTeams: function(){
 		var division_id = $("#teams_division_select").val();
 		var division = collection.getDivisionFromId(division_id);
-		forms.printTeams(division);
+		
+		try {
+
+			pairing.updateRecords();
+			forms.printTeams(division);
+			
+		} catch(e){
+			console.log(e);
+			view.showMessageDialog(e.message);
+		}
+		
 	} ,
 	render: function(){
 		//clear everything and re-render from collections
@@ -1179,6 +1189,8 @@ view.RoundTable = Backbone.View.extend({
 			if(winner != undefined){
 				winner = winner.get("team_code");
 			}
+		} else {
+			
 		}
 		$("#selected_winner").text(winner || "");
 	} ,
@@ -1296,7 +1308,7 @@ view.RoundTable = Backbone.View.extend({
 		this.drawForm(round);
 	} ,
 	changeRoom: function(){
-		var room_id = $("#editround_room").val();
+		var room_id = $("#edit_round_room").val();
 		var room = collection.getRoomFromId(room_id);
 		var round_id = $("#edit_round_dialog").data("round_id");
 		var round = collection.getRoundFromId(round_id);
@@ -1431,7 +1443,7 @@ view.RoundTable = Backbone.View.extend({
 			var round_id = $("#edit_round_dialog").data("round_id");
 			var round = collection.getRoundFromId(round_id);
 			var result = $("#edit_round_result").val();
-			
+			var is_bye = (team1_id == "-1" || team2_id == "-1" || result == 1 || result == 3 || result == 6 || result == 7);
 			var max_speaks = round.get("division").get("max_speaks");
 			if(max_speaks === undefined){
 				max_speaks = 30;
@@ -1449,18 +1461,30 @@ view.RoundTable = Backbone.View.extend({
 					if($(this).val() > max_speaks){
 						throw new Exception("Entered speaker point value was greater than max speaks for this division.");
 					}
-					if($(this).val() == ""){
-						throw new Exception("Empty speaker points");
+
+					if(is_bye === true){
+						aff_points.push({speaks: "0", rank: ""});
+					} else {
+						if($(this).val() == ""){
+							throw new Exception("Empty speaker points");
+						}
+						aff_points.push({speaks: $(this).val(), rank: ""});	
 					}
-					aff_points.push({speaks: $(this).val(), rank: ""});
+				
 					i++;
 				} else if($(this).hasClass("edit_round_ranks")){
-					if($(this).val() == ""){
-						throw new Exception("Empty rank");
-					} else if($(this).val() > max_rank){
-						throw new Exception("Rank exceeded maximum rank.");
+					if(is_bye === true){
+						aff_points[i-1].rank = "0";
+					} else {
+						if($(this).val() == ""){
+							throw new Exception("Empty rank");
+						} else if($(this).val() > max_rank){
+							throw new Exception("Rank exceeded maximum rank.");
+						}
+						aff_points[i-1].rank = $(this).val();
+						
 					}
-					aff_points[i-1].rank = $(this).val();
+					
 					
 				}
 			});
@@ -1472,18 +1496,28 @@ view.RoundTable = Backbone.View.extend({
 					if($(this).val() > max_speaks){
 						throw new Exception("Entered speaker point value was greater than max speaks for this division.");
 					}
-					if($(this).val() == ""){
-						throw new Exception("Empty speaker points");
+					if(is_bye === true){
+						neg_points.push({speaks: "0", rank: ""});
+					} else {
+						if($(this).val() == ""){
+							throw new Exception("Empty speaker points");
+						}
+						neg_points.push({speaks: $(this).val(), rank: ""});
 					}
-					neg_points.push({speaks: $(this).val(), rank: ""});
+					
 					i++;
 				} else if($(this).hasClass("edit_round_ranks")){
-					if($(this).val() == ""){
-						throw new Exception("Empty rank");
-					} else if($(this).val() > max_rank){
-						throw new Exception("Rank exceeded maximum rank.");
+					if(is_bye === true){
+						neg_points[i-1].rank = "0";
+					} else {
+						if($(this).val() == "" && is_bye === false){
+							throw new Exception("Empty rank");
+						} else if($(this).val() > max_rank){
+							throw new Exception("Rank exceeded maximum rank.");
+						}
+						neg_points[i-1].rank = $(this).val();
 					}
-					neg_points[i-1].rank = $(this).val();
+					
 				}
 			});
 			//check for unconfirmed LPW
@@ -1514,12 +1548,14 @@ view.RoundTable = Backbone.View.extend({
 			}
 			
 			$("#edit_round_error").text("");
+			$("#selected_winner").html("");
 			round.save()
 			//speaker points are stored in the round model in aff_points, and neg_points
 
 			$("#edit_round_dialog").dialog("close");
 		} catch(e){
 			$("#edit_round_error").text(e.message);
+			console.log(e);
 		}
 	} ,
 	printBallots: function(){
@@ -1529,7 +1565,9 @@ view.RoundTable = Backbone.View.extend({
 		try {
 			forms.printBallots(round_number, division);
 		} catch(e){
+
 			view.showMessageDialog(e.message);
+			console.log(e);
 		}
 		
 		
