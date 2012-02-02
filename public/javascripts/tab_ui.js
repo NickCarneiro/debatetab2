@@ -153,32 +153,6 @@ $("#pair_delete_all_rounds").click(function(){
 	
 });
 
-//client-side function call Code for sending a single text
-$("#single_text").click(function(){
-
-	var pNumber = $("#debug_sms_input_phone").val();
-	if(pNumber == '' || pNumber == ' ') {
-		pNumber = ' ';
-		$("#debug_sms_input_phone").val("<Phone Number> for single");
-		con.write("For a single text, enter phone number. There is no default. Not sending msg.");
-		return;
-	}
-
-	var msg = $("#debug_sms_input_message").val();
-	if($.trim(msg) == '') {
-		msg = 'Hello World!';
-	}
-
-	var data = {phone_number: pNumber, message: msg};
-
-	$.post("/text", data, function(res){
-		console.log('Message sent from UI: ' + res.body);
-		con.write(res);
-		$("#debug_sms_input_phone").val("");
-		$("#debug_sms_input_message").val("");
-	});
-});
-
 
 
 
@@ -210,6 +184,28 @@ $("#pair_print_pairings").click(function(){
 Edit round event bindings
 =========================================
 */	
+
+$("#send_sms").click(function(){
+	var div_id = $("#rounds_division_select").val();
+	var division = collection.getDivisionFromId(div_id);
+
+	var round_number = $("#rounds_round_number_select").val();
+	$("#sms_confirm_message").text("Send text for " + division.get("division_name") + " and round " + round_number);
+	$( "#sms_confirm" ).dialog({
+				resizable: false,
+				height:250,
+				modal: true,
+				buttons: {
+					"Send": function() {
+						pairing.sendSms(round_number, division);
+						$( this ).dialog( "close" );
+					},
+					Cancel: function() {
+						$( this ).dialog( "close" );
+					}
+				}
+			});
+});
 $("#edit_round_swap").click(function(){
 	console.log("swapping sides");
 	view.roundTable.swapSides();

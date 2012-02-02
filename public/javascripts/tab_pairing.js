@@ -60,6 +60,7 @@ pairing.updateSpeaks = function(){
 
 		//if any round has a zero, that means it was a bye. average the other rounds.
 		var division = team.get("division");
+		console.log(division);
 		if(division.get("comp_per_team") == 1){
 			//ld
 			var total = 0;
@@ -1107,15 +1108,28 @@ pairing.pairJudges = function(round_number, division){
 	}
 }
 
-//
+//checks to see if a judge has heard team1 or team2 in a prior round.
+
+//returns true if judge, team1, or team2 is undefined
 pairing.canJudge = function(team1, team2, judge, round_number, division){
+	if(team1 === undefined || team2 === undefined || judge === undefined || round_number == 1){
+		return true;
+	}
 	//check for school affiliations
 	var school1 = team1.get("school");
 	var school2 = team2.get("school");
+
+
 	if(judge.get("school") === school1 || judge.get("school") === school2){
 		return false;
 	}
+	
+
 	for(var i = 0; i < collection.rounds.length; i++){
+
+		if(collection.rounds.at(i).get("round_number") >= round_number){
+			continue;
+		}
 		//check to see if judge has judged the either of the teams before
 		if(collection.rounds.at(i).get("team1") === team1 && collection.rounds.at(i).get("judge") === judge){
 			return false;
@@ -1131,6 +1145,7 @@ pairing.canJudge = function(team1, team2, judge, round_number, division){
 		}
 	}
 	
+
 	return true;	
 }
 
@@ -1364,6 +1379,188 @@ pairing.alreadyPaired = function(round_number, division){
 			return true;
 		}
 	}
+	return false;
+}
+
+
+
+pairing.sendSms = function(round_number, division){
+	
+	var start_time = $("#text_pairings_start").val();
+	var data = [];
+	for(var i =0; i < collection.rounds.length; i++) //collection.rounds.length
+	{
+		if(collection.rounds.at(i).get("round_number") != round_number || collection.rounds.at(i).get("division") != division){
+				continue;
+			}
+
+			if(collection.rounds.at(i).get("aff") == 0){
+				var aff = collection.rounds.at(i).get("team1");
+				if(aff != undefined){
+					aff = aff.get("team_code");
+				}
+					
+				var neg = collection.rounds.at(i).get("team2");
+				if(neg != undefined){
+					neg = neg.get("team_code");
+				}
+					
+				} else {
+					var aff = collection.rounds.at(i).get("team2");
+					if(aff != undefined){
+						aff = aff.get("team_code");
+					}
+						
+					var neg = collection.rounds.at(i).get("team1");
+					if(neg != undefined){
+						neg = neg.get("team_code");
+					}
+				}
+
+			var judge = (collection.rounds.at(i).get("judge") != undefined ? collection.rounds.at(i).get("judge").get("name") : "");
+			var room = (collection.rounds.at(i).get("room") != undefined ? collection.rounds.at(i).get("room").get("name") : "");
+
+			for(var j = 0; j < collection.rounds.at(i).get("team1").get("competitors").length; j++){
+				
+				var phone_number = collection.rounds.at(i).get("team1").get("competitors")[j].phone_number;
+				if(phone_number === undefined){
+					continue;
+				}
+				//skip invalid numbers
+				if(phone_number.length > 9 && phone_number.length < 12){
+
+					data.push(
+						{
+							phone_number: phone_number, message: 
+						
+						'Aff: ' + aff + "\n" +
+						'Neg: ' + neg + "\n" +
+						'Judge: ' + judge + "\n" +
+						'Room: ' + room + "\n" +
+						'Start: ' + start_time
+						}
+					);
+				}
+			}
+
+			for(var j = 0; j < collection.rounds.at(i).get("team2").get("competitors").length; j++){
+
+				var phone_number = collection.rounds.at(i).get("team2").get("competitors")[j].phone_number;
+				//skip invalid numbers
+				if(phone_number.length > 9 && phone_number.length < 12){
+					data.push(
+						{
+							phone_number: phone_number, message: 
+						
+						'Aff: ' + aff + "\n" +
+						'Neg: ' + neg + "\n" +
+						'Judge: ' + judge + "\n" +
+						'Room: ' + room + "\n" +
+						'Start: ' + start_time
+						}
+					);
+				}
+			}
+
+	}
+	//send this as a mass text
+	$.post("/textMass", data, function(res){
+			console.log('Response from server: ' + res.body);
+			con.write(res);
+		});
+	console.log(data);
+
+
+}
+
+pairing.validateRound = function(round_number, division){
+
+	var bye_count = 0;
+	console.log(division);
+	var teams = {};
+	$.each(collection.rounds, function(i){
+
+		var round = collection.rounds.at(i);
+		var judge = round.get("judge");
+
+			if(round.get("division") != division){		//skip irrelevant rounds and divisions
+				return true;
+			}
+			if(round.get("round_number") != round_number){
+				return true;
+			}
+
+			//checking if judge allowed to judge both teams
+			if(!pairing.canJudge(round.get("team1"), round.get("team2"), round.get("judge"), round_number, division)){
+				if(judge != undefined){
+					var judge_name = round.get("judge").get("name")
+				} else {
+					judge_name = "No name";
+				}
+				
+				tab.warnings.push(judge_name + " already judged");
+				return true;
+			}
+
+			//checking if round has a room and is not a bye
+			if(round.get("room") === undefined && (round.get(team1) != undefined || round.get(team2) != undefined))
+			{	
+				tab.warnings.push("No room scheduled");
+				return true;
+			}
+
+			//checking if teams have not debated before
+			if(pairing.alreadyDebated(round.get("team1"), round.get("team2"), round_number))
+			{
+				tab.warnings.push(round.get("team1").get("team_code") + "and" + round.get("team2").get("team_code") + "have already debated");
+				return true;
+			}
+
+			//checking if same team scheduled multiple times in same round
+
+			var team1 = round.get("team1");
+			var team2 = round.get("team2");
+			if(team1 != undefined){
+				if(teams[team1.id] === undefined){
+				teams[team1.id] = 1;
+				} else{
+					teams[team1.id]++;
+				}
+			}
+
+			if(team2 != undefined){
+				if(teams[team2.id] === undefined){
+				teams[team2.id] = 1;
+				} else{
+					teams[team2.id]++;
+				}
+			}
+
+
+			//checking for more than one BYE
+			if(team1 === "BYE" || team2 === "BYE" )
+			{
+				bye_count++;
+			}
+			if(bye_count > 1)
+			{
+				tab.warnings.push("More than 1 bye in same round");
+			}
+
+			
+			console.log("warnings " + tab.warnings.length);
+
+
+	});
+
+	//team count is the number of times team with id is on the pairing
+	$.each(teams, function(id, team_count){
+		if(team_count > 1){
+			var team_code = collection.getTeamFromId(id).get("team_code");
+			tab.warnings.push(team_code + " is on the pairing " + team_count + " times.");
+		}
+	});
+
 	return false;
 }
 

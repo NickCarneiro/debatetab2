@@ -1161,17 +1161,20 @@ view.RoundTable = Backbone.View.extend({
 		"change #edit_round_result" : "displayWinner",
 		"click button#save_round_button": "saveRound",
 		"click #add_round_button": "addEmptyRound",
+		"click #validate_round": "validateRound",
 
 		"change #left_team_select": "changeTeam",
 		"change #right_team_select": "changeTeam",
 		//can't get these to fire
 		"change #edit_round_judge": "changeJudge",
 		"change #edit_round_room": "changeRoom",
-		"click #edit_round_swap": "swapSides",
+		"click #edit_round_swap": "swapSides"
 		//
 	
 
 	} ,
+
+	
 	initialize: function(){
 		_.bindAll(this, "render", "addRound", "appendRound", "renderRoundNumberSelect");
 		
@@ -1187,10 +1190,25 @@ view.RoundTable = Backbone.View.extend({
 		
 	} ,
 
+	validateRound: function(){
+		
+		var div_id = $("#rounds_division_select").val();
+		var division = collection.getDivisionFromId(div_id);
+		var round_number = $("#rounds_round_number_select").val();
+		
+		pairing.validateRound(round_number, division);
+
+		if(tab.warnings.length > 0){
+			view.showWarningsDialog();
+		} else {
+			view.showMessageDialog("Round is valid.");
+		}
+	} ,
+
 	printBoxes: function(){
 		var div_id = $("#rounds_division_select").val();
 		var division = collection.getDivisionFromId(div_id);
-
+		
 		try {
 			forms.printBoxes(division);
 		} catch(e){

@@ -3,7 +3,8 @@ echo "Building project..."
 #combine javascript
 #same order as inclusion in server.js
 cat public/javascripts/jquery.tmpl.js \
-	public/jquery-ui-1.8.17.custom.min.js \
+	public/javascripts/jquery-ui-1.8.17.custom.min.js \
+	public/javascripts/socket.io.js \
 	public/javascripts/underscore.js \
 	public/javascripts/backbone.js \
 	public/javascripts/plugins.js \
