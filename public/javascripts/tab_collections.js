@@ -429,70 +429,40 @@ collection.getModelFromId = function(model_id){
 		}
 
 		//for each model in the collection, look for models matching the id
-		col.forEach(function(elem, index){
-			if(elem.id === model_id){
-				//found a matching model
-				matching_model = elem;
-			}
-		});
+		matching_model = col.get(model_id);
+
+		if(matching_model != undefined){
+			return false;
+		}
 
 	});
+	
 	return matching_model;
 }
 
 collection.getDivisionFromId = function(division_id){
-	for(var i = 0; i < collection.divisions.length; i++){
-		if(division_id === collection.divisions.at(i).get("id")){
-			return collection.divisions.at(i);
-		}
-	}
-	return undefined;
+	return collection.divisions.get(division_id);
 };
 
 collection.getSchoolFromId = function(school_id){
-	for(var i = 0; i < collection.schools.length; i++){
-		if(school_id === collection.schools.at(i).get("id")){
-			return collection.schools.at(i);
-		}
-	}
-	return undefined;
+	return collection.schools.get(school_id);
 }
 
 
 collection.getTeamFromId = function(team_id){
-	for(var i = 0; i < collection.teams.length; i++){
-		if(team_id === collection.teams.at(i).get("id")){
-			return collection.teams.at(i);
-		}
-	}
-	return undefined;
+	return collection.teams.get(team_id);
 }
 
 collection.getRoomFromId = function(room_id){
-	for(var i = 0; i < collection.rooms.length; i++){
-		if(room_id === collection.rooms.at(i).get("id")){
-			return collection.rooms.at(i);
-		}
-	}
-	return undefined;
+	return collection.rooms.get(room_id)
 }
 
 collection.getJudgeFromId = function(judge_id){
-	for(var i = 0; i < collection.judges.length; i++){
-		if(judge_id === collection.judges.at(i).get("id")){
-			return collection.judges.at(i);
-		}
-	}
-	return undefined;
+	return collection.judges.get(judge_id);
 }
 
 collection.getRoundFromId = function(round_id){
-	for(var i = 0; i < collection.rounds.length; i++){
-		if(round_id === collection.rounds.at(i).get("id")){
-			return collection.rounds.at(i);
-		}
-	}
-	return undefined;
+	return collection.rounds.get(round_id)
 }
 
 //export all collections to JSON

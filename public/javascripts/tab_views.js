@@ -384,7 +384,7 @@ view.Team = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
       'click td.remove': 'remove',
-	  'click td.name': 'showEditForm'
+	  'click td': 'showEditForm'
     },  
 
 	initialize: function(){
@@ -413,25 +413,23 @@ view.Team = Backbone.View.extend({
 		$("#team_form_overlay").fadeIn();
 	} ,
 
-	remove: function(team){
+	remove: function(team){ 
 		var team = this.model;
-		$.confirm({
-			'title'		: 'Delete Team',
-			'message'	: 'You are about to delete a team <br />It cannot be restored at a later time! Continue?',
-			'buttons'	: {
-				'Yes'	: {
-					'model': team,
-					'class'	: 'blue',
-					'action': function(model){
-						model.destroy();
-					}
+		var dialog = $('<div>You are about to delete a team. <br />It cannot be restored at a later time! Continue?</div>')
+		$( dialog ).dialog({
+			resizable : false,
+			height :160,
+			modal : true,
+			title : 'Delete Team',
+			buttons : {
+				"Yes": function() {
+					team.destroy();
+					$(this).dialog("close");
 				},
-				'No'	: {
-					'class'	: 'gray',
-					'action': function(){}	
+				"No": function() {
+					$(this).dialog("close");
 				}
-			},
-			
+			}
 		});
 	} ,
 	render: function(){
@@ -477,7 +475,7 @@ view.Judge = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
       'click td.remove': 'remove',
-	  'click td.name': 'showEditForm'
+	  'click td': 'showEditForm'
     },  
 
 	initialize: function(){
@@ -523,23 +521,23 @@ view.Judge = Backbone.View.extend({
 	} ,
 	remove: function(judge){
 		var judge = this.model;
-		$.confirm({
-			'title'		: 'Delete Judge',
-			'message'	: 'You are about to delete a judge <br />It cannot be restored at a later time! Continue?',
-			'buttons'	: {
-				'Yes'	: {
-					'model': judge,
-					'class'	: 'blue',
-					'action': function(model){
-						model.destroy();
-					}
+		
+
+		var dialog = $('<div>You are about to delete a judge. <br />It cannot be restored at a later time! Continue?</div>')
+		$( dialog ).dialog({
+			resizable : false,
+			height :160,
+			modal : true,
+			title : 'Delete Team',
+			buttons : {
+				"Yes": function() {
+					judge.destroy();
+					$(this).dialog("close");
 				},
-				'No'	: {
-					'class'	: 'gray',
-					'action': function(){}	
+				"No": function() {
+					$(this).dialog("close");
 				}
-			},
-			
+			}
 		});
 		
 		
@@ -720,7 +718,7 @@ view.Room = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
       'click td.remove': 'remove',
-	  'click td.name': 'showEditForm'
+	  'click td': 'showEditForm'
     },  
 
 	initialize: function(){
@@ -740,23 +738,21 @@ view.Room = Backbone.View.extend({
 
 	remove: function(room){
 		var room = this.model;
-		$.confirm({
-			'title'		: 'Delete Room',
-			'message'	: 'You are about to delete a room <br />It cannot be restored at a later time! Continue?',
-			'buttons'	: {
-				'Yes'	: {
-					'model': room,
-					'class'	: 'blue',
-					'action': function(model){
-						model.destroy();
-					}
+		var dialog = $('<div>You are about to delete a room. <br />It cannot be restored at a later time! Continue?</div>')
+		$( dialog ).dialog({
+			resizable : false,
+			height :160,
+			modal : true,
+			title : 'Delete Team',
+			buttons : {
+				"Yes": function() {
+					room.destroy();
+					$(this).dialog("close");
 				},
-				'No'	: {
-					'class'	: 'gray',
-					'action': function(){}	
+				"No": function() {
+					$(this).dialog("close");
 				}
-			},
-			
+			}
 		});
 	} ,
 	render: function(){
@@ -1005,23 +1001,23 @@ view.Round = Backbone.View.extend({
 	} ,
 	remove: function(round){
 		var round = this.model;
-		$.confirm({
-			'title'		: 'Delete Round',
-			'message'	: 'You are about to delete a round <br />It cannot be restored at a later time! Continue?',
-			'buttons'	: {
-				'Yes'	: {
-					'model': round,
-					'class'	: 'blue',
-					'action': function(model){
-						model.destroy();
-					}
+		
+
+		var dialog = $('<div>You are about to delete a round. <br />It cannot be restored at a later time! Continue?</div>')
+		$( dialog ).dialog({
+			resizable : false,
+			height :160,
+			modal : true,
+			title : 'Delete Round',
+			buttons : {
+				"Yes": function() {
+					round.destroy();
+					$(this).dialog("close");
 				},
-				'No'	: {
-					'class'	: 'gray',
-					'action': function(){}	
+				"No": function() {
+					$(this).dialog("close");
 				}
-			},
-			
+			}
 		});
 	} ,
 	render: function(){
@@ -1195,7 +1191,7 @@ view.RoundTable = Backbone.View.extend({
 		var div_id = $("#rounds_division_select").val();
 		var division = collection.getDivisionFromId(div_id);
 		var round_number = $("#rounds_round_number_select").val();
-		
+
 		pairing.validateRound(round_number, division);
 
 		if(tab.warnings.length > 0){
@@ -1208,7 +1204,7 @@ view.RoundTable = Backbone.View.extend({
 	printBoxes: function(){
 		var div_id = $("#rounds_division_select").val();
 		var division = collection.getDivisionFromId(div_id);
-		
+
 		try {
 			forms.printBoxes(division);
 		} catch(e){
@@ -1641,20 +1637,19 @@ view.RoundTable = Backbone.View.extend({
 		var already_paired = pairing.alreadyPaired(round_number, div);
 		if(already_paired === true){
 			//pop up dialog for confirmation
-			var context = this;
-			$.confirm({
-				'title'		: 'Repair Confirmation',
-				'message'	: 'You are about to repair a round that has already been paired. <br />It cannot be restored at a later time! Continue?',
-				'buttons'	: {
-					'Yes'	: {
-						'class'	: 'blue',
-						'action': function(){
-							context.pairRound(round_number, div);
-						}
+			var dialog = $('<div>You are about to re-pair a round that has already been paired. <br />It cannot be restored at a later time! Continue?</div>')
+			$( dialog ).dialog({
+				resizable : false,
+				height :160,
+				modal : true,
+				title : 'Re-pair Round',
+				buttons : {
+					"Yes": function() {
+						view.roundTable.pairRound(round_number, division);
+						$(this).dialog("close");
 					},
-					'No'	: {
-						'class'	: 'gray',
-						'action': function(){}	// Nothing to do in this case. You can as well omit the action property.
+					"No": function() {
+						$(this).dialog("close");
 					}
 				}
 			});
@@ -1671,7 +1666,7 @@ view.RoundTable = Backbone.View.extend({
 		//show round options for selected division
 		var div_id = $("#rounds_division_select").val();
 		var div = collection.getDivisionFromId(div_id);
-		if(div === undefined){
+		if(div == undefined){
 			return;
 		}
 		if(div.get("schedule") != undefined){
@@ -1826,23 +1821,22 @@ view.School = Backbone.View.extend({
 	
 	remove: function(school){
 		var school = this.model;
-		$.confirm({
-			'title'		: 'Delete School',
-			'message'	: 'You are about to delete a school <br />It cannot be restored at a later time! Continue?',
-			'buttons'	: {
-				'Yes'	: {
-					'model': school,
-					'class'	: 'blue',
-					'action': function(model){
-						model.destroy();
-						}
-					},
-					'No'	: {
-					'class'	: 'gray',
-					'action': function(){}	
-				}
-			},
 
+		var dialog = $('<div>You are about to delete a school. <br />It cannot be restored at a later time! Continue?</div>')
+		$( dialog ).dialog({
+			resizable : false,
+			height :160,
+			modal : true,
+			title : 'Delete School',
+			buttons : {
+				"Yes": function() {
+					school.destroy();
+					$(this).dialog("close");
+				},
+				"No": function() {
+					$(this).dialog("close");
+				}
+			}
 		});
 			
 	} ,
@@ -1966,7 +1960,6 @@ view.Division = Backbone.View.extend({
 		$("#newdiv_flighted_rounds").attr("checked", this.model.get("flighted_rounds"));
 		$("#newdiv_combine_speaks").val(this.model.get("combine_speaks"));
 		$("#newdiv_break_to").val(this.model.get("break_to"));
-		$("#newdiv_max_speaks").val(this.model.get("max_speaks"));
 		$("#newdiv_prelims").val(this.model.get("prelims"));
 		$("#newdiv_ballot_type").val(this.model.get("ballot_type"));
 
@@ -1975,23 +1968,21 @@ view.Division = Backbone.View.extend({
 	} ,
 	remove: function(division){
 		var division = this.model;
-		$.confirm({
-			'title'		: 'Delete Division',
-			'message'	: 'You are about to delete a division <br />It cannot be restored at a later time! Continue?',
-			'buttons'	: {
-				'Yes'	: {
-					'model': division,
-					'class'	: 'blue',
-					'action': function(model){
-						collection.deleteDivision(model);
-						}
-					},
-					'No'	: {
-					'class'	: 'gray',
-					'action': function(){}	
+		var dialog = $('<div>You are about to delete a division. <br />It cannot be restored at a later time! Continue?</div>')
+		$( dialog ).dialog({
+			resizable : false,
+			height :160,
+			modal : true,
+			title : 'Delete Division',
+			buttons : {
+				"Yes": function() {
+					collection.deleteDivision(division);
+					$(this).dialog("close");
+				},
+				"No": function() {
+					$(this).dialog("close");
 				}
-			},
-			
+			}
 		});
 		
 	} ,
@@ -2033,7 +2024,6 @@ view.DivisionTable = Backbone.View.extend({
 		$("#newdiv_flighted_rounds").attr("checked", false);
 		$("#newdiv_combine_speaks").val(false);
 		$("#newdiv_break_to").val("4");
-		$("#newdiv_max_speaks").val("30");
 		$("#newdiv_prelims").val("4");
 		$("#newdiv_ballot_type").val("TFA_CX");
 	} ,
@@ -2049,7 +2039,7 @@ view.DivisionTable = Backbone.View.extend({
 		//TODO: verify that this boolean works
 		var flighted_rounds = Boolean($("#newdiv_flighted_rounds").attr("checked"));
 		var break_to = $("#newdiv_break_to").val();
-		var max_speaks = parseInt($("#newdiv_max_speaks").val());
+		var max_speaks = 30;
 		var prelims = parseInt($("#newdiv_prelims").val());
 		var schedule = [];
 		var ballot_type = $("#newdiv_ballot_type").val();

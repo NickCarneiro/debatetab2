@@ -148,45 +148,6 @@ Backbone.sync = Backbone.localSync;
  * and converts between that format and the standard 24 character representation.
 */
 var ObjectId=function(){var a=0;var b=Math.floor(Math.random()*32767);var c=Math.floor(Math.random()*16777216);if(typeof localStorage!="undefined"){var d=parseInt(localStorage["mongoMachineId"]);if(d>=0&&d<=16777215){c=Math.floor(localStorage["mongoMachineId"])}localStorage["mongoMachineId"]=c;document.cookie="mongoMachineId="+c+";expires=Tue, 19 Jan 2038 05:00:00 GMT"}else{var e=document.cookie.split("; ");for(var f in e){var g=e[f].split("=");if(g[0]=="mongoMachineId"&&g[1]>=0&&g[1]<=16777215){c=g[1];break}}document.cookie="mongoMachineId="+c+";expires=Tue, 19 Jan 2038 05:00:00 GMT"}return function(){if(!(this instanceof ObjectId)){return(new ObjectId(arguments[0],arguments[1],arguments[2],arguments[3])).toString()}if(typeof arguments[0]=="object"){this.timestamp=arguments[0].timestamp;this.machine=arguments[0].machine;this.pid=arguments[0].pid;this.increment=arguments[0].increment}else if(typeof arguments[0]=="string"&&arguments[0].length==24){this.timestamp=Number("0x"+arguments[0].substr(0,8)),this.machine=Number("0x"+arguments[0].substr(8,6)),this.pid=Number("0x"+arguments[0].substr(14,4)),this.increment=Number("0x"+arguments[0].substr(18,6))}else if(arguments.length==4&&arguments[0]!=null){this.timestamp=arguments[0];this.machine=arguments[1];this.pid=arguments[2];this.increment=arguments[3]}else{this.timestamp=Math.floor((new Date).valueOf()/1e3);this.machine=c;this.pid=b;if(a>16777215){a=0}this.increment=a++}}}();ObjectId.prototype.getDate=function(){return new Date(this.timestamp*1e3)};ObjectId.prototype.toString=function(){var a=this.timestamp.toString(16);var b=this.machine.toString(16);var c=this.pid.toString(16);var d=this.increment.toString(16);return"00000000".substr(0,6-a.length)+a+"000000".substr(0,6-b.length)+b+"0000".substr(0,4-c.length)+c+"000000".substr(0,6-d.length)+d};
-/**
-jQuery Array Shuffle Plugin
-http://www.yelotofu.com/2008/08/jquery-shuffle-plugin/
-**/
-(function($){
-  $.fn.shuffle = function() {
-    return this.each(function(){
-      var items = $(this).children();
-      return (items.length)
-        ? $(this).html($.shuffle(items))
-        : this;
-    });
-  }
- 
-  $.shuffle = function(arr) {
-    for(
-      var j, x, i = arr.length; i;
-      j = parseInt(Math.random() * i),
-      x = arr[--i], arr[i] = arr[j], arr[j] = x
-    );
-    return arr;
-  }
-})(jQuery);
-
-/**
- * jQuery Simple Dialog Plugin
- *   http://code.google.com/p/jquery-simpledialog/
- *
- * Copyright (c) 2009 Yusuke Horie
- *
- * Released under the MIT License:
- * http://www.opensource.org/licenses/mit-license.php
- *
- * Since  : 0.01 - 07/06/2009
- * Version: 0.11 - 08/08/2009
- */
-
- (function(a){var b=null,c=null,d=0,e=0,f=0,g=null,h=null,i=null,j="",k="",l="",m=null,n=null;a.fn.simpleDialog=function(b){var c=a.extend({},$.fn.simpleDialog.defaults,b);return this.each(function(b,d){var e=a(d);var f=e.is("form")?"submit":"click";e.bind(f+".simpledialog",function(b){b.preventDefault();g=this;g.opts=c;h=b;o();s();var d=a(this);if(g.opts.title!="")k=g.opts.title;if(d.is("a")){if(g.opts.useTitleAttr){var e=d.attr("title");if(typeof e!="undefined"&&e!="")k=e}var f=d.attr("href");if(f.match(/^#/)){var m=a("#"+d.attr("rel"));if(m.length==0)return false;i=m;j=i.clone().html();i.empty();p(j)}else if(d.find("img").length>0){if(g.opts.showCaption)l=d.find("img").attr("title");r(f)}else{q(f,{})}}else if(d.is(":submit",":button")){var n=d.parents("form");q(n.attr("action"),n.serialize(),n.attr("method"))}else if(d.is("form")){q(d.attr("action"),d.serialize(),d.attr("method"))}else{a.simpleDialog.close(b)}return false})})};a.fn.simpleDialog.defaults={title:"",useTitleAttr:true,containerId:"sd_container",containerClass:"sd_container",overlayId:"sd_overlay",overlayClass:"sd_overlay",loadingClass:"sd_loading",closeLabelClass:"sd_closelabel",showCloseLabel:true,closeLabel:"close ×",opacity:.6,duration:400,easing:"linear",zIndex:1e3,width:null,height:null,showCaption:true,open:null,close:null,closeSelector:".close"};a.simpleDialog={close:function(b){if($.isFunction(g.opts.close))g.opts.close.apply(this,[typeof b=="undefined"?null:b,g]);if(m!=null)m.remove();if(i!=null)i.html(j);a("#"+g.opts.overlayId).remove();return false}};var o=function(){b=a(document);c=a(window);d=b.height();e=c.height();f=c.width();k="";l=""};var p=function(b){var c="";if(k!="")c+='<div class="sd_header">'+k+"</div>";c+='<div class="sd_content">'+b+"</div>";if(l!=""&&typeof l!="undefined")c+=' <div class="sd_footer">'+l+"</div>";var d=a("<div />").addClass(g.opts.containerClass).hide().css({position:"absolute",height:"auto"}).html(c).appendTo(document.body);var e=g.opts.width?parseInt(g.opts.width):d.width();var f=g.opts.height?parseInt(g.opts.height):d.height();d.remove();var i=t(e,f);m.removeClass(g.opts.loadingClass).animate({width:e+"px",height:f+"px",left:i[0]+"px",top:i[1]+"px"},g.opts.duration,g.opts.easing,function(){m.html(c).find(g.opts.closeSelector).bind("click.simpledialog",a.simpleDialog.close);if(g.opts.showCloseLabel){var b='<div id="sd_closelabel" class="'+g.opts.closeLabelClass+'">'+'<a href="#">'+g.opts.closeLabel+"</a></div>";m.hover(function(){$(this).append(b);var c=$("#sd_closelabel");c.css({position:"absolute",top:0,left:e-c.width()+"px",opacity:.85}).find("a").click(a.simpleDialog.close)},function(){$("#sd_closelabel").remove()})}if(a.isFunction(g.opts.open))g.opts.open.apply(m,[h,g])})};var q=function(b,c,d){a.ajax({type:typeof d=="undefined"?"GET":d,url:b,data:c,dataType:"html",success:p})};var r=function(a){$(document.body).append('<div id="sd_tmp_image" style="display:none;"><img src="'+a+'" alt="" /></div>');var b=$("#sd_tmp_image");b.find("img").load(function(){var a=b.html();b.remove();p(a)}).error(function(a){$.simpleDialog.close(a);b.remove()})};var s=function(){a("<div />").attr("id",g.opts.overlayId).addClass(g.opts.overlayClass).css({position:"absolute",width:f,height:d,opacity:g.opts.opacity,zIndex:g.opts.zIndex}).bind("click.simpledialog",a.simpleDialog.close).appendTo(document.body);m=a("<div />").attr("id",g.opts.containerId).addClass(g.opts.loadingClass).addClass(g.opts.containerClass).hide().appendTo(document.body);var b=m.width();var c=m.height();var e=t(b,c);m.css({position:"absolute",left:e[0]+"px",top:e[1]+"px",width:b+"px",height:c+"px",zIndex:g.opts.zIndex+1e3}).show()};var t=function(a,c){return[d>e?f/2-a/2-18:f/2-a/2,b.scrollTop()+e/2-c/2]}})(jQuery)
-
 
 
 

@@ -8,6 +8,11 @@ ui.showMenu = function(menu_item){
 	$("#main_menu > li").addClass("menu_item");
 	$("#menu_" + menu_item).addClass("menu_item_selected");
 	localStorage.setItem("selected", menu_item);
+
+	//make the height the window height minus the top of the container
+	console.log($("#" + menu_item + "_table").position().top);
+	var height = $(window).height() - $("#" + menu_item + "_table").position().top - 80;
+	$(".table_container").height(height);
 	
 }
 
@@ -98,23 +103,24 @@ $(function(){
 
 $("#debug_tournament_id").html("Tournament ID: " + '<a href="/tab/'+tab.tournament_id+'">' + tab.tournament_id + '</a>');
 $("#clear_storage").click(function(){
-
-	$.confirm({
-			'title'		: 'Clear localStorage',
-			'message'	: 'You are about to delete ALL LOCAL DATA <br />This will erase the entire tournament! Continue?',
-			'buttons'	: {
-				'Yes'	: {
-					
-					'class'	: 'blue',
-					'action': collection.emptyCollections,
-				},
-				'No'	: {
-					'class'	: 'gray',
-					'action': function(){}	
-				}
+	console.log("asdf");
+	var dialog = $('<div>You are about to delete ALL LOCAL DATA <br />This will erase the entire tournament! Continue?</div>')
+	$( dialog ).dialog({
+		resizable : false,
+		height :190,
+		modal : true,
+		title : 'Delete localStorage',
+		buttons : {
+			"Yes": function() {
+				localStorage.clear();
+				$(this).dialog("close");
 			},
-			
-		});
+			"No": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
 	
 });
 
@@ -241,6 +247,11 @@ $("#edit_round_save").click(function(){
 $("#edit_round_result").change(function(){
 	view.roundTable.displayWinner()
 });
+
+
+//grow tables to fill window space after forms
+
+
 
 
 });
