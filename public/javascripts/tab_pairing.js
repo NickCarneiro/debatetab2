@@ -1473,6 +1473,14 @@ pairing.sendSms = function(round_number, division){
 
 }
 
+/*
+Check for the following problems:
+judges have judged either team before and are from either of the teams' schools
+any round that is not a bye is missing a room
+teams have already debated in a previous round
+a team is on the pairing more than once
+more than one bye
+*/
 pairing.validateRound = function(round_number, division){
 
 	var bye_count = 0;
@@ -1546,10 +1554,6 @@ pairing.validateRound = function(round_number, division){
 			{
 				tab.warnings.push("More than 1 bye in same round");
 			}
-
-			
-			console.log("warnings " + tab.warnings.length);
-
 
 	});
 

@@ -10,9 +10,13 @@ ui.showMenu = function(menu_item){
 	localStorage.setItem("selected", menu_item);
 
 	//make the height the window height minus the top of the container
-	console.log($("#" + menu_item + "_table").position().top);
-	var height = $(window).height() - $("#" + menu_item + "_table").position().top - 80;
-	$(".table_container").height(height);
+	
+
+	if($("#" + menu_item + "_table").length != 0){
+		var height = $(window).height() - $("#" + menu_item + "_table").position().top - 80;
+		$(".table_container").height(height);
+	}
+	
 	
 }
 

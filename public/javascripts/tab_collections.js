@@ -597,16 +597,28 @@ collection.deleteDivision = function(division){
 		judge.save();
 	})
 	//delete all teams in division
-	console.log(collection.teams.length);
+	var team_count = 0;
+	var to_delete = [];
 	collection.teams.each(function(team){
-
 		if(team.get("division") === division){
-			team.destroy();
+			team_count++;
+			to_delete.push(team);
 		}
 	});
+	var delete_count = 0;
+	$.each(to_delete, function(i, team){
+		team.destroy();
+		delete_count++;
+	})
+
+	console.log("team count: " + team_count + " delete count: " + delete_count);
 
 	//and finally, delete the division model itself
 	division.destroy();
+}
+
+collection.deleteModel = function(model){
+	
 }
 
 //deletes EVERYTHING and replaces with joy import

@@ -23,7 +23,7 @@
 				<li class="menu_item" id="menu_rooms">Rooms</li>
 				<li class="menu_item" id="menu_schools">Schools</li>
 				<li class="menu_item" id="menu_divisions">Divisions</li>
-				<li class="menu_item" id="menu_settings">Settings</li>
+				<li class="menu_item" id="menu_settings">Setup</li>
 				<li class="menu_item" id="menu_debug">Debug</li>
 			</ul>
 		</div>
@@ -109,7 +109,12 @@
 
 		<div id="teams_container" class="main_container hidden tencol block last">
 			<div id="teams" class="subcontainer">
-				<div id="team_form" class="input_form">
+			<div class="top_buttons">
+			<button id="add_team">Add Team</button>
+			<button id="print_teams">Print Teams</button>
+			<button id="print_speakers">Print Speakers</button>
+			</div>
+				<div id="team_form" class="input_form dialog">
 					
 					<input id="newteam_id" type="hidden" value=""/>
 					<label>
@@ -135,15 +140,11 @@
 					<input id="newteam_stop_scheduling" type="checkbox" />
 					</label>
 
-					<button class="save_button" id="add_team_button">Save</button>
-					<button class="cancel_button" id="cancel_team_button">Cancel</button>
+				
 				</div>	
 						
 				<span>Division: </span><select id="teams_division_select"></select>
-				<div class="top_buttons">
-					<button id="print_teams">Print Teams</button>
-					<button id="print_speakers">Print Speakers</button>
-				</div>
+				
 				<div class="table_container">
 				
 				<table id="teams_table">
@@ -154,8 +155,10 @@
 
 		<div id="judges_container" class="main_container hidden tencol block last">
 			<div id="judges" class="subcontainer">
-				
-				<div id="judge_form" class="input_form">
+				<div class="top_buttons">
+					<button id="add_judge">Add Judge</button>
+				</div>
+				<div id="judge_form" class="input_form dialog">
 					<div class="edit_model_box">
 					<input id="newjudge_id" type="hidden" value=""/>
 					<label>
@@ -173,8 +176,7 @@
 					Stop scheduling: <br />
 					<input id="newjudge_stop_scheduling" type="checkbox" />
 					</label>
-					<button class="save_button" id="add_judge_button">Save</button>
-					<button class="cancel_button" id="cancel_judge_button">Cancel</button>
+				
 					</div>
 				</div>
 				<div class="table_container">
@@ -186,8 +188,11 @@
 		</div>
 		<div id="rooms_container" class="main_container hidden tencol block last">
 			<div id="rooms" class="subcontainer">
-				
-				<div id="room_form" class="input_form top_buttons">
+		
+				<div class="top_buttons">
+				<button id="add_room">Add Room</button>
+				</div>
+				<div id="room_form" class="input_form dialog">
 					<input id="newroom_id" type="hidden" value=""/>
 					<label>
 					Room Name: <br />
@@ -236,11 +241,13 @@
 		</div>
 		<div id="divisions_container" class="main_container hidden tencol block last">
 			<div id="divisions" class="subcontainer">
-				
+			<div class="top_buttons">
+			<button id="add_division">Add Division</button>
+			</div>
 			
 			
 
-			<div id="division_form" class="input_form">
+			<div id="division_form" class="input_form dialog">
 			
 			<input id="newdiv_id" type="hidden" value=""/>
 				<label>
@@ -285,11 +292,6 @@
 				</label> 
 				
 
-				<button class="save_button" id="add_division_button">Save</button>
-
-		
-
-
 			
 			</div>
 
@@ -302,14 +304,13 @@
 				
 			</div>
 		</div>
-		<div id="settings_container" class="main_container hidden tencol block last">Settings</div>
+		<div id="settings_container" class="main_container hidden tencol block last">Setup</div>
 		<div id="debug_container" class="main_container hidden tencol block last">
 				<div id="debug" class="subcontainer">
 					<div id="debug_tournament_id"></div>
 					<button id="toggle_debug">Toggle debug</button><br />
 					<h1>Pairing</h1>
-					<button id="pair_tests">Run Pairing Tests</button><br />
-					<button id="pair_delete_all_rounds">Delete All Rounds</button><br /> <br />
+					
 					<button id="pair_print_pairings">Print all pairings</button>
 
 					<h1>LocalStorage </h1>
