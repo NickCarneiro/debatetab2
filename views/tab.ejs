@@ -36,6 +36,47 @@
 		<div id="rounds_container" class="main_container hidden span9 block">
 			<div id="rounds" class="subcontainer">
 				
+				
+				<div class="top_buttons">
+					<div class="btn-group">
+						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+							Pairing
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<!-- dropdown menu links -->
+							<li><a id="add_round_button">Add Debate</a></li>
+							<li><a id="pair_round_button">Pair Round</a></li>
+							<li><a id="validate_round">Validate Round</a> </li>
+						</ul>
+					</div>
+
+					<div class="btn-group">
+						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+							Printouts
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<!-- dropdown menu links -->
+							<li><a id="print_ballots_button">Print Ballots</a></li>
+							<li><a id="print_pairings_button">Print Pairings</a></li>
+							<li><a id="print_boxes">Print Boxes</a></li>
+						</ul>
+					</div>
+
+					<div class="btn-group">
+						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+							Publish
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<!-- dropdown menu links -->
+							<li><a id="send_sms">Send SMS</a> </li>
+							
+						</ul>
+					</div>
+				</div>
+					
 				<div class="top_buttons">
 					<span>Division: </span><select id="rounds_division_select">
 					</select>
@@ -43,31 +84,16 @@
 					</select>
 					Remaining ballots: <span id="remaining_ballots"></span>
 				</div>
-				<div class="top_buttons">
-					<button id="add_round_button">Add Debate</button>
-					<button id="pair_round_button">Pair Round</button>
-					<button id="print_ballots_button">Print Ballots</button>
-					<button id="print_pairings_button">Print Pairings</button>
-					<button id="print_boxes">Print Boxes</button>
 
-				</div>
-					
 				<div id="pairing_indicator">
 					Pairing Round. Please wait.
 					<img class="inline_block" src="/images/indicator.gif" alt="Please wait spinning image" />
 				</div>
 				<div class="table_container">
-					<table id="rounds_table" class="large_table">
+					<table id="rounds_table" class="table table-striped large_table">
 					</table>
 				</div>
-				<div class="bottom_buttons">
-					<button id="send_sms">Send SMS</button> 
-					<button id="validate_round">Validate</button> 
-				</div>
-				
 
-
-				
 			</div>
 
 			<div id="edit_round_dialog" class="dialog edit_round_dialog">
@@ -151,7 +177,7 @@
 				
 				<div class="table_container">
 				
-				<table id="teams_table">
+				<table id="teams_table" class="large_table table table-striped">
 				</table>		
 				</div>	
 			</div>
@@ -172,10 +198,12 @@
 					<label>
 					School Affiliation <br />
 					<select id="newjudge_school">
+
 					</select>
+					</label>
 					<ul id="newjudge_divisions">
 					</ul>
-					</label>
+					
 					<label>
 					Stop scheduling: <br />
 					<input id="newjudge_stop_scheduling" type="checkbox" />
@@ -184,7 +212,7 @@
 					</div>
 				</div>
 				<div class="table_container">
-				<table id="judges_table">
+				<table id="judges_table" class="table table-striped">
 				</table>
 				</div>
 
@@ -211,10 +239,9 @@
 					Stop scheduling: <br />
 					<input id="newroom_stop_scheduling" type="checkbox" />
 					</label>
-					<button class="save_button" id="add_room_button">Save</button>
 				</div>
 				<div class="table_container">
-				<table id="rooms_table">
+				<table id="rooms_table" class="table table-striped">
 				</table>
 				</div>
 						
@@ -237,7 +264,7 @@
 					</div>
 				</div>
 				<div class="table_container">
-				<table id="schools_table">
+				<table id="schools_table" class="table table-striped">
 				</table>
 				</div>
 				
@@ -301,7 +328,7 @@
 
 			
 
-				<table id="divisions_table">
+				<table id="divisions_table" class="large_table table table-striped">
 				</table>
 			
 				<br />

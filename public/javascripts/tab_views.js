@@ -410,7 +410,7 @@ view.Team = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
       'click td.remove': 'remove',
-	  'click td.name': 'showEditForm'
+	  'click td.row': 'showEditForm'
     },  
 
 	initialize: function(){
@@ -430,7 +430,7 @@ view.Team = Backbone.View.extend({
 		//TODO populate competitor names and phone numbers here
 		var competitors = this.model.get("competitors");
 		for(var i = 0; i < competitors.length; i++){
-			$("#newteam_competitors").append('Name: <input class="newteam_competitor" type="text" value="' + competitors[i].name + '"/> <br />');
+			$("#newteam_competitors").append('Name: <input class="newteam_competitor " type="text" value="' + competitors[i].name + '"/> <br />');
 			var phone_number = competitors[i].phone_number || "";
 			$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" value="' + phone_number + '"/> <br /> <br />');
 		}
@@ -471,8 +471,8 @@ view.Team = Backbone.View.extend({
 	render: function(){
 		var wins = this.model.get("losses") || "0";
 		var losses = this.model.get("wins") || "0";
-		$(this.el).html('<td class="name">' + this.model.get("team_code") + 
-			'</td> <td>'+this.model.get("division").get("division_name") +'</td><td>' + 
+		$(this.el).html('<td class="name row">' + this.model.get("team_code") + 
+			'</td> <td class="row">'+this.model.get("division").get("division_name") +'</td><td class="row">' + 
 			wins + "-"+ losses + '</td><td class="remove"><button>Remove</button></td>');
 		return this; //required for chainable call, .render().el ( in appendTeam)
 	} ,
@@ -511,7 +511,7 @@ view.Judge = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
       'click td.remove': 'remove',
-	  'click td.name': 'showEditForm'
+	  'click td.row': 'showEditForm'
     },  
 
 	initialize: function(){
@@ -595,7 +595,7 @@ view.Judge = Backbone.View.extend({
 			div_string = div_string + div + " ";
 		}
 		var school = this.model.get("school") === undefined ? "None" : this.model.get("school").get("school_name");
-		$(this.el).html('<td class="name">' + this.model.get("name") + '</td><td>'+ school +'</td><td>' + div_string + '</td><td class="remove"><button>Remove</button></td>');
+		$(this.el).html('<td class="name row">' + this.model.get("name") + '</td><td class="row">'+ school +'</td><td class="row">' + div_string + '</td><td class="remove"><button>Remove</button></td>');
 		return this; //required for chainable call, .render().el ( in appendJudge)
 	} ,
 	unrender: function(){
@@ -784,22 +784,7 @@ view.Room = Backbone.View.extend({
 	} ,
 	showEditForm: function(){
 		//populate form with existing values
-		$("#newroom_id").val(this.model.get("id"));
-		$("#newroom_name").val(this.model.get("name"));
-		$("#newroom_division").val((this.model.get("division").get("id")));
-		$("#newroom_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
-		$("#room_form").dialog({
-			buttons: {
-				"Save": function(){
-					view.roomTable.addDivision();
-					$(this).dialog("close");
-				} ,
-				"Cancel": function(){
-					view.roomTable.clearEditForm();
-					$(this).dialog("close");
-				}
-			}
-		});
+		view.roomForm.render(this.model);
 	} ,
 
 	remove: function(room){
@@ -837,34 +822,17 @@ view.Room = Backbone.View.extend({
 view.RoomTable = Backbone.View.extend({
 	el: $("#rooms") , // attaches `this.el` to an existing element.
 	events: {
-		"click #add_room": "showEditForm" ,
-		"keyup #newroom_name": "keyupRoom" ,
-		"keyup #rooms_search": "search"
-	} ,
-	showEditForm: function(){
-		//populate form with existing values
-	
-		$("#room_form").dialog({
-			buttons: {
-				"Save": function(){
-					view.roomTable.addRoom();
-					$(this).dialog("close");
-				} ,
-				"Cancel": function(){
-					view.roomTable.clearEditForm();
-					$(this).dialog("close");
-				}
-			}
-		});
-	},
-	keyupRoom: function(event){
-		if(event.which === 13){
-			this.addRoom();
-		}
+		"click #add_room": "showEditForm"
 		
 	} ,
+	showEditForm: function(){
+		
+		view.roomForm.render();
+		
+	},
+	
 	initialize: function(){
-		_.bindAll(this, "render", "addRoom", "appendRoom");
+		_.bindAll(this, "render", "appendRoom");
 		
 		collection.rooms.bind("add", this.appendRoom);
 		collection.rooms.bind("reset", this.render, this);
@@ -881,64 +849,11 @@ view.RoomTable = Backbone.View.extend({
         	this.appendRoom(room);
     	}, this);
 
-    	_(collection.divisions.models).each(function(division){ // in case collection is not empty
-        	this.addDivSelect(division);
-    	}, this);
+    
 	} ,
-	clearEditForm: function(){
-		$("#newroom_id").val("");
-		$("#newroom_name").val("");
-		//$("#newroom_division").val("");
-		$("#newroom_stop_scheduling").prop("checked", false);
+	
 
-	} ,
-
-	//add new division to dropdown box
-	addDivSelect: function(division){
-		var divOptionView = new view.DivisionOption({
-			model: division
-		});
-		$("#newroom_division", this.el).append(divOptionView.render().el);
-	} ,
-	addRoom: function(){
-		//TODO: validate room name
-			//	
-		var id = $("#newroom_id").val();
-		var room_name = $("#newroom_name").val();
-		var div_name_id = $("#newroom_division").val();
-		var division = collection.getDivisionFromId(div_name_id);
-		var stop_scheduling = $("#newroom_stop_scheduling").prop("checked");
-
-		$(".edit_model_overlay").fadeOut();
-		
-		if(id.length > 0){
-			
-			var room = collection.getRoomFromId(id);
-			room.set({
-				
-				name: room_name, 
-				division: division,
-				stop_scheduling: stop_scheduling
-
-		});
-		}else{
-		
-		var room = new model.Room();
-		room.set({
-			id: (new ObjectId).toString(),
-			name: room_name, 
-			division: division,
-			stop_scheduling: stop_scheduling
-			
-		});
-		collection.rooms.add(room);
-		
-		
-		}
-		room.save();
-		this.clearEditForm();
-		
-	} ,
+	
 
 	appendRoom: function(room){
 		var roomView = new view.Room({

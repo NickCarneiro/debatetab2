@@ -78,15 +78,15 @@ app.configure('development', function() {
 		'tab_collections.js', 
 		'tab_pairing.js', 
 		'tab_views.js', 
+		'tab_views_forms.js',
 		'tab_ui.js', 
 		'tab_forms.js'
 	];
 
 	var dev_styles = [
-		'bptop.css', 
 		
 		'tab.css', 
-		'bpbottom.css',
+		
 		'bootstrap.css', 
 		'jquery-ui-1.8.17.custom.css'
 	];

@@ -13,6 +13,7 @@ cat public/javascripts/jquery.tmpl.js \
 	public/javascripts/tab_collections.js \
 	public/javascripts/tab_pairing.js \
 	public/javascripts/tab_views.js \
+	public/javascripts/tab_views_forms.js \
 	public/javascripts/tab_ui.js \
 	public/javascripts/tab_forms.js \
 	> build/combined.js
@@ -22,9 +23,7 @@ java -jar node_modules/node-minify/lib/google_closure_compiler.jar \
 	--js build/combined.js --js_output_file public/javascripts/tab-min.js
 
 #combine css
-cat public/stylesheets/bptop.css \
-	public/stylesheets/tab.css \
-	public/stylesheets/bpbottom.css \
+cat public/stylesheets/tab.css \
 	public/stylesheets/bootstrap.css \
 	public/jquery-ui-1.8.17.custom.css \
 	> build/combined.css

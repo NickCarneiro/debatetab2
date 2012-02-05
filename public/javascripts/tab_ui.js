@@ -92,6 +92,10 @@ view.roundTable = new view.RoundTable();
 view.statsArea = new view.StatsArea();
 
 
+//initialize forms
+view.roomForm = new view.RoomForm();
+
+
 
 //restore references is silent so we have to manually render	
 //view.renderAll();

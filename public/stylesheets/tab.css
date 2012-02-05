@@ -142,6 +142,8 @@ styles for main menu
 	margin: 6px 0px 6px 0px;
 	text-align: left;
 	opacity: .9;
+  height: 30px;
+  padding-top: 12px;
 }
 
 
@@ -150,13 +152,11 @@ styles for main menu
 }
 
 tr {
-  border: 1px solid #fff;
   padding: 5px;
 }
 
-tr:hover{
-  background: #a5cbde;
-}
+
+
 
 
 
@@ -179,10 +179,7 @@ when a menu item li is selectedm its only class is menu_item_selected. When it i
 	background-color: #d8d8d8;
 }
 
-table{
-  border-collapse: collapse;
-  border-spacing: 3px 3px;
-}
+
 
 .large_table{
   width: 100%;
@@ -247,5 +244,15 @@ God dammit, Paul Irish.
 
 input.division_list{
   display:inline-block;
+}
+
+.btn-group {
+  display: inline-block;
+
+}
+
+.btn-group a{
+  font-size: 20px;
+  height: 24px;
 }
 
