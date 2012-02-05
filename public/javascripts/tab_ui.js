@@ -4,8 +4,8 @@
 ui.showMenu = function(menu_item){
 	$(".main_container").hide();
 	$("#" + menu_item + "_container").show();
-	$("#main_menu > li").removeClass("menu_item_selected");
-	$("#main_menu > li").addClass("menu_item");
+	$("#main_menu > div").removeClass("menu_item_selected");
+	$("#main_menu > div").addClass("menu_item");
 	$("#menu_" + menu_item).addClass("menu_item_selected");
 	localStorage.setItem("selected", menu_item);
 
@@ -33,7 +33,7 @@ $(function(){
 	
 	} 
 	//Main Menu Controls
-	$("#main_menu > li").click(function(){
+	$("#main_menu > div").click(function(){
 		//menu item ids are like: menu_judges
 		var menu_item_name = $(this).attr("id").substr(5);
 		//TODO: save menu state in a model so it opens to where you were if browser gets closed

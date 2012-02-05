@@ -1,36 +1,39 @@
-<div class="container">
+<div class="container-fluid">
 	<!-- begin header -->
-	<div class="twelvecol">
-		<div class="header_image block center">
-			<img src="/images/logo.png" alt="DebateTab logo, Advancing academic competition"/>
+	<div class="row-fluid">
+		<div class="span12">
+			<div class="header_image block center">
+				<img src="/images/logo.png" alt="DebateTab logo, Advancing academic competition"/>
+			</div>
+		</div>
+		
+		<!-- end header -->
+
+		<div id="tournament_id" style="display:none;">
+		<% if(locals.tournament_id){ %>
+			<%= tournament_id %>
+		<% } %>
 		</div>
 	</div>
-	<!-- end header -->
-
-	<div id="tournament_id" style="display:none;">
-	<% if(locals.tournament_id){ %>
-		<%= tournament_id %>
-	<% } %>
-	</div>
-	<div class="row maincontent">
+	<div class="row-fluid maincontent">
 
 		<!-- begin left nav-->
-		<div class="twocol block">
-			<ul id="main_menu" class="menu">
-				<li class="menu_item" id="menu_rounds">Rounds</li>
-				<li class="menu_item" id="menu_teams">Teams</li>
-				<li class="menu_item" id="menu_judges">Judges</li>
-				<li class="menu_item" id="menu_rooms">Rooms</li>
-				<li class="menu_item" id="menu_schools">Schools</li>
-				<li class="menu_item" id="menu_divisions">Divisions</li>
-				<li class="menu_item" id="menu_settings">Setup</li>
-				<li class="menu_item" id="menu_debug">Debug</li>
-			</ul>
+		<div class="span2 block menu_container">
+			<div id="main_menu" class="menu">
+				<div class="menu_item" id="menu_rounds">Rounds</div>
+				<div class="menu_item" id="menu_teams">Teams</div>
+				<div class="menu_item" id="menu_judges">Judges</div>
+				<div class="menu_item" id="menu_rooms">Rooms</div>
+				<div class="menu_item" id="menu_schools">Schools</div>
+				<div class="menu_item" id="menu_divisions">Divisions</div>
+				<div class="menu_item" id="menu_settings">Setup</div>
+				<div class="menu_item" id="menu_debug">Debug</div>
+			</div>
 		</div>
 		<!-- end left nav-->
 
 		<!-- begin main content areas. Only one is shown at a time.-->
-		<div id="rounds_container" class="main_container hidden tencol block last">
+		<div id="rounds_container" class="main_container hidden span9 block">
 			<div id="rounds" class="subcontainer">
 				
 				<div class="top_buttons">
@@ -51,7 +54,7 @@
 					
 				<div id="pairing_indicator">
 					Pairing Round. Please wait.
-					<img class="inline_block" src="/images/indicator.gif" />
+					<img class="inline_block" src="/images/indicator.gif" alt="Please wait spinning image" />
 				</div>
 				<div class="table_container">
 					<table id="rounds_table" class="large_table">
@@ -77,7 +80,7 @@
 						<div id="left_team_container">
 						</div>
 					</div>
-					<div id="edit_round_right" class="edit_round_team">
+					<div id="edit_round_left" class="edit_round_team">
 						<label for="right_team_select">Negative</label><select id="right_team_select"></select>
 						<div id="right_team_container">
 						</div>
@@ -107,7 +110,7 @@
 		</div>
 
 
-		<div id="teams_container" class="main_container hidden tencol block last">
+		<div id="teams_container" class="main_container hidden span9 block last">
 			<div id="teams" class="subcontainer">
 			<div class="top_buttons">
 			<button id="add_team">Add Team</button>
@@ -122,6 +125,7 @@
 					<select id="newteam_division">
 					</select>
 					</label> 
+					<label>
 					School: <br />
 					<select id="newteam_school">
 					</select>
@@ -153,7 +157,7 @@
 			</div>
 		</div>
 
-		<div id="judges_container" class="main_container hidden tencol block last">
+		<div id="judges_container" class="main_container hidden span9 block">
 			<div id="judges" class="subcontainer">
 				<div class="top_buttons">
 					<button id="add_judge">Add Judge</button>
@@ -186,7 +190,7 @@
 
 			</div>
 		</div>
-		<div id="rooms_container" class="main_container hidden tencol block last">
+		<div id="rooms_container" class="main_container hidden span9 block">
 			<div id="rooms" class="subcontainer">
 		
 				<div class="top_buttons">
@@ -200,7 +204,7 @@
 					</label> 
 					<label>
 					Division: <br />
-					<select id="newroom_division" type="text">
+					<select id="newroom_division">
 					</select>
 					</label> 
 					<label>
@@ -216,7 +220,7 @@
 						
 			</div>
 		</div>
-		<div id="schools_container" class="main_container hidden tencol block last">
+		<div id="schools_container" class="main_container hidden span9 block">
 			<div id="schools" class="subcontainer">
 				
 				<div id="school_form" class="input_form">
@@ -239,7 +243,7 @@
 				
 			</div>
 		</div>
-		<div id="divisions_container" class="main_container hidden tencol block last">
+		<div id="divisions_container" class="main_container hidden span9 block">
 			<div id="divisions" class="subcontainer">
 			<div class="top_buttons">
 			<button id="add_division">Add Division</button>
@@ -272,7 +276,7 @@
 						<option value="32">Triple Octofinals</option>
 						<option value="16">Double Octofinals</option>
 						<option value="8">Octofinals</option>
-						<option selected="yes" value="4">Quarterfinals</option>
+						<option value="4">Quarterfinals</option>
 						<option value="2">Semifinals</option>
 						<option value="1">Finals</option>
 					</select> 
@@ -304,8 +308,8 @@
 				
 			</div>
 		</div>
-		<div id="settings_container" class="main_container hidden tencol block last">Setup</div>
-		<div id="debug_container" class="main_container hidden tencol block last">
+		<div id="settings_container" class="main_container hidden span9 block">Setup</div>
+		<div id="debug_container" class="main_container hidden span9 block">
 				<div id="debug" class="subcontainer">
 					<div id="debug_tournament_id"></div>
 					<button id="toggle_debug">Toggle debug</button><br />

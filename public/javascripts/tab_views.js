@@ -410,7 +410,7 @@ view.Team = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
       'click td.remove': 'remove',
-	  'click td': 'showEditForm'
+	  'click td.name': 'showEditForm'
     },  
 
 	initialize: function(){
@@ -499,7 +499,7 @@ view.DivisionCheckbox = Backbone.View.extend({
 		//This will be read by jQuery to figure out which division was selected
 		$(this.el).attr("value", this.model.get("id"));
 		$(this.el).data("division_id", this.model.get("id"));
-		$(this.el).html('<input type="checkbox" /> ' + this.model.get("division_name"));
+		$(this.el).html('<input class="division_list" type="checkbox" /> ' + this.model.get("division_name"));
 		return this; //required for chainable call, .render().el ( in appendTeam)
 	} ,
 	unrender: function(){
@@ -511,7 +511,7 @@ view.Judge = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
       'click td.remove': 'remove',
-	  'click td': 'showEditForm'
+	  'click td.name': 'showEditForm'
     },  
 
 	initialize: function(){
@@ -773,7 +773,7 @@ view.Room = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
       'click td.remove': 'remove',
-	  'click td': 'showEditForm'
+	  'click td.name': 'showEditForm'
     },  
 
 	initialize: function(){
@@ -788,7 +788,18 @@ view.Room = Backbone.View.extend({
 		$("#newroom_name").val(this.model.get("name"));
 		$("#newroom_division").val((this.model.get("division").get("id")));
 		$("#newroom_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
-		$("#room_form_overlay").fadeIn();
+		$("#room_form").dialog({
+			buttons: {
+				"Save": function(){
+					view.roomTable.addDivision();
+					$(this).dialog("close");
+				} ,
+				"Cancel": function(){
+					view.roomTable.clearEditForm();
+					$(this).dialog("close");
+				}
+			}
+		});
 	} ,
 
 	remove: function(room){
@@ -826,11 +837,26 @@ view.Room = Backbone.View.extend({
 view.RoomTable = Backbone.View.extend({
 	el: $("#rooms") , // attaches `this.el` to an existing element.
 	events: {
-		"click #add_room_button": "addRoom" ,
+		"click #add_room": "showEditForm" ,
 		"keyup #newroom_name": "keyupRoom" ,
 		"keyup #rooms_search": "search"
 	} ,
-
+	showEditForm: function(){
+		//populate form with existing values
+	
+		$("#room_form").dialog({
+			buttons: {
+				"Save": function(){
+					view.roomTable.addRoom();
+					$(this).dialog("close");
+				} ,
+				"Cancel": function(){
+					view.roomTable.clearEditForm();
+					$(this).dialog("close");
+				}
+			}
+		});
+	},
 	keyupRoom: function(event){
 		if(event.which === 13){
 			this.addRoom();

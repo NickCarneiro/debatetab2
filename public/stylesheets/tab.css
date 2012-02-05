@@ -124,24 +124,28 @@ label{
 /*
 styles for main menu
 */
+.menu_container{
+  text-align:center;
+}
 .menu {
+  display: inline-block;
+  width: 100%;
 	font-size: 28px;
 	list-style-type: none;
 	text-align: left;
-	padding-right: 10px;
-	margin-top: -6px;
+  margin: 0px auto;
 }
 
 
-#main_menu > li {
+#main_menu > div {
 	width: 100%;
-	margin: 6px 0px 0px 0px;
-	padding: 3px 0px 3px 0px;
+	margin: 6px 0px 6px 0px;
 	text-align: left;
-	padding-left: 10px;
 	opacity: .9;
 }
-#main_menu > li:hover {
+
+
+#main_menu > div:hover {
 	cursor: pointer;
 }
 
@@ -239,5 +243,9 @@ God dammit, Paul Irish.
   }
 ::-moz-selection {
   background: #ced4ff; /* Firefox */
+}
+
+input.division_list{
+  display:inline-block;
 }
 

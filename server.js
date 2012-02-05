@@ -69,6 +69,7 @@ app.configure('development', function() {
 	var dev_scripts = [
 		'jquery.tmpl.js',
 		'jquery-ui-1.8.17.custom.min.js', 
+		'bootstrap.js',
 		'socket.io.js' ,
 		'underscore.js', 
 		'backbone.js', 
@@ -83,9 +84,10 @@ app.configure('development', function() {
 
 	var dev_styles = [
 		'bptop.css', 
-		'1140.css', 
+		
 		'tab.css', 
-		'bpbottom.css', 
+		'bpbottom.css',
+		'bootstrap.css', 
 		'jquery-ui-1.8.17.custom.css'
 	];
 

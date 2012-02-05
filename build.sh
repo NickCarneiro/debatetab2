@@ -4,6 +4,7 @@ echo "Building project..."
 #same order as inclusion in server.js
 cat public/javascripts/jquery.tmpl.js \
 	public/javascripts/jquery-ui-1.8.17.custom.min.js \
+	public/javascripts/bootstrap.js \
 	public/javascripts/socket.io.js \
 	public/javascripts/underscore.js \
 	public/javascripts/backbone.js \
@@ -22,9 +23,9 @@ java -jar node_modules/node-minify/lib/google_closure_compiler.jar \
 
 #combine css
 cat public/stylesheets/bptop.css \
-	public/stylesheets/1140.css \
 	public/stylesheets/tab.css \
 	public/stylesheets/bpbottom.css \
+	public/stylesheets/bootstrap.css \
 	public/jquery-ui-1.8.17.custom.css \
 	> build/combined.css
 #minify css
