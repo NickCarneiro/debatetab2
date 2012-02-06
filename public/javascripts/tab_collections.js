@@ -294,7 +294,8 @@ collection.Rounds = Backbone.Collection.extend({
 			}));
 		} ,
 		comparator: function(round){
-			return round.get("round_number");
+			return round.get("result") === undefined ? -1 : 1;
+		
 		}
 });	
 

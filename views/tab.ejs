@@ -39,7 +39,7 @@
 				
 				<div class="top_buttons">
 					<div class="btn-group">
-						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+						<a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
 							Pairing
 							<span class="caret"></span>
 						</a>
@@ -52,7 +52,7 @@
 					</div>
 
 					<div class="btn-group">
-						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+						<a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
 							Printouts
 							<span class="caret"></span>
 						</a>
@@ -65,7 +65,7 @@
 					</div>
 
 					<div class="btn-group">
-						<a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+						<a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
 							Publish
 							<span class="caret"></span>
 						</a>
@@ -126,12 +126,7 @@
 					<label id="lpw_label" for="edit_round_lpw">Low point win: </label><input type="checkbox" id="edit_round_lpw" /> 
 					<div id="selected_winner"></div>
 					<span id="edit_round_error"></span>
-					<div class="bottom_buttons">
-						<button id="edit_round_save">Save</button>
-						<button id="edit_round_cancel">Cancel</button>
-						<button id="edit_round_swap">Swap Sides</button>
-						
-					</div>
+					
 				</div>
 		</div>
 
@@ -139,9 +134,9 @@
 		<div id="teams_container" class="main_container hidden span9 block last">
 			<div id="teams" class="subcontainer">
 			<div class="top_buttons">
-			<button id="add_team">Add Team</button>
-			<button id="print_teams">Print Teams</button>
-			<button id="print_speakers">Print Speakers</button>
+			<button class="btn btn-large" id="add_team">Add Team</button>
+			<button class="btn btn-large" id="print_teams">Print Teams</button>
+			<button class="btn btn-large" id="print_speakers">Print Speakers</button>
 			</div>
 				<div id="team_form" class="input_form dialog">
 					
@@ -330,7 +325,13 @@
 				
 			</div>
 		</div>
-		<div id="settings_container" class="main_container hidden span9 block">Setup</div>
+		<div id="settings_container" class="main_container hidden span9 block">
+			<h1>Backup Data</h1>
+			<button id="export_data">Export tournament data</button> <br />
+			<button id="import_data">Import native tournament data</button><br />
+			<button id="import_joy_data">Import Joy tournament data</button><br />
+			<textarea id="import_box"></textarea>
+		</div>
 		<div id="debug_container" class="main_container hidden span9 block">
 				<div id="debug" class="subcontainer">
 					<div id="debug_tournament_id"></div>
@@ -349,11 +350,7 @@
 					Message: <br /> <textarea id="debug_sms_input_message"></textarea><br />
 					<button id="single_text">Send Single Text</button> <br /><br />
 				
-					<h1>Backup Data</h1>
-					<button id="export_data">Export tournament data</button> <br />
-					<button id="import_data">Import native tournament data</button><br />
-					<button id="import_joy_data">Import Joy tournament data</button><br />
-					<textarea id="import_box"></textarea>
+					
 					
 				</div>
 		</div>

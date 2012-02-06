@@ -98,7 +98,7 @@ view.judgeForm = new view.JudgeForm();
 view.roomForm = new view.RoomForm();
 view.schoolForm = new view.SchoolForm();
 view.divisionForm = new view.DivisionForm();
-
+view.roundForm = new view.RoundForm();
 
 
 /*
@@ -221,41 +221,14 @@ $("#send_sms").click(function(){
 				}
 			});
 });
-$("#edit_round_swap").click(function(){
-	console.log("swapping sides");
-	view.roundTable.swapSides();
-})
+
 
 $("#print_boxes").click(function(){
 	view.roundTable.printBoxes();
 })
 
-$("#edit_round_cancel").click(function(){
-	$("#edit_round_error").html("");
-	$("#selected_team_winnder").html("");
-	$("#edit_round_lpw").attr("checked", false);
-	$("#edit_round_dialog").dialog("close");
-});
 
-$("#edit_round_judge").change(function(){
-	view.roundTable.changeJudge();
-});
 
-$("#left_team_select, #right_team_select").live("change", function(){
-	view.roundTable.changeTeam();
-});
-
-$("#edit_round_room").live("change", function(){
-	view.roundTable.changeRoom();
-});
-
-$("#edit_round_save").click(function(){
-	view.roundTable.saveRound();
-});
-
-$("#edit_round_result").change(function(){
-	view.roundTable.displayWinner()
-});
 
 
 //grow tables to fill window space after forms
