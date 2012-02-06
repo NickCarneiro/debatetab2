@@ -60,7 +60,6 @@ pairing.updateSpeaks = function(){
 
 		//if any round has a zero, that means it was a bye. average the other rounds.
 		var division = team.get("division");
-		console.log(division);
 		if(division.get("comp_per_team") == 1){
 			//ld
 			var total = 0;

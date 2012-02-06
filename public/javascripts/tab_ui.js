@@ -89,16 +89,17 @@ view.divisionTable = new view.DivisionTable();
 view.judgeTable = new view.JudgeTable(); 
 view.roomTable = new view.RoomTable();  
 view.roundTable = new view.RoundTable();
-view.statsArea = new view.StatsArea();
 
 
 //initialize forms
+
+view.teamForm = new view.TeamForm();
+view.judgeForm = new view.JudgeForm();
 view.roomForm = new view.RoomForm();
+view.schoolForm = new view.SchoolForm();
+view.divisionForm = new view.DivisionForm();
 
 
-
-//restore references is silent so we have to manually render	
-//view.renderAll();
 
 /*
 =========================================
@@ -259,7 +260,11 @@ $("#edit_round_result").change(function(){
 
 //grow tables to fill window space after forms
 
-
+/*
+=========================================
+Miscellaneous visual effects
+=========================================
+*/	
 
 
 });

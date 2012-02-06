@@ -78,29 +78,25 @@ view.TeamTable = Backbone.View.extend({
 	events: {
 		"click #add_team": "showEditForm",
 		"keyup #teams_search": "search",
-		"change #newteam_division": "showCompetitors",
-		"focus #newteam_name": "generateTeamName",
-		"keyup #newteam_name":		"keyupTeamName",
+		
 		"change #teams_division_select" : "render",
 		"click #print_teams" : "printTeams",
 		"click #print_speakers" : "printSpeakers"
 
 	} ,
 	initialize: function(){
-		_.bindAll(this, "render", "addTeam", "appendTeam", 
-			"renderSearch", "search", "addDivSelect");
+		_.bindAll(this, "render", "appendTeam", 
+			"renderSearch", "search", "showEditForm");
 		
 		
 		collection.teams.bind("add", this.appendTeam);
 		collection.teams.bind("reset", this.render, this);
 
-		//keep division and schools dropdown boxes up to date
-		collection.divisions.bind("add", this.addDivSelect);
-		collection.schools.bind("add", this.addSchoolSelect);
+	
 
 		//populate dropdowns with initial divisions and schools
 		collection.divisions.bind("reset", this.render, this);
-		collection.divisions.bind("reset", this.showCompetitors, this);
+		
 		collection.schools.bind("reset", this.render, this);
 
 		collection.divisions.bind("add", this.renderDivisionSelect, this);
@@ -138,6 +134,19 @@ view.TeamTable = Backbone.View.extend({
 			view.showMessageDialog(e.message);
 		}
 	} ,
+	renderDivisionSelect: function(){
+		$("#teams_division_select").empty();
+		collection.divisions.each(function(division){ // in case collection is not empty
+        	this.appendDivisionOption(division);
+    	}, this);
+	} ,
+	appendDivisionOption: function(division){
+		var divOptionView = new view.DivisionOption({
+			model: division
+		});
+		$("#teams_division_select", this.el).append(divOptionView.render().el);
+		
+	} ,
 	render: function(){
 		//clear everything and re-render from collections
 		this.clearView();
@@ -152,169 +161,15 @@ view.TeamTable = Backbone.View.extend({
         	
     	}, this);
 
-    	//populate form
-    	_(collection.divisions.models).each(function(division){ // pre-existing divisions
-        	this.addDivSelect(division);
-    	}, this);
-    	_(collection.schools.models).each(function(school){ // pre-existing schools
-        	this.addSchoolSelect(school);
-    	}, this);
-
-	} ,
-	renderDivisionSelect: function(){
-		$("#teams_division_select").empty();
-		collection.divisions.each(function(division){ // in case collection is not empty
-        	this.appendDivisionOption(division);
-    	}, this);
-	} ,
-	appendDivisionOption: function(division){
-		var divOptionView = new view.DivisionOption({
-			model: division
-		});
-		$("#teams_division_select", this.el).append(divOptionView.render().el);
-		
 	} ,
 	showEditForm: function(){
 		//populate form with existing values
-		$("#newteam_id").val(this.model.get("id"));
-		$("#newteam_division").val(this.model.get("division").get("id"));
-		$("#newteam_school").val(this.model.get("school").get("id")); 	
-		$("#newteam_name").val(this.model.get("team_code"));
-		$("#newteam_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
-		$("#newteam_competitors").html('');
-		//TODO populate competitor names and phone numbers here
-		var competitors = this.model.get("competitors");
-		for(var i = 0; i < competitors.length; i++){
-			$("#newteam_competitors").append('Name: <input class="newteam_competitor" type="text" value="' + competitors[i].name + '"/> <br />');
-			var phone_number = competitors[i].phone_number || "";
-			$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" value="' + phone_number + '"/> <br /> <br />');
-		}
+		view.teamForm.render();
 
-
-		$("#team_form").dialog({
-			buttons: {
-				"Save": function(){
-					view.teamTable.addTeam();
-					view.teamTable.clearEditForm();
-					collection.teams.sort();
-				} ,
-				"Close": function(){
-					$(this).dialog("close");
-
-				}
-			}
-		});
-
-	} ,
-	keyupTeamName: function(event){
-		if(event.which === 13){
-			this.addTeam();
-		}
-	} ,
-	
-	clearEditForm: function(){
-		$("#newteam_id").val("");
-		//$("#newteam_division").val("");
-		//$("#newteam_school").val("");
-		$("#newteam_competitors").find("input").val("");
-		$("#newteam_name").val("");
-	} ,
-	//called when a competitor name box is modified.
-	//generate a team name if every competitor name has been entered.
-	generateTeamName: function(){
-		var competitors =  $("#newteam_competitors > .newteam_competitor");
-
-		//count number of filled in competitor names to see if they are all complete
-		var i = 0;
-		$("#newteam_competitors > .newteam_competitor").each(function(index, comp_name){
-			if($(comp_name).val().length > 0){
-				i++;
-			}
-		});
-		if(i === competitors.length){
-			//generate team name and place in box
-			var team_code = $("#newteam_school option:selected").text().trim();
-
-			//case 1: 1 competitor. Use initials like
-			//Nick Carneiro => Round Rock NC
-			if(competitors.length === 1){
-				var whole_name = $(competitors.get(0)).val();
-				var names = whole_name.split(" ");
-				if(names.length >= 2){
-					
-					team_code += " " + names[0].substr(0,1) + names[1].substr(0,1);
-				}
-			} else if(competitors.length >=2){		
-				var whole_name = $(competitors.get(1)).val();	//TODO: fix indexing, should work for
-				var names = whole_name.split(" ");				//any number of competitors
-				var last_name = names[names.length-1];
-
-				var whole_name_2 = $(competitors.get(0)).val();
-				var names_2 = whole_name_2.split(" ");
-				var last_name_2 = names_2[names_2.length-1];
-
-				team_code += " " + last_name.substr(0,1).toUpperCase() 
-					+ last_name_2.substr(0,1).toUpperCase();
-				
-			} else {
-			
-				//can't generate team code
-			}
-
-			$("#newteam_name").val(team_code);
-			
-		} else {
-		console.log("failed");
-			return;
-		}
-
-	} ,
-	//show correct number of competitor name inputs depending on competitors
-	//per team in selected division
-	showCompetitors: function(){
-		$("#newteam_competitors").html("");
-		var division_id = $("#newteam_division").val();
-		var comp_per_team = null;
-		collection.divisions.each( 
-			function(division){
-
-				if(division.get("id") == division_id){
-
-					comp_per_team = division.get("comp_per_team");
-				}
-			}
-		); 
-		if(comp_per_team === null){
-				comp_per_team = 1;
-		}
-		
-		for(var i = 0; i < comp_per_team; i++){
-
-			$("#newteam_competitors").append('Name: <input class="newteam_competitor" type="text" /> <br />');
-			$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" /> <br /> <br />');
-
-		}
-	} ,
-	//add new division to dropdown box
-	addDivSelect: function(division){
-		var divOptionView = new view.DivisionOption({
-			model: division
-		});
-		$("#newteam_division", this.el).append(divOptionView.render().el);
-		this.showCompetitors();
-	} ,
-	//add new school to dropdown box
-	addSchoolSelect: function(school){
-		var schoolOptionView = new view.SchoolOption({
-			model: school
-		});
-		$("#newteam_school", this.el).append(schoolOptionView.render().el);
 	} ,
 	clearView: function(){
 		//clear table
 		$("#teams_table").empty();
-		$("#newteam_division").empty();
-		$("#newteam_school").empty();
 	} ,
 	
 
@@ -328,69 +183,6 @@ view.TeamTable = Backbone.View.extend({
 			$("#teams_table", this.el).append(teamView.render().el);
 		});
 		return this;
-	} ,
-	
-	addTeam: function(){
-		//validate team code
-		var id = $("#newteam_id").val();
-		var team_code = $("#newteam_name").val();
-		var school_id = $("#newteam_school").val();
-		var team = new model.Team();
-		var division_id = $("#newteam_division").val();
-		var division = collection.getDivisionFromId(division_id);
-		var school = collection.getSchoolFromId(school_id);
-		var competitors = [];
-		var stop_scheduling = $("#newteam_stop_scheduling").prop("checked");
-
-		//populate competitors based on form entries
-		var i = 0;
-		$("#newteam_competitors").children().each(function(){
-				if(($(this).hasClass("newteam_competitor")) == true)
-				{
-					competitors.push({name: $(this).val(), phone_number: ""});
-					i++;
-					$(this).val("");
-				}
-				else if($(this).hasClass("competitor_phone")) {
-					//it's a phone number box
-					competitors[i-1].phone_number = $(this).val();
-					$(this).val("");
-
-				}
-				
-			
-		});
-	
-		$(".edit_model_overlay").fadeOut();
-		
-	if(id.length > 0){
-		
-		var team = collection.getTeamFromId(id);
-			team.set({
-				team_code: team_code,
-				school: school,
-				competitors: competitors,
-				division: division,
-				stop_scheduling: stop_scheduling
-			});
-		
-		}
-		else{
-		
-		var team = new model.Team();
-			team.set({
-				id: (new ObjectId).toString(),
-				team_code: team_code,
-				school: school,
-				competitors: competitors,
-				division: division,
-				stop_scheduling: stop_scheduling
-		});
-		collection.teams.add(team);
-		}
-		
-		team.save();
-		
 	} ,
 
 	appendTeam: function(team){
@@ -420,33 +212,7 @@ view.Team = Backbone.View.extend({
 
 	} ,
 	showEditForm: function(){
-		//populate form with existing values
-		$("#newteam_id").val(this.model.get("id"));
-		$("#newteam_division").val(this.model.get("division").get("id"));
-		$("#newteam_school").val(this.model.get("school").get("id")); 	
-		$("#newteam_name").val(this.model.get("team_code"));
-		$("#newteam_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
-		$("#newteam_competitors").html('');
-		//TODO populate competitor names and phone numbers here
-		var competitors = this.model.get("competitors");
-		for(var i = 0; i < competitors.length; i++){
-			$("#newteam_competitors").append('Name: <input class="newteam_competitor " type="text" value="' + competitors[i].name + '"/> <br />');
-			var phone_number = competitors[i].phone_number || "";
-			$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" value="' + phone_number + '"/> <br /> <br />');
-		}
-
-
-		$("#team_form").dialog({
-			buttons: {
-				"Save": function(){
-					view.teamTable.addTeam();
-					view.teamTable.clearEditForm();
-				} ,
-				"Close": function(){
-					$(this).dialog("close");
-				}
-			}
-		});
+		view.teamForm.render(this.model);
 	} ,
 
 	remove: function(team){ 
@@ -515,47 +281,14 @@ view.Judge = Backbone.View.extend({
     },  
 
 	initialize: function(){
-		_.bindAll(this, "render", "unrender", "remove");
+		_.bindAll(this, "render", "unrender", "remove","showEditForm");
 	    this.model.bind('remove', this.unrender);
 		this.model.bind('change', this.render);
 
 	} ,
 	showEditForm: function(){
 		//populate form with existing values
-		view.judgeTable.clearEditForm();
-		$("#newjudge_id").val(this.model.get("id"));
-		$("#new_judge_name").val(this.model.get("name"));
-		$("#newjudge_school").val(this.model.get("school") === undefined ? "no_affiliation" : this.model.get("school").get("id")); 	
-		
-		var div = this.model.get("divisions");
-		
-		$("#newjudge_divisions").children().each(function(i, li){
-			if($(li).attr != undefined){
-				//console.log($(li).find("input").attr("checked"));
-				
-				for(var i = 0; i < div.length; i++)
-				
-				if($(li).data("division_id") === div[i].id){
-				
-					$(li).find("input").attr("checked", true);
-				}
-				
-			}
-		});
-		
-		$("#newjudge_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
-
-		$("#judge_form").dialog({
-			buttons: {
-				"Save": function(){
-					view.judgeTable.addJudge();
-				} ,
-				"Close": function(){
-					view.judgeTable.clearEditForm();
-					$(this).dialog("close");
-				}
-			}
-		});
+		view.judgeForm.render(this.model);
 	} ,
 
 	
@@ -610,120 +343,35 @@ view.JudgeTable = Backbone.View.extend({
 	el: $("#judges") , // attaches `this.el` to an existing element.
 	events: {
 		"click #add_judge": "showEditForm" ,
-		"keyup #judges_search": "search" ,
-		"keyup #new_judge_name": "keyupJudgeName"
+		"keyup #judges_search": "search" 
+		
 	} ,
 	initialize: function(){
-		_.bindAll(this, "render", "addJudge", "appendJudge", "addSchoolSelect", "showEditForm");
+		_.bindAll(this, "render", "appendJudge", "showEditForm");
 		
 		collection.judges.bind("add", this.appendJudge);
 		collection.divisions.bind("remove", this.render);
-		collection.schools.bind("add", this.addSchoolSelect);
-		collection.divisions.bind("add", this.addDivisionCheckbox);
+		
 
 		collection.judges.bind("reset", this.render, this);
 		collection.schools.bind("reset", this.render, this);
 		collection.divisions.bind("reset", this.render, this);
 
-		collection.schools.each(function(school){ // pre-existing schools
-        	this.addSchoolSelect(school);
-    	}, this);
+		
 
-    	$("#newjudge_school", this.el).append('<option value="no_affiliation">No Affiliation</option>');
-    	collection.divisions.each(function(division){ // pre-existing schools
-        	this.addDivisionCheckbox(division);
-    	}, this);
+    	
 		this.render();
 		
 	} ,
-	keyupJudgeName: function(event){
-		if(event.which === 13){
-			this.addJudge();
-		}
-	} ,
+	
 	render: function(){
 		$("#judges_table").html("");
 		_(collection.judges.models).each(function(judge){ // in case collection is not empty
         	this.appendJudge(judge);
     	}, this);
 	} ,
-	clearEditForm: function(){
-		$("#newjudge_id").val("");
-		$("#new_judge_name").val("");
-		//$("#newjudge_school").val("");
-		$("#newjudge_divisions").find("input").attr("checked", false);
-		$("#newjudge_stop_scheduling").prop("checked", false);
-
-	} ,
 	showEditForm: function(){
-		this.clearEditForm();
-		$("#judge_form").dialog({
-			buttons: {
-				"Save": function(){
-					view.judgeTable.addJudge();
-				} ,
-				"Close": function(){
-					view.judgeTable.clearEditForm();
-					$(this).dialog("close");
-				}
-			}
-		});
-	} ,
-	addJudge: function(){
-		//TODO: validate judge name
-		var id = $("#newjudge_id").val();
-		var judge_name = $("#new_judge_name").val();
-
-		var judge = new model.Judge();
-		var school_id = $("#newjudge_school").val();
-		//may be undefined
-		var school = collection.getSchoolFromId(school_id);
-		var divisions = [];
-		var stop_scheduling = $("#newjudge_stop_scheduling").prop("checked");
-
-		$("#newjudge_divisions").children().each(function(i, li){
-			if($(li).attr != undefined){
-				//console.log($(li).find("input").attr("checked"));
-			
-				if($(li).find("input").attr("checked") === "checked"){
-
-					var division_id = $(li).data("division_id");
-					var div = collection.getDivisionFromId(division_id);
-					divisions.push(div);
-				}
-			}
-		});
-		
-		if(id.length > 0){
-			var judge = collection.getJudgeFromId(id);
-			judge.set({
-			
-			
-			name: judge_name,
-			school: school,
-			divisions: divisions,
-			stop_scheduling: stop_scheduling
-
-			
-		});
-		}else{
-		
-		var judge = new model.Judge();
-		judge.set({
-			
-			id: (new ObjectId).toString(),
-			name: judge_name,
-			school: school,
-			divisions: divisions,
-			stop_scheduling: stop_scheduling
-
-			
-		});
-		collection.judges.add(judge);
-		}
-		
-		judge.save();
-		this.clearEditForm();
+		view.judgeForm.render();
 	} ,
 
 	appendJudge: function(judge){
@@ -736,24 +384,7 @@ view.JudgeTable = Backbone.View.extend({
 		var letters = $("#judges_search").val();
 		this.renderSearch(collection.judges.search(letters));
 	} ,
-	//add new school to dropdown box
-	addSchoolSelect: function(school){
-		
-			
-		
-		var schoolOptionView = new view.SchoolOption({
-			model: school
-		});
-		$("#newjudge_school", this.el).append(schoolOptionView.render().el);
-		
-	} ,
-
-	addDivisionCheckbox: function(division){
-		var divisionCheckboxView = new view.DivisionCheckbox({
-			model: division
-		});	
-		$("#newjudge_divisions", this.el).append(divisionCheckboxView.render().el);
-	} ,
+	
 	renderSearch: function(results){
 		$("#judges_table").html("");
 
@@ -836,7 +467,6 @@ view.RoomTable = Backbone.View.extend({
 		
 		collection.rooms.bind("add", this.appendRoom);
 		collection.rooms.bind("reset", this.render, this);
-		collection.divisions.bind("add", this.addDivSelect);
 		collection.divisions.bind("reset", this.render);
 		this.render();
 		
@@ -907,80 +537,6 @@ view.RoomOption = Backbone.View.extend({
 });
 
 
-view.DivisionStats = Backbone.View.extend ({
-	tagName: "tr" ,
-	events: { 
-    },  
-
-	initialize: function(){
-		_.bindAll(this, "render", "unrender", "remove");
-	    this.model.bind('remove', this.unrender);
-		this.model.bind('change', this.render);
-
-	} ,
-	render: function(){
-		var teams = collection.teamsInDivision(this.model);
-		teams = (teams != undefined) ?  teams : "-";
-
-		var ded_judges = pairing.dedicatedJudges(this.model);
-		ded_judges = (ded_judges != undefined) ?  ded_judges : "-";
-
-		var total_judges = pairing.totalJudges(this.model);
-		total_judges = (total_judges != undefined) ?  total_judges : "-";
-
-		var reqd_judges = pairing.requiredJudges(this.model);
-		reqd_judges = (reqd_judges != undefined) ?  pairing.requiredJudges(this.model) : "-";
-
-		var rooms = pairing.totalRooms(this.model)
-		rooms = (rooms != undefined) ?  rooms : "-";
-
-		var reqd_rooms = pairing.requiredRooms(this.model);
-		reqd_rooms = (reqd_rooms != undefined) ?  reqd_rooms : "-";
-
-		$(this.el).html('<td>'+ this.model.get("division_name") + '</td><td>' + teams + '</td>'+
-		'<td>' + ded_judges + '</td><td>' + total_judges + '</td><td>' + reqd_judges + '</td><td>' +rooms + '</td><td>' + 
-		reqd_rooms + '</td>');
-		return this; //required for chainable call, .render().el ( in appendRoom)			.get("division_name")
-	} ,
-	unrender: function(){
-		$(this.el).remove();
-	}
-});
-
-view.StatsArea = Backbone.View.extend({
-	el: $("#settings_stats") , // attaches `this.el` to an existing element.
-	events: {
-		
-	} ,
-
-
-
-	initialize: function(){
-		_.bindAll(this, "render");
-		
-		this.render();
-	
-	} ,
-	
-	render: function(){
-		$("#stats_schools").text("Total schools: " + collection.schools.length);
-		$("#settings_stats").empty();
-		$(this.el).append("<tr><td>Name</td><td>Teams</td><td>Dedicated Judges</td><td>Total Judges</td><td>Required Judges</td><td>Rooms</td><td>Required Rooms</td></tr>");
-    	collection.divisions.each(function(division){ // in case collection is not empty
-        	this.addDivStat(division);
-    	}, this);
-	} ,
-
-	//add new division to dropdown box
-	addDivStat: function(division){
-		var divStatView = new view.DivisionStats({
-			model: division
-		});
-		$(this.el).append(divStatView.render().el);
-	} ,
-
-	
-});
 view.Round = Backbone.View.extend({
 	tagName: "tr" ,
 	events: { 
@@ -1651,7 +1207,7 @@ view.RoundTable = Backbone.View.extend({
 				}
 			});
 		} else {
-			this.pairRound(round_number, div);
+			this.pairRound(round_number, division);
 		}
 
 		
@@ -1810,10 +1366,7 @@ view.School = Backbone.View.extend({
 	} ,
 	
 	showEditForm: function(){
-		//populate form with existing values
-		$("#newschool_id").val(this.model.get("id"));
-		$("#newschool_name").val(this.model.get("school_name"));
-		$("#school_form_overlay").fadeIn();
+		view.schoolForm.render(this.model);
 	} ,
 	
 	remove: function(school){
@@ -1851,13 +1404,13 @@ view.School = Backbone.View.extend({
 view.SchoolTable = Backbone.View.extend({
 	el: $("#schools") , // attaches `this.el` to an existing element.
 	events: {
-		"click #add_school_button": "addSchool" ,
-		"keyup #schools_search": "search",
-		"keyup #newschool_name": "keyupSchoolName"
+		"click #add_school": "showEditForm" ,
+		"keyup #schools_search": "search"
+	
 	} ,
 
 	initialize: function(){
-		_.bindAll(this, "render", "addSchool", "appendSchool");
+		_.bindAll(this, "render", "appendSchool");
 		
 		collection.schools.bind("add", this.appendSchool);
 		collection.schools.bind("reset", this.render, this);
@@ -1865,50 +1418,15 @@ view.SchoolTable = Backbone.View.extend({
 		
 	} ,
 	
-	keyupSchoolName: function(event){
-		if(event.which === 13){
-			this.addSchool();
-		}
-	},
+	
 	render: function(){
 		_(collection.schools.models).each(function(school){ // in case collection is not empty
         	this.appendSchool(school);
     	}, this);
 	} ,
-	clearEditForm: function(){
-		$("#newschool_id").val("");
-		$("#newschool_name").val("");
-	} ,
-	addSchool: function(){
-		//TODO: validate school name
-		var id = $("#newschool_id").val();
-		var school_name = $("#newschool_name").val();
-		//$(".edit_model_overlay").fadeOut();
-		
-		if(id.length > 0)
-		{
-			var school = collection.getSchoolFromId(id);
-			school.set({
-			
-			school_name: school_name
-			
-			});
-		}
-		else
-		{
-			var school = new model.School();
-			school.set({
-			
-				id		   : (new ObjectId).toString(),
-				school_name: school_name
-			
-			});
-			collection.schools.add(school);
-		}
-		
-		school.save();
-		this.clearEditForm();
-		
+	
+	showEditForm: function(){
+		view.schoolForm.render();
 	} ,
 
 	appendSchool: function(school){
@@ -1949,28 +1467,7 @@ view.Division = Backbone.View.extend({
 
 	} ,
 	showEditForm: function(){
-		console.log("showing division edit form");
-		//populate form with existing values
-		$("#newdiv_id").val(this.model.get("id"));
-		$("#newdiv_division_name").val(this.model.get("division_name"));
-		$("#newdiv_comp_per_team").val(this.model.get("comp_per_team"));
-		$("#newdiv_flighted_rounds").attr("checked", this.model.get("flighted_rounds"));
-		$("#newdiv_combine_speaks").val(this.model.get("combine_speaks"));
-		$("#newdiv_break_to").val(this.model.get("break_to"));
-		$("#newdiv_prelims").val(this.model.get("prelims"));
-		$("#newdiv_ballot_type").val(this.model.get("ballot_type"));
-		$("#division_form").dialog({
-			buttons: {
-				"Save": function(){
-					view.divisionTable.addDivision();
-					$(this).dialog("close");
-				} ,
-				"Cancel": function(){
-					view.divisionTable.clearEditForm();
-					$(this).dialog("close");
-				}
-			}
-		});
+		view.divisionForm.render(this.model);
 	} ,
 	remove: function(division){
 		var division = this.model;
@@ -2008,7 +1505,7 @@ view.DivisionTable = Backbone.View.extend({
 		"click #add_division": "showEditForm"
 	} ,
 	initialize: function(){
-		_.bindAll(this, "render", "addDivision", "appendDivision");
+		_.bindAll(this, "render", "appendDivision");
 		
 		collection.divisions.bind("add", this.appendDivision);
 		collection.divisions.bind("reset", this.render, this);
@@ -2016,18 +1513,7 @@ view.DivisionTable = Backbone.View.extend({
 		
 	} ,
 	showEditForm: function(){
-		$("#division_form").dialog({
-			buttons: {
-				"Save": function(){
-					view.divisionTable.addDivision();
-					$(this).dialog("close");
-				} ,
-				"Cancel": function(){
-					view.divisionTable.clearEditForm();
-					$(this).dialog("close");
-				}
-			}
-		});
+		view.divisionForm.render();
 	} ,
 	
 	render: function(){
@@ -2037,100 +1523,7 @@ view.DivisionTable = Backbone.View.extend({
 	} ,
 
 	
-	clearEditForm: function(){
-		$("#newdiv_id").val("");
-		$("#newdiv_division_name").val("");
-		$("#newdiv_comp_per_team").val("");
-		$("#newdiv_flighted_rounds").attr("checked", false);
-		$("#newdiv_combine_speaks").val(false);
-		$("#newdiv_break_to").val("4");
-		$("#newdiv_prelims").val("4");
-		$("#newdiv_ballot_type").val("TFA_CX");
-		$("#division_form").dialog("close");
-	} ,
-	addDivision: function(){
-		//TODO: validate school name
 	
-
-		
-		
-		//TODO: verify all this input
-		var division_name = $("#newdiv_division_name").val();
-		var comp_per_team = parseInt($("#newdiv_comp_per_team").val(), 10);
-		//TODO: verify that this boolean works
-		var flighted_rounds = Boolean($("#newdiv_flighted_rounds").attr("checked"));
-		var break_to = $("#newdiv_break_to").val();
-		var max_speaks = 30;
-		var prelims = parseInt($("#newdiv_prelims").val());
-		var schedule = [];
-		var ballot_type = $("#newdiv_ballot_type").val();
-		var combine_speaks = Boolean($("#newdiv_combine_speaks").val());
-
-		for(var i = 0; i < prelims; i++){
-			var num = i + 1;
-			schedule.push({round_number: num, type: "prelim", matching: "power"});
-		}
-		var elims = [
-			{name:	"triple octafinals", debates: 32}, 
-			{name: "double octafinals", debates: 16},
-			{name: "octafinals", debates: 8},
-			{name: "quarterfinals", debates: 4},
-			{name:  "semifinals", debates: 2},
-			{name: "finals", debates: 1}
-		];
-
-
-		for(var i = 0; i < elims.length; i++){
-			if(break_to >= elims[i].debates){
-				schedule.push({round_number:elims[i].name, type: "elim"});
-			}
-		}
-
-
-		$(".edit_model_overlay").fadeOut();
-
-		//check if we are modifying an existing division or created a new one
-		var id = $("#newdiv_id").val();
-		console.log(id);
-		if(id.length > 0){
-			console.log("updating existing model");
-			//update existing model
-			var division = collection.getDivisionFromId(id);
-			division.set({
-			division_name	: division_name,
-			comp_per_team	: comp_per_team,
-			flighted_rounds	: flighted_rounds,
-			break_to		: break_to,
-			max_speaks		: max_speaks,
-			prelims			: prelims,
-			schedule		: schedule,
-			ballot_type		: ballot_type
-
-		});
-		} else {
-			console.log("creating new model");
-			var division = new model.Division();
-			division.set({
-			id				: (new ObjectId).toString(),
-			division_name	: division_name,
-			comp_per_team	: comp_per_team,
-			flighted_rounds	: flighted_rounds,
-			break_to		: break_to,
-			max_speaks		: max_speaks,
-			prelims			: prelims,
-			schedule		: schedule,
-			ballot_type		: ballot_type,
-			combine_speaks	: combine_speaks
-
-		});
-			collection.divisions.add(division);
-		}
-		
-		division.save();
-		this.clearEditForm();
-
-
-	} ,
 
 	appendDivision: function(division){
 		var divisionView = new view.Division({

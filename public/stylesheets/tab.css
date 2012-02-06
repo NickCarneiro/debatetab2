@@ -256,3 +256,7 @@ input.division_list{
   height: 24px;
 }
 
+.input_form > ul{
+  list-style: none;
+}
+

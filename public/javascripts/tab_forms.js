@@ -389,7 +389,7 @@ forms.getSpeakerArray = function(division){
 //todo: give competitors IDs. assumes that everyone in the division has unique names
 forms.printSpeakers = function(division){
 	var speakers = forms.getSpeakerArray(division);
-	console.log(speakers);
+	//console.log(speakers);
 	var css = $("#ballot_css").html();
 	var export_string = '<html>'+
 		'<head>	'	+
