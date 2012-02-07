@@ -1295,3 +1295,23 @@ Backbone.Model.prototype.setByName = function(key, value, options) {
     setter[key] = value; 
     this.set(setter, options); 
 };
+
+Backbone.Model.prototype.toJSON = function(){
+  var clone =  _.clone(this.attributes);
+  $.each(clone, function(name, attr){
+    //replace references to models with little objects containing their ids.
+    if(attr.cid != undefined && attr.id != undefined){
+      //found reference to backbone model.
+      clone[name] = {id: attr.id, dereferenced: true};
+    } else if(attr instanceof Array){
+      //look for models to dereference inside an array.
+      $.each(attr, function(j, array_attr){
+        if(array_attr.cid != undefined && array_attr.id != undefined){
+          //found reference to backbone model.
+          attr[j] = {id: array_attr.id, dereferenced: true};
+        }
+      });
+    }
+  });
+  return clone;
+}

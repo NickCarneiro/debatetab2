@@ -99,7 +99,7 @@ view.roomForm = new view.RoomForm();
 view.schoolForm = new view.SchoolForm();
 view.divisionForm = new view.DivisionForm();
 view.roundForm = new view.RoundForm();
-
+view.setupScreen = new view.SetupScreen();
 
 /*
 =========================================
@@ -133,19 +133,6 @@ $("#clear_storage").click(function(){
 	
 });
 
-$("#export_data").click(function(){
-	collection.exportAll();
-});	
-
-$("#import_data").click(function(){
-	var json = $("#import_box").val();
-	collection.import(json);
-});	
-
-$("#import_joy_data").click(function(){
-	var joy_data = $("#import_box").val().trim();
-	collection.importJoyFile(joy_data);
-});	
 
 $("#pair_delete_all_rounds").click(function(){
 	

@@ -325,13 +325,7 @@
 				
 			</div>
 		</div>
-		<div id="settings_container" class="main_container hidden span9 block">
-			<h1>Backup Data</h1>
-			<button id="export_data">Export tournament data</button> <br />
-			<button id="import_data">Import native tournament data</button><br />
-			<button id="import_joy_data">Import Joy tournament data</button><br />
-			<textarea id="import_box"></textarea>
-		</div>
+
 		<div id="debug_container" class="main_container hidden span9 block">
 				<div id="debug" class="subcontainer">
 					<div id="debug_tournament_id"></div>
@@ -355,9 +349,40 @@
 				</div>
 		</div>
 		
+		<div id="settings_container" class="main_container hidden span9 block">
+			<div id="setup" class="subcontainer">
+				<div class="top_buttons">
+					<div class="btn-group">
+						<a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
+							Import / Export
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<!-- dropdown menu links -->
+							<li><a id="import_data">Import Tournament</a></li>
+							<li><a id="export_data">Backup Tournament</a> </li>
+						</ul>
+					</div>
+				</div>
 
+				<div id="import_data_dialog" class="dialog">
+					<label>
+					Import data type:
+					<select id="import_type">
+						<option val="native">DebateTab Backup</option>
+						<option val="jot">JOT_Debate.txt</option>
 
-	</div>
+					</select>
+					</label>
+					<div id="import_message"
+					<textarea id="import_box"></textarea>
+				
+				</div>
+			</div>
+		</div>
+
+		
+		
 </div>
 
 <div id="message_dialog" class="dialog">

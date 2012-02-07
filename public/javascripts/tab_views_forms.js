@@ -672,7 +672,7 @@ view.JudgeForm = Backbone.View.extend({
 	},  
 	initialize: function(){
 		_.bindAll(this, "render", "addSchoolSelect");
-		collection.divisions.bind("reset", this.render);
+		//collection.divisions.bind("reset", this.render);
 		//collection.schools.bind("reset", this.render);
 
 		$("#newjudge_school", this.el).append('<option value="no_affiliation">No Affiliation</option>');

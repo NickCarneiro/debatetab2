@@ -345,7 +345,7 @@ collection.restoreReferences = function(){
 			//for each attribute, see if it has an id.
 			$.each(elem.attributes, function(attr_name, attr){
 				//console.log(attr);
-				if(attr != null && attr.id != undefined){
+				if(attr != null && attr.id != undefined && (attr.dereferenced == true || attr.dereferenced === "true")){
 					var model = collection.getModelFromId(attr.id);
 					//if we found a model for the id, replace the object copy with the model reference
 					if(model != undefined && typeof model.attributes === "object"){
@@ -356,17 +356,18 @@ collection.restoreReferences = function(){
 					}
 				} else if(attr instanceof Array){ //if we have an array
 					//restore references for each thing in array
-					for(var i = 0; i < attr.length; i++){
-						if(attr[i].id != undefined){
+					$.each(attr, function(i, array_attr){
+						if(array_attr.id != undefined && (array_attr.dereferenced == true || array_attr.dereferenced === "true" )){
 
-							var model = collection.getModelFromId(attr[i].id);
+							var model = collection.getModelFromId(array_attr.id);
 							//if we found a model for the id, replace the object copy with the model reference
 							if(model != undefined && typeof model.attributes === "object"){
 								attr[i] = model;
-								console.dbg("creating reference from " + col_name + " array to " + attr_name);
+
+								console.dbg("creating array reference from " + col_name + " array to " + attr_name);
 							}
 						}
-					}
+					});
 				}
 			})
 
@@ -488,7 +489,7 @@ collection.exportAll = function(){
 };
 
 //used to import native JSON format
-collection.import = function(json){
+collection.importNative = function(json){
 	//delete all existing data
 	collection.emptyCollections();
 	localStorage.clear();
@@ -507,9 +508,10 @@ collection.import = function(json){
 			m.save();
 		}
 	});
+
+	collection.restoreReferences();
 	
 
-	//save all to localstorage
 
 }
 

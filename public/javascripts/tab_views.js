@@ -328,6 +328,7 @@ view.Judge = Backbone.View.extend({
 			div_string = div_string + div + " ";
 		}
 		var school = this.model.get("school") === undefined ? "None" : this.model.get("school").get("school_name");
+
 		$(this.el).html('<td class="name row">' + this.model.get("name") + '</td><td class="row">'+ school +'</td><td class="row">' + div_string + '</td><td class="remove"><button>Remove</button></td>');
 		return this; //required for chainable call, .render().el ( in appendJudge)
 	} ,
@@ -1172,6 +1173,84 @@ view.DivisionTable = Backbone.View.extend({
 		$("#divisions_table", this.el).append(divisionView.render().el);
 	}
 	
+});
+
+
+
+
+
+view.SetupScreen = Backbone.View.extend({
+	el: $("#setup") , // attaches `this.el` to an existing element.
+	events: {
+		"click #export_data": "exportAll",
+		"click #import_data": "showImportDialog"
+	} ,
+	initialize: function(){
+		
+		this.render();
+		
+	} ,
+	render: function(){
+		
+	} ,
+
+	showImportDialog: function(){
+
+		$( "#import_data_dialog").dialog({
+			width: 700,
+			title: "Import Tournament",
+			modal: true,
+			buttons: {
+				
+				"Import" : {
+					text: "Import",
+					click: function(){
+						view.setupScreen.import();
+					} ,
+					class: "btn btn-large"
+				} ,
+				
+				"Cancel" : {
+					text: "Cancel",
+					click: function(){
+						$(this).dialog("close");
+						
+					} ,
+					class: "btn btn-large"
+				} ,	
+			}
+		});
+		
+
+		
+	} ,
+
+	import: function(){
+		try {
+			if($("#import_type").val() === "native"){
+				var json = $("#import_box").val();
+				collection.importNative(json);
+			} else {
+				var joy_data = $("#import_box").val().trim();
+				collection.importJoyFile(joy_data);
+			}
+			$("#import_data_dialog").dialog("close");
+			//show newly imported teams
+			$("#menu_teams").trigger("click");
+		} catch(e){
+			$("#import_message").text(e.message);
+			e.stack === undefined ? console.log(e.stack) : "";
+		}
+		
+	} ,
+
+	exportAll: function(){
+		console.log("exporting");
+		collection.exportAll();
+	}
+
+	
+
 });
 
 view.showMessageDialog = function(message){
