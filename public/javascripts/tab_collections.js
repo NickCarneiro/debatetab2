@@ -245,6 +245,9 @@ collection.Judges = Backbone.Collection.extend({
 			  	return pattern.test(data.get("name"));
 			}));
 		} ,
+		comparator: function(team){
+			return team.get("name");
+		},
 		localStorage: new Store("Judges")
 });	
 

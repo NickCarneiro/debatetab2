@@ -11,13 +11,14 @@ forms.generateCxBallotString = function(options){
 		if(options.flip == true){
 			ballot = ballot + '<div id="flip">FLIP FOR SIDES</div>';
 		}
-		ballot = ballot + '<div id="judgeName">Judge: '+options.judge+'</div> <br /><br />'+
+		var judge_string = options.judge.trim() === '' ? '' : 'Judge: ' + options.judge;
+		ballot = ballot + '<div id="judgeName">'+judge_string+'</div> <br /><br />'+
 		
 		'<div id="team_codes">' +
 		'<div id="affCode">'+left_label+': '+options.aff_team_code+'</div> '+
 		'<div id="negCode">'+right_label+': '+options.neg_team_code+'</div>'+
 		'</div>' +
-		'<div id="instr">Please place the debater\'s first and last name in the appropriate blank</div> </br></br>'+
+		'<div id="instr">Please ask the debaters to write their first and last names in the appropriate blanks.</div> </br></br>'+
 		'<div id="affPointsLabel">Points</div>'+
 		'<div id="affRanksLabel">Ranks</div>'+
 		'<div id="negPointsLabel">Points</div>'+
@@ -139,12 +140,13 @@ forms.generateLdBallotString = function(options){
 		if(options.flip == true){
 			ballot = ballot + '<div id="flip">FLIP FOR SIDES</div>';
 		}
-		ballot = ballot + '<div id="judgeName">Judge: '+options.judge+'</div> <br /><br />'+
+		var judge_string = options.judge.trim() === '' ? '' : 'Judge: '+options.judge;
+		ballot = ballot + '<div id="judgeName">'+judge_string+'</div> <br /><br />'+
 		'<div id="team_codes">' +
 		'<div id="affCode">'+left_label+': '+options.aff_team_code+'</div> '+
 		'<div id="negCode">'+right_label+': '+options.neg_team_code+'</div>'+
 		'</div>' +
-		'<div id="instr">Please place the debater\'s first and last name in the appropriate blank</div> </br></br>'+
+		'<div id="instr">Please ask the debaters to write their first and last names in the appropriate blanks.</div> </br></br>'+
 		'<div id="affPointsLabelLD">Points</div>'+
 		'<div id="negPointsLabelLD">Points</div><br /><br />'+
 		'<div id="firstAff">AFFIRMATIVE _______________________   ______</div>'+

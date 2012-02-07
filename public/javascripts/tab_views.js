@@ -781,14 +781,12 @@ view.RoundTable = Backbone.View.extend({
 		var division = collection.getDivisionFromId(div_id);
 		var round_number = $("#rounds_round_number_select").val();
 		var round = new model.Round();
-		var bye_team = new model.Team();
-		bye_team.set({team_code: "BYE"});
 
 		round.set({"round_number": round_number});
 		round.set({"division": division});
-		round.set({"team1": bye_team});
-		round.set({"team2": bye_team});
+		
 		collection.rounds.add(round);
+		round.save();
 	} ,
 
 
@@ -919,10 +917,18 @@ view.RoundTable = Backbone.View.extend({
 		var roundView = new view.Round({
 			model: round
 		});
-		$("#rounds_table", this.el).append(roundView.render().el);
-		//save round to localstorage
-		//round.save();
+
+		//put round at top if it has no competitors
+		if(round.get("team1") === undefined && round.get("team2") === undefined){
+			$("#rounds_table", this.el).prepend(roundView.render().el);
+		} else {
+			$("#rounds_table", this.el).append(roundView.render().el);
+		}
+		
+		
 	} ,
+
+
 
 	filterDivisions: function(){
 		
