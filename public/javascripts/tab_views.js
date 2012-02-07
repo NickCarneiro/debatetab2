@@ -635,18 +635,13 @@ view.RoundTable = Backbone.View.extend({
 		
 		"click #add_round_button": "addEmptyRound",
 		"click #validate_round": "validateRound"
-
-		
-		//can't get these to fire
-		
-		//
 	
 
 	} ,
 
 	
 	initialize: function(){
-		_.bindAll(this, "render", "addRound", "appendRound", "renderRoundNumberSelect");
+		_.bindAll(this, "render", "appendRound", "renderRoundNumberSelect");
 		
 		collection.rounds.bind("add", this.appendRound);
 		collection.rounds.bind("reset", this.render, this);
@@ -920,18 +915,13 @@ view.RoundTable = Backbone.View.extend({
     	this.filterDivisions();
 	} ,
 
-	addRound: function(){
-		//TODO: validate round name
-		
-	} ,
-
 	appendRound: function(round){
 		var roundView = new view.Round({
 			model: round
 		});
 		$("#rounds_table", this.el).append(roundView.render().el);
 		//save round to localstorage
-		round.save();
+		//round.save();
 	} ,
 
 	filterDivisions: function(){

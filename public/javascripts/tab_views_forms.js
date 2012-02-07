@@ -7,7 +7,7 @@ Define Backbone Views for all the forms used to enter data.
 
 
 view.RoundForm = Backbone.View.extend({
-	el: $("#division_form") ,
+	el: $("#round_form") ,
 	events: { 
 		"change #edit_round_result" : "displayWinner",
 		"click button#save_round_button": "saveRound",
@@ -18,12 +18,17 @@ view.RoundForm = Backbone.View.extend({
 		"change #right_team_select": "changeTeam"
 	},  
 	initialize: function(){
-		_.bindAll(this, "render");
-		
+		_.bindAll(this, "render", "changeJudge");
+		collection.judges.bind("add", this.populateRoomsAndJudges);
+		collection.judges.bind("reset", this.populateRoomsAndJudges);
+		collection.judges.bind("change", this.populateRoomsAndJudges);
+
+		collection.teams.bind("add", this.populateTeamSelects);
+		collection.teams.bind("reset", this.populateTeamSelects);
+		collection.teams.bind("change", this.populateTeamSelects);
 	} ,
 
 	render: function(model){
-
 		if(model != undefined){
 			this.model = model;
 			//populate form with existing values
@@ -45,13 +50,13 @@ view.RoundForm = Backbone.View.extend({
 	*/
 			
 			//show dialog
-			$( "#edit_round_dialog").dialog({
+			$( "#round_form").dialog({
 				width: 700,
 				title: "Record Round ",
 				modal: true,
 				buttons: {
 					"Save" : {
-						text: "Save Round",
+						text: "Record Round",
 						click: function(){
 							view.roundForm.saveRound(this);
 							
@@ -81,6 +86,93 @@ view.RoundForm = Backbone.View.extend({
 		}
 	},
 
+
+	drawForm: function(){
+		var round = this.model;
+		var aff;
+		var neg;
+		if(round.get("aff") == 0){
+			aff = round.get("team1");
+			neg = round.get("team2");
+		} else {
+			aff = round.get("team2");
+			neg = round.get("team1");
+		}
+
+		var aff_id = aff === undefined ? -1 : aff.get("id");
+		var neg_id = neg === undefined ? -1 : neg.get("id");
+		
+		//draw left side of form (aff)
+		var competitors = aff === undefined ? undefined : aff.get("competitors");
+		if(competitors != undefined){
+			//clear out existing form data
+			$("#left_team_container").html('');
+			
+			$("#left_team_select").val(aff_id);
+			
+
+			var points = round.get("aff_points") || []; 
+			for(var i = 0; i < competitors.length; i++){
+				
+				var speaks = (points[i] === undefined ? "" : points[i].speaks);
+				var rank = (points[i] === undefined ? "" : points[i].rank);
+				var competitor_input = '<span class="competitor_name">' + competitors[i].name + "</span>" + 
+					'<br /> Points: <input class="edit_round_speaks" value="'+ speaks +'"/> ' +
+					'Rank: <input class="edit_round_ranks" value="'+ rank +'"/> <br />';
+
+				$("#left_team_container").append(competitor_input);
+			}
+
+		} else {
+			//no competitors? team1 must have been a bye
+			$("#left_team_select").val("-1");
+		}
+
+		//draw right side of form
+
+		var competitors = neg === undefined ? undefined : neg.get("competitors");
+		if(competitors != undefined){
+			//clear out existing form data
+			$("#right_team_container").html('');
+			
+			$("#right_team_select").val(neg_id);
+			
+
+			var points = round.get("neg_points") || []; 
+			for(var i = 0; i < competitors.length; i++){
+				
+				var speaks = (points[i] === undefined ? "" : points[i].speaks);
+				var rank = (points[i] === undefined ? "" : points[i].rank);
+				var competitor_input = '<span class="competitor_name">' + competitors[i].name + '</span>' +
+					'<br /> Points: <input class="edit_round_speaks" value="'+ speaks +'"/> ' +
+					'Rank: <input class="edit_round_ranks" value="'+ rank +'"/> <br />';
+
+				$("#right_team_container").append(competitor_input);
+			}
+
+		} else {
+			//no competitors? team1 must have been a bye
+			$("#left_team_select").val(-1);
+		}
+		
+
+		//select correct room and judge from dropdowns
+		var judge_id = round.get("judge") === undefined ? "-1" : round.get("judge").get("id");
+		$("#edit_round_judge").val(judge_id);
+		var room_id = round.get("room") === undefined ? "-1" : round.get("room").get("id");
+		$("#edit_round_room").val(room_id);
+		//populate result box
+		
+		$("#edit_round_result").val(round.get("result"));
+
+	} ,
+
+	clearEditForm: function(){
+		
+		$("#edit_round_error").html("");
+		$("#selected_team_winnder").html("");
+		$("#edit_round_lpw").attr("checked", false);
+	} ,
 	displayWinner: function(){
 		//put winner's name in box above save button
 		
@@ -112,6 +204,10 @@ view.RoundForm = Backbone.View.extend({
 		//empty out existing rooms and judges
 		$("#edit_round_judge").html("");
 		$("#edit_round_room").html("");
+		//first entries are blank for rooms and judges
+		$("#edit_round_room").append('<option value="-1"> </option>');
+		$("#edit_round_judge").append('<option value="-1"> </option>');
+
 		for(var i = 0; i < collection.rooms.length; i++){
 			//skip irrelevant rooms
 			if(collection.rooms.at(i).get("division") != division){
@@ -169,13 +265,13 @@ view.RoundForm = Backbone.View.extend({
 		this.drawForm();
 	} ,
 	changeJudge: function(){
-		console.log("changing judge");
+		
 		var judge_id = $("#edit_round_judge").val();
 		var judge = collection.getJudgeFromId(judge_id);
 		var round = this.model;
 		round.set({judge: judge});
 		round.save();
-		this.drawForm();
+		
 	} ,
 	changeRoom: function(){
 		var room_id = $("#edit_round_room").val();
@@ -186,6 +282,7 @@ view.RoundForm = Backbone.View.extend({
 		this.drawForm();
 	} ,
 	changeTeam: function(){
+		var round = this.model;
 		//update edit round form to reflect new team
 		var aff_id = $("#left_team_select").val();
 		var aff = collection.getTeamFromId(aff_id);
@@ -329,102 +426,13 @@ view.RoundForm = Backbone.View.extend({
 			collection.rounds.sort();
 			//speaker points are stored in the round model in aff_points, and neg_points
 			$(dialog).dialog("close");
-			$("#edit_round_dialog").dialog("close");
 		} catch(e){
 			$("#edit_round_error").text(e.message);
 			if( e.stack != undefined){
 				console.log(e.stack);
 			}
 		}
-	} ,
-
-	drawForm: function(){
-		var round = this.model;
-		var aff;
-		var neg;
-		if(round.get("aff") == 0){
-			aff = round.get("team1");
-			neg = round.get("team2");
-		} else {
-			aff = round.get("team2");
-			neg = round.get("team1");
-		}
-
-		var aff_id = aff === undefined ? -1 : aff.get("id");
-		var neg_id = neg === undefined ? -1 : neg.get("id");
-		
-		//draw left side of form (aff)
-		var competitors = aff === undefined ? undefined : aff.get("competitors");
-		if(competitors != undefined){
-			//clear out existing form data
-			$("#left_team_container").html('');
-			
-			$("#left_team_select").val(aff_id);
-			
-
-			var points = round.get("aff_points") || []; 
-			for(var i = 0; i < competitors.length; i++){
-				
-				var speaks = (points[i] === undefined ? "" : points[i].speaks);
-				var rank = (points[i] === undefined ? "" : points[i].rank);
-				var competitor_input = '<span class="competitor_name">' + competitors[i].name + "</span>" + 
-					'<br /> Points: <input class="edit_round_speaks" value="'+ speaks +'"/> ' +
-					'Rank: <input class="edit_round_ranks" value="'+ rank +'"/> <br />';
-
-				$("#left_team_container").append(competitor_input);
-			}
-
-		} else {
-			//no competitors? team1 must have been a bye
-			$("#left_team_select").val("-1");
-		}
-
-		//draw right side of form
-
-		var competitors = neg === undefined ? undefined : neg.get("competitors");
-		if(competitors != undefined){
-			//clear out existing form data
-			$("#right_team_container").html('');
-			
-			$("#right_team_select").val(neg_id);
-			
-
-			var points = round.get("neg_points") || []; 
-			for(var i = 0; i < competitors.length; i++){
-				
-				var speaks = (points[i] === undefined ? "" : points[i].speaks);
-				var rank = (points[i] === undefined ? "" : points[i].rank);
-				var competitor_input = '<span class="competitor_name">' + competitors[i].name + '</span>' +
-					'<br /> Points: <input class="edit_round_speaks" value="'+ speaks +'"/> ' +
-					'Rank: <input class="edit_round_ranks" value="'+ rank +'"/> <br />';
-
-				$("#right_team_container").append(competitor_input);
-			}
-
-		} else {
-			//no competitors? team1 must have been a bye
-			$("#left_team_select").val(-1);
-		}
-		
-
-		//select correct room and judge from dropdowns
-		var judge_id = round.get("judge") === undefined ? "-1" : round.get("judge").get("id");
-		$("#edit_round_judge").val(judge_id);
-		var room_id = round.get("room") === undefined ? "-1" : round.get("room").get("id");
-		$("#edit_round_room").val(room_id);
-		//populate result box
-		
-		$("#edit_round_result").val(round.get("result"));
-
-	} ,
-
-	clearEditForm: function(){
-		
-		$("#edit_round_error").html("");
-		$("#selected_team_winnder").html("");
-		$("#edit_round_lpw").attr("checked", false);
-		$("#edit_round_dialog").dialog("close");
-	}
+	} 
 
 });
 view.TeamForm = Backbone.View.extend({

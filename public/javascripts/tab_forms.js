@@ -73,12 +73,38 @@ forms.printBallots = function(round_number, division){
 		}
 
 		var flip = round.get("aff") === "flip" ? true : false;
+
+		var aff_code = "";
+		var neg_code = "";
+		if(collection.rounds.at(i).get("aff") == 0){
+			var aff = collection.rounds.at(i).get("team1");
+			if(aff != undefined){
+				var aff_code = aff.get("team_code");
+			}
+				
+			var neg = collection.rounds.at(i).get("team2");
+			if(neg != undefined){
+				var neg_code = neg.get("team_code");
+			}
+				
+		} else {
+			var aff = collection.rounds.at(i).get("team2");
+			if(aff != undefined){
+				var aff_code = aff.get("team_code");
+			}
+				
+			var neg = collection.rounds.at(i).get("team1");
+			if(neg != undefined){
+				var neg_code = neg.get("team_code");
+			}
+		}
+
 		var options = {
 			round: round_number, 
 			room: room, 
 			judge: judge, 
-			aff_team_code: "Round Rock AC",
-			neg_team_code: "Westwood BX",
+			aff_team_code: aff_code,
+			neg_team_code: neg_code,
 			flip: false
 		};
 
