@@ -480,14 +480,25 @@ view.TeamForm = Backbone.View.extend({
 
 		}
 		$("#team_form").dialog({
+			width: 300,
+			title: "Add Team",
+			modal: true,
 			buttons: {
-				"Save": function(){
-					view.teamForm.addTeam();
-					view.teamForm.clearEditForm();
-					collection.teams.sort();
+				"Save": {
+					text: "Save",
+					click: function(){
+						view.teamForm.addTeam();
+						view.teamForm.clearEditForm();
+						collection.teams.sort();
+					},
+					class: "btn btn-large" 
 				} ,
-				"Close": function(){
-					$(this).dialog("close");
+				"Close": {
+					text: "Close",
+					click: function(){
+						$(this).dialog("close");
+					},
+					class: "btn btn-large" 
 
 				}
 			}
@@ -714,13 +725,24 @@ view.JudgeForm = Backbone.View.extend({
 		
 		
 		$("#judge_form").dialog({
+			width:300,
+			title: "Add Judge",
+			modal: true,
 			buttons: {
-				"Save": function(){
-					view.judgeForm.addJudge();
+				"Save": {
+					text: "Add Judge",
+					click: function(){
+						view.judgeForm.addJudge();
+					},
+					class: "btn btn-large" 
 				} ,
-				"Close": function(){
-					view.judgeForm.clearEditForm();
-					$(this).dialog("close");
+				"Close": {
+					text: "Close",
+					click: function(){
+						view.judgeForm.clearEditForm();
+						$(this).dialog("close");
+					},
+					class: "btn btn-large" 
 				}
 			}
 		});
@@ -842,13 +864,24 @@ view.RoomForm = Backbone.View.extend({
 			$("#newroom_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
 		}
 		$("#room_form").dialog({
+			width:300,
+			title: "Add Room",
+			modal: true,
 			buttons: {
-				"Save": function(){
-					view.roomForm.addRoom();
+				"Save": {
+					text: "Add Room",
+					click: function(){
+						view.roomForm.addRoom();
+					},
+					class: "btn btn-large" 
 				} ,
-				"Close": function(){
-					view.roomForm.clearEditForm();
-					$(this).dialog("close");
+				"Close": {
+					text: "Close",
+					click: function(){
+						view.roomForm.clearEditForm();
+						$(this).dialog("close");
+					},
+					class: "btn btn-large" 
 				}
 			}
 		});
@@ -943,13 +976,23 @@ view.SchoolForm = Backbone.View.extend({
 		}
 
 		$("#school_form").dialog({
+			title: "Add School",
+			modal: true,
 			buttons: {
-				"Save": function(){
-					view.schoolForm.addSchool();
+				"Save": {
+					text: "Add School",
+					click: function(){
+						view.schoolForm.addSchool();
+					},
+					class: "btn btn-large" 
 				} ,
-				"Close": function(){
-					view.schoolForm.clearEditForm();
-					$(this).dialog("close");
+				"Close": {
+					text: "Close",
+					click: function(){
+						view.schoolForm.clearEditForm();
+						$(this).dialog("close");
+					},
+					class: "btn btn-large" 
 				}
 			}
 		});
@@ -1028,14 +1071,24 @@ view.DivisionForm = Backbone.View.extend({
 			$("#newdiv_ballot_type").val(this.model.get("ballot_type"));
 		}
 		$("#division_form").dialog({
+			title: "Add Division",
+			modal: true,
 			buttons: {
-				"Save": function(){
-					view.divisionForm.addDivision();
-					$(this).dialog("close");
+				"Save": {
+					text: "Add Division",
+					click: function(){
+						view.divisionForm.addDivision();
+						$(this).dialog("close");
+					},
+					class: "btn btn-large" 
 				} ,
-				"Cancel": function(){
-					view.divisionForm.clearEditForm();
-					$(this).dialog("close");
+				"Cancel": {
+					text: "Cancel",
+					click: function(){
+						view.divisionForm.clearEditForm();
+						$(this).dialog("close");
+					},
+					class: "btn btn-large" 
 				}
 			}
 		});
