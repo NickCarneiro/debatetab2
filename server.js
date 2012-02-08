@@ -20,6 +20,8 @@ var express = require('express'),
 		cleanCSS = require('clean-css'),
 		app = module.exports = express.createServer(),
 		db = require('mongojs').connect("mongodb://localhost/test", ["TournamentData"]);
+		var io = require('socket.io').listen(app);
+
 
 
 /*===========================================================================
@@ -69,6 +71,8 @@ app.configure('development', function() {
 	var dev_scripts = [
 		'jquery.tmpl.js',
 		'jquery-ui-1.8.17.custom.min.js', 
+		'bootstrap.js',
+		'socket.io.js' ,
 		'underscore.js', 
 		'backbone.js', 
 		'plugins.js',
@@ -76,15 +80,16 @@ app.configure('development', function() {
 		'tab_collections.js', 
 		'tab_pairing.js', 
 		'tab_views.js', 
+		'tab_views_forms.js',
 		'tab_ui.js', 
 		'tab_forms.js'
 	];
 
 	var dev_styles = [
-		'bptop.css', 
-		'1140.css', 
+		
 		'tab.css', 
-		'bpbottom.css', 
+		
+		'bootstrap.css', 
 		'jquery-ui-1.8.17.custom.css'
 	];
 
@@ -104,6 +109,51 @@ app.configure('development', function() {
 			tournament_id: req.params.id
 		});
 	});
+
+	var Client = require('twilio').Client,
+	Twiml = require('twilio').Twiml,
+	sys = require('sys'),
+	tClient = new Client('AC89170a4e43fc4a38daed8f055879a20f', 'b6fd343fee0be8aaad34ed8df07ffb3f', 'debatetab.com', {port:3019});
+
+	var phone = tClient.getPhoneNumber('+15128430409');
+	// code to send MASS texts
+	// TODO verify user logged in
+	app.post('/textMass' , function(req, res){
+		try {
+			var list = req.body.smsList;
+			console.log('Mass Message request: ');
+			console.log(list);
+			
+			for (var i=0; i< list.length; i++) {
+				var number = list[i].phone_number;
+				var message = list[i].message;
+				
+				console.log('Sending ith message where i = ' + i);
+
+				sendMassTexts(i, number, message);
+			}
+			res.send('mass texts sent');
+		} catch (e) {
+			console.log('An error has occured while sending the mass messages: ' + e.message);
+			res.send('An error has occured while sending the mass messages: ' + e.message);
+		}
+	});
+
+	// function that sends message and provides a callback with specific log actions as well
+	// used by post('/textMass')
+	// abstracting this action into a function allows the logging to work correctly because of
+	// variable scope, which was an issue earlier
+	function sendMassTexts(i, number, message) {
+		 phone.sendSms(number, message, null, function () {
+			console.log('i = ' + i);
+			console.log('SMS sent to: ' + number);
+			console.log('Message Sent: ' + message);
+			console.log('');
+		});
+	}
+
+
+
 
 });
 
@@ -133,6 +183,18 @@ app.configure('production', function() {
 	});
 });
 
+/*===========================================================================
+	SOCKET.IO
+============================================================================= */
+
+/*
+io.sockets.on('connection', function (socket) {
+  socket.emit('news', { hello: 'world' });
+  socket.on('ping', function (data) {
+    console.log(data);
+  });
+});
+*/
 
 /*===========================================================================
 	ERROR HANDLING

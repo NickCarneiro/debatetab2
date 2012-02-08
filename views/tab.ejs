@@ -1,38 +1,82 @@
-<div class="container">
+<div class="container-fluid">
 	<!-- begin header -->
-	<div class="twelvecol">
-		<div class="header_image block center">
-			<img src="/images/logo.png" alt="DebateTab logo, Advancing academic competition"/>
+	<div class="row-fluid">
+		<div class="span12">
+			<div class="header_image block center">
+				<img src="/images/logo.png" alt="DebateTab logo, Advancing academic competition"/>
+			</div>
+		</div>
+		
+		<!-- end header -->
+
+		<div id="tournament_id" style="display:none;">
+		<% if(locals.tournament_id){ %>
+			<%= tournament_id %>
+		<% } %>
 		</div>
 	</div>
-	<!-- end header -->
-
-	<div id="tournament_id" style="display:none;">
-	<% if(locals.tournament_id){ %>
-		<%= tournament_id %>
-	<% } %>
-	</div>
-	<div class="row maincontent">
+	<div class="row-fluid maincontent">
 
 		<!-- begin left nav-->
-		<div class="twocol block">
-			<ul id="main_menu" class="menu">
-				<li class="menu_item" id="menu_rounds">Rounds</li>
-				<li class="menu_item" id="menu_teams">Teams</li>
-				<li class="menu_item" id="menu_judges">Judges</li>
-				<li class="menu_item" id="menu_rooms">Rooms</li>
-				<li class="menu_item" id="menu_schools">Schools</li>
-				<li class="menu_item" id="menu_divisions">Divisions</li>
-				<li class="menu_item" id="menu_settings">Settings</li>
-				<li class="menu_item" id="menu_debug">Debug</li>
-			</ul>
+		<div class="span2 block menu_container">
+			<div id="main_menu" class="menu">
+				<div class="menu_item" id="menu_rounds">Rounds</div>
+				<div class="menu_item" id="menu_teams">Teams</div>
+				<div class="menu_item" id="menu_judges">Judges</div>
+				<div class="menu_item" id="menu_rooms">Rooms</div>
+				<div class="menu_item" id="menu_schools">Schools</div>
+				<div class="menu_item" id="menu_divisions">Divisions</div>
+				<div class="menu_item" id="menu_settings">Setup</div>
+				<div class="menu_item" id="menu_debug">Debug</div>
+			</div>
 		</div>
 		<!-- end left nav-->
 
 		<!-- begin main content areas. Only one is shown at a time.-->
-		<div id="rounds_container" class="main_container hidden tencol block last">
+		<div id="rounds_container" class="main_container hidden span9 block">
 			<div id="rounds" class="subcontainer">
 				
+				
+				<div class="top_buttons">
+					<div class="btn-group">
+						<a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
+							Pairing
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<!-- dropdown menu links -->
+							<li><a id="add_round_button">Add Debate</a></li>
+							<li><a id="pair_round_button">Pair Round</a></li>
+							<li><a id="validate_round">Validate Round</a> </li>
+						</ul>
+					</div>
+
+					<div class="btn-group">
+						<a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
+							Printouts
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<!-- dropdown menu links -->
+							<li><a id="print_ballots_button">Print Ballots</a></li>
+							<li><a id="print_pairings_button">Print Pairings</a></li>
+							<li><a id="print_boxes">Print Boxes</a></li>
+						</ul>
+					</div>
+
+					<div class="btn-group">
+						<a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
+							Publish
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<!-- dropdown menu links -->
+							<li><a id="send_sms">Send SMS</a> </li>
+							
+						</ul>
+					</div>
+				</div>
+					
 				<div class="top_buttons">
 					<span>Division: </span><select id="rounds_division_select">
 					</select>
@@ -40,6 +84,7 @@
 					</select>
 					Remaining ballots: <span id="remaining_ballots"></span>
 				</div>
+<<<<<<< HEAD
 				<div class="top_buttons">
 					<button id="add_round_button">Add Debate</button>
 					<button id="pair_round_button">Pair Round</button>
@@ -48,19 +93,26 @@
 					<button id="validate_round">Validate Round</button>
 				</div>
 					
+=======
+
+>>>>>>> a282dca6f70b530dbc61bc14a9ab5607b9075fc2
 				<div id="pairing_indicator">
 					Pairing Round. Please wait.
-					<img class="inline_block" src="/images/indicator.gif" />
+					<img class="inline_block" src="/images/indicator.gif" alt="Please wait spinning image" />
 				</div>
 				<div class="table_container">
-					<table id="rounds_table" class="large_table">
+					<table id="rounds_table" class="table table-striped large_table">
 					</table>
 				</div>
+<<<<<<< HEAD
 				
 		
+=======
+
+>>>>>>> a282dca6f70b530dbc61bc14a9ab5607b9075fc2
 			</div>
 
-			<div id="edit_round_dialog" class="dialog edit_round_dialog">
+			<div id="round_form" class="dialog edit_round_dialog">
 
 					<div id="edit_round_top_div">Judge: <select id="edit_round_judge"></select>
 					 Room: <select id="edit_round_room"></select></div>
@@ -70,7 +122,7 @@
 						<div id="left_team_container">
 						</div>
 					</div>
-					<div id="edit_round_right" class="edit_round_team">
+					<div id="edit_round_left" class="edit_round_team">
 						<label for="right_team_select">Negative</label><select id="right_team_select"></select>
 						<div id="right_team_container">
 						</div>
@@ -83,26 +135,35 @@
 						<option value="3">Neg BYE Aff Forfeit</option> 
 						<option value="4">Double Win</option> 
 						<option value="5">Double Loss</option> 
-						<option value="6">Double Bye</option> 
+						<option value="6">Double BYE</option> 
 						<option value="7">Double Forfeit</option> 
 					</select>
 
 					<label id="lpw_label" for="edit_round_lpw">Low point win: </label><input type="checkbox" id="edit_round_lpw" /> 
 					<div id="selected_winner"></div>
 					<span id="edit_round_error"></span>
+<<<<<<< HEAD
 					<div class="bottom_buttons">
 						<button id="edit_round_save">Save</button>
 						<button id="edit_round_cancel">Cancel</button>
 						<button id="edit_round_swap">Swap Sides</button>
 
 					</div>
+=======
+					
+>>>>>>> a282dca6f70b530dbc61bc14a9ab5607b9075fc2
 				</div>
 		</div>
 
 
-		<div id="teams_container" class="main_container hidden tencol block last">
+		<div id="teams_container" class="main_container hidden span9 block last">
 			<div id="teams" class="subcontainer">
-				<div id="team_form" class="input_form">
+			<div class="top_buttons">
+			<button class="btn btn-large" id="add_team">Add Team</button>
+			<button class="btn btn-large" id="print_teams">Print Teams</button>
+			<button class="btn btn-large" id="print_speakers">Print Speakers</button>
+			</div>
+				<div id="team_form" class="input_form dialog">
 					
 					<input id="newteam_id" type="hidden" value=""/>
 					<label>
@@ -110,6 +171,7 @@
 					<select id="newteam_division">
 					</select>
 					</label> 
+					<label>
 					School: <br />
 					<select id="newteam_school">
 					</select>
@@ -128,27 +190,25 @@
 					<input id="newteam_stop_scheduling" type="checkbox" />
 					</label>
 
-					<button class="save_button" id="add_team_button">Save</button>
-					<button class="cancel_button" id="cancel_team_button">Cancel</button>
+				
 				</div>	
 						
 				<span>Division: </span><select id="teams_division_select"></select>
-				<div class="top_buttons">
-					<button id="print_teams">Print Teams</button>
-				</div>
+				
 				<div class="table_container">
 				
-				<table id="teams_table">
+				<table id="teams_table" class="large_table table table-striped">
 				</table>		
 				</div>	
 			</div>
 		</div>
 
-		<div id="judges_container" class="main_container hidden tencol block last">
+		<div id="judges_container" class="main_container hidden span9 block">
 			<div id="judges" class="subcontainer">
-				
-				<div id="judge_form" class="input_form">
-					<div class="edit_model_box">
+				<div class="top_buttons">
+					<button id="add_judge">Add Judge</button>
+				</div>
+				<div id="judge_form" class="input_form dialog">
 					<input id="newjudge_id" type="hidden" value=""/>
 					<label>
 					Judge Name: <br />
@@ -157,30 +217,32 @@
 					<label>
 					School Affiliation <br />
 					<select id="newjudge_school">
+
 					</select>
+					</label>
 					<ul id="newjudge_divisions">
 					</ul>
-					</label>
+					
 					<label>
 					Stop scheduling: <br />
 					<input id="newjudge_stop_scheduling" type="checkbox" />
 					</label>
-					<button class="save_button" id="add_judge_button">Save</button>
-					<button class="cancel_button" id="cancel_judge_button">Cancel</button>
-					</div>
+				
 				</div>
 				<div class="table_container">
-				<table id="judges_table">
+				<table id="judges_table" class="table table-striped">
 				</table>
 				</div>
 
 			</div>
 		</div>
-		<div id="rooms_container" class="main_container hidden tencol block last">
+		<div id="rooms_container" class="main_container hidden span9 block">
 			<div id="rooms" class="subcontainer">
-				
-				<div id="room_form" class="input_form">
-					<div class="edit_model_box">
+		
+				<div class="top_buttons">
+				<button id="add_room">Add Room</button>
+				</div>
+				<div id="room_form" class="input_form dialog">
 					<input id="newroom_id" type="hidden" value=""/>
 					<label>
 					Room Name: <br />
@@ -188,53 +250,50 @@
 					</label> 
 					<label>
 					Division: <br />
-					<select id="newroom_division" type="text">
+					<select id="newroom_division">
 					</select>
 					</label> 
 					<label>
 					Stop scheduling: <br />
 					<input id="newroom_stop_scheduling" type="checkbox" />
 					</label>
-					<button class="save_button" id="add_room_button">Save</button>
-					</div>
 				</div>
 				<div class="table_container">
-				<table id="rooms_table">
+				<table id="rooms_table" class="table table-striped">
 				</table>
 				</div>
 						
 			</div>
 		</div>
-		<div id="schools_container" class="main_container hidden tencol block last">
+		<div id="schools_container" class="main_container hidden span9 block">
 			<div id="schools" class="subcontainer">
-				
-				<div id="school_form" class="input_form">
-					<div class="edit_model_overlay" id="school_form_overlay">
-						<div class="edit_model_box">
-						<input id="newschool_id" type="hidden" value=""/>
-						<label>
-						School Name: <br />
-						<input id="newschool_name" />
-						</label> 
-						<button class="save_button" id="add_school_button">Save</button>
+				<div class="top_buttons"><button id="add_school">Add School</button></div>
+				<div id="school_form" class="input_form dialog">
+					
+					<input id="newschool_id" type="hidden" value=""/>
+					<label>
+					School Name: <br />
+					<input id="newschool_name" />
+					</label> 
 
-						</div>
-					</div>
 				</div>
+					
 				<div class="table_container">
-				<table id="schools_table">
+				<table id="schools_table" class="table table-striped">
 				</table>
 				</div>
 				
 			</div>
 		</div>
-		<div id="divisions_container" class="main_container hidden tencol block last">
+		<div id="divisions_container" class="main_container hidden span9 block">
 			<div id="divisions" class="subcontainer">
-				
+			<div class="top_buttons">
+			<button id="add_division">Add Division</button>
+			</div>
 			
 			
 
-			<div id="division_form" class="input_form">
+			<div id="division_form" class="input_form dialog">
 			
 			<input id="newdiv_id" type="hidden" value=""/>
 				<label>
@@ -259,16 +318,12 @@
 						<option value="32">Triple Octofinals</option>
 						<option value="16">Double Octofinals</option>
 						<option value="8">Octofinals</option>
-						<option selected="yes" value="4">Quarterfinals</option>
+						<option value="4">Quarterfinals</option>
 						<option value="2">Semifinals</option>
 						<option value="1">Finals</option>
 					</select> 
 				</label> 
 
-				<label>
-					Maximum speaker points: <br />
-					<input id="newdiv_max_speaks" type="text" value="30"/>
-				</label> 
 				<label>
 					Number of prelims: <br />
 					<input id="newdiv_prelims" type="text" value="4"/>
@@ -283,29 +338,25 @@
 				</label> 
 				
 
-				<button class="save_button" id="add_division_button">Save</button>
-
-		
-
-
 			
 			</div>
 
-				<table id="divisions_table">
+			
+
+				<table id="divisions_table" class="large_table table table-striped">
 				</table>
 			
 				<br />
 				
 			</div>
 		</div>
-		<div id="settings_container" class="main_container hidden tencol block last">Settings</div>
-		<div id="debug_container" class="main_container hidden tencol block last">
+
+		<div id="debug_container" class="main_container hidden span9 block">
 				<div id="debug" class="subcontainer">
 					<div id="debug_tournament_id"></div>
 					<button id="toggle_debug">Toggle debug</button><br />
 					<h1>Pairing</h1>
-					<button id="pair_tests">Run Pairing Tests</button><br />
-					<button id="pair_delete_all_rounds">Delete All Rounds</button><br /> <br />
+					
 					<button id="pair_print_pairings">Print all pairings</button>
 
 					<h1>LocalStorage </h1>
@@ -317,20 +368,44 @@
 					Phone Number: <br /><input type="text" id="debug_sms_input_phone"/><br />
 					Message: <br /> <textarea id="debug_sms_input_message"></textarea><br />
 					<button id="single_text">Send Single Text</button> <br /><br />
-				
-					<h1>Backup Data</h1>
-					<button id="export_data">Export tournament data</button> <br />
-					<button id="import_data">Import native tournament data</button><br />
-					<button id="import_joy_data">Import Joy tournament data</button><br />
-					<textarea id="import_box"></textarea><br />
-					<button id="save_to_database">Save tournament data</button><br />
-					<button id="get_from_database">Get tournament data</button><br />
+
 				</div>
 		</div>
 		
+		<div id="settings_container" class="main_container hidden span9 block">
+			<div id="setup" class="subcontainer">
+				<div class="top_buttons">
+					<div class="btn-group">
+						<a class="btn btn-large dropdown-toggle" data-toggle="dropdown" href="#">
+							Import / Export
+							<span class="caret"></span>
+						</a>
+						<ul class="dropdown-menu">
+							<!-- dropdown menu links -->
+							<li><a id="import_data">Import Tournament</a></li>
+							<li><a id="export_data">Backup Tournament</a> </li>
+						</ul>
+					</div>
+				</div>
 
+				<div id="import_data_dialog" class="dialog">
+					<label>
+					Import data type:
+					<select id="import_type">
+						<option val="native">DebateTab Backup</option>
+						<option val="jot">JOT_Debate.txt</option>
 
-	</div>
+					</select>
+					</label>
+					<div id="import_message"
+					<textarea id="import_box"></textarea>
+				
+				</div>
+			</div>
+		</div>
+
+		
+		
 </div>
 
 <div id="message_dialog" class="dialog">
@@ -338,6 +413,11 @@
 </div>
 <div id="warnings_dialog" class="dialog">
 	<div id="warnings_dialog_message"></div>
+</div>
+
+<div id="sms_confirm" class="dialog">
+	<div id="sms_confirm_message"></div>
+	Start time: <input type="text" id="text_pairings_start" />
 </div>
 
 <div id="ballot_css" style="display: none;">
@@ -510,4 +590,9 @@ td{
 .table_header{
 	font-weight: bold;
 }
+
+.result_letter{
+	font-size: 16px
+}
+
 </div>

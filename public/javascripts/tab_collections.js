@@ -137,20 +137,19 @@ model.Round = Backbone.Model.extend({
 	//returns winning team, false if no winner
 	getWinner: function(){
 		//if round is a bye, the real team is the winner.
-		if(this.get("team1") === undefined){
-			return this.get("team2");
-		} else if(this.get("team2") === undefined){
-			return this.get("team1");
-		} else if(this.get("result") === undefined){
+		if(this.get("result") === undefined){
 			return false;
 		} else if(this.get("result") == 0 || this.get("result") == 1){
+			//aff won
 			return this.get("aff") == 0 ? this.get("team1") : this.get("team2");
 		} else if(this.get("result") == 2 || this.get("result") == 3){
+			//neg won
 			return this.get("aff") == 0 ? this.get("team2") : this.get("team1"); 
 		} else {
 			con.write("fatal error: invalid round result: " + this.get("result"));
 		}
 	},
+
 	getLoser: function(){
 		if(this.get("result") === undefined){
 			return false;
@@ -217,16 +216,18 @@ collection.Teams = Backbone.Collection.extend({
 	//keep sorted in descending order of wins
 	//overwrite this to change method of ranking for TFA vs UIL vs NFL or other league rules
 	
+	/*
 	comparator : function(team){
-		//var sort_string = team.get("wins").toString() + team.get("total_speaks").toString() +  
+
 		return team.get("wins") * -1;
 	} ,
+	*/
 	
-	/*
+	
 	comparator: function(team){
 		return team.get("team_code");
 	},
-	*/
+	
 
 
 	localStorage: new Store("Teams")
@@ -244,6 +245,9 @@ collection.Judges = Backbone.Collection.extend({
 			  	return pattern.test(data.get("name"));
 			}));
 		} ,
+		comparator: function(team){
+			return team.get("name");
+		},
 		localStorage: new Store("Judges")
 });	
 
@@ -291,6 +295,10 @@ collection.Rounds = Backbone.Collection.extend({
 					return false;
 				}
 			}));
+		} ,
+		comparator: function(round){
+			return round.get("result") === undefined ? -1 : 1;
+		
 		}
 });	
 
@@ -337,7 +345,7 @@ collection.restoreReferences = function(){
 			//for each attribute, see if it has an id.
 			$.each(elem.attributes, function(attr_name, attr){
 				//console.log(attr);
-				if(attr != null && attr.id != undefined){
+				if(attr != null && attr.id != undefined && (attr.dereferenced == true || attr.dereferenced === "true")){
 					var model = collection.getModelFromId(attr.id);
 					//if we found a model for the id, replace the object copy with the model reference
 					if(model != undefined && typeof model.attributes === "object"){
@@ -348,17 +356,18 @@ collection.restoreReferences = function(){
 					}
 				} else if(attr instanceof Array){ //if we have an array
 					//restore references for each thing in array
-					for(var i = 0; i < attr.length; i++){
-						if(attr[i].id != undefined){
+					$.each(attr, function(i, array_attr){
+						if(array_attr.id != undefined && (array_attr.dereferenced == true || array_attr.dereferenced === "true" )){
 
-							var model = collection.getModelFromId(attr[i].id);
+							var model = collection.getModelFromId(array_attr.id);
 							//if we found a model for the id, replace the object copy with the model reference
 							if(model != undefined && typeof model.attributes === "object"){
 								attr[i] = model;
-								console.dbg("creating reference from " + col_name + " array to " + attr_name);
+
+								console.dbg("creating array reference from " + col_name + " array to " + attr_name);
 							}
 						}
-					}
+					});
 				}
 			})
 
@@ -425,70 +434,40 @@ collection.getModelFromId = function(model_id){
 		}
 
 		//for each model in the collection, look for models matching the id
-		col.forEach(function(elem, index){
-			if(elem.id === model_id){
-				//found a matching model
-				matching_model = elem;
-			}
-		});
+		matching_model = col.get(model_id);
+
+		if(matching_model != undefined){
+			return false;
+		}
 
 	});
+	
 	return matching_model;
 }
 
 collection.getDivisionFromId = function(division_id){
-	for(var i = 0; i < collection.divisions.length; i++){
-		if(division_id === collection.divisions.at(i).get("id")){
-			return collection.divisions.at(i);
-		}
-	}
-	return undefined;
+	return collection.divisions.get(division_id);
 };
 
 collection.getSchoolFromId = function(school_id){
-	for(var i = 0; i < collection.schools.length; i++){
-		if(school_id === collection.schools.at(i).get("id")){
-			return collection.schools.at(i);
-		}
-	}
-	return undefined;
+	return collection.schools.get(school_id);
 }
 
 
 collection.getTeamFromId = function(team_id){
-	for(var i = 0; i < collection.teams.length; i++){
-		if(team_id === collection.teams.at(i).get("id")){
-			return collection.teams.at(i);
-		}
-	}
-	return undefined;
+	return collection.teams.get(team_id);
 }
 
 collection.getRoomFromId = function(room_id){
-	for(var i = 0; i < collection.rooms.length; i++){
-		if(room_id === collection.rooms.at(i).get("id")){
-			return collection.rooms.at(i);
-		}
-	}
-	return undefined;
+	return collection.rooms.get(room_id)
 }
 
 collection.getJudgeFromId = function(judge_id){
-	for(var i = 0; i < collection.judges.length; i++){
-		if(judge_id === collection.judges.at(i).get("id")){
-			return collection.judges.at(i);
-		}
-	}
-	return undefined;
+	return collection.judges.get(judge_id);
 }
 
 collection.getRoundFromId = function(round_id){
-	for(var i = 0; i < collection.rounds.length; i++){
-		if(round_id === collection.rounds.at(i).get("id")){
-			return collection.rounds.at(i);
-		}
-	}
-	return undefined;
+	return collection.rounds.get(round_id)
 }
 
 //export all collections to JSON
@@ -510,7 +489,7 @@ collection.exportAll = function(){
 };
 
 //used to import native JSON format
-collection.import = function(json){
+collection.importNative = function(json){
 	//delete all existing data
 	collection.emptyCollections();
 	localStorage.clear();
@@ -535,9 +514,10 @@ collection.import = function(json){
 			console.log(collection[index]);
 		}
 	});
+
+	collection.restoreReferences();
 	
 
-	//save all to localstorage
 
 }
 
@@ -629,16 +609,28 @@ collection.deleteDivision = function(division){
 		judge.save();
 	})
 	//delete all teams in division
-	console.log(collection.teams.length);
+	var team_count = 0;
+	var to_delete = [];
 	collection.teams.each(function(team){
-
 		if(team.get("division") === division){
-			team.destroy();
+			team_count++;
+			to_delete.push(team);
 		}
 	});
+	var delete_count = 0;
+	$.each(to_delete, function(i, team){
+		team.destroy();
+		delete_count++;
+	})
+
+	console.log("team count: " + team_count + " delete count: " + delete_count);
 
 	//and finally, delete the division model itself
 	division.destroy();
+}
+
+collection.deleteModel = function(model){
+	
 }
 
 //deletes EVERYTHING and replaces with joy import
@@ -864,6 +856,53 @@ collection.isAlpha = function(char){
 	}
 }
 
+//comparator function for sorting teams
+collection.sortTeams = function(team1, team2){
+
+	//see uil constitution
+	//http://www.uiltexas.org/files/academics/manuals/sm_manual12_cx.pdf
+	//wins, total speaks, adjusted speaks, ranks, opposition win/loss
+
+	//check wins
+	if(team1.get("wins") > team2.get("wins")){
+		return -1;
+	} else if(team2.get("wins") > team1.get("wins")){
+		return 1
+	} else {
+		//wins were the same. check total speaks
+		if(team1.get("total_speaks") > team2.get("total_speaks")){
+			return -1;
+		} else if(team2.get("total_speaks") > team1.get("total_speaks")){
+			return 1
+		} else {
+			//total speaks were the same. check adjusted speaks
+			if(team1.get("adjusted_speaks") > team2.get("adjusted_speaks")){
+				return -1;
+			} else if(team2.get("adjusted_speaks") > team1.get("adjusted_speaks")){
+				return 1;
+			} else {
+				return 0;
+				tab.warnings.push("Two teams were tied on wins, speaks, and adjusted speaks.");
+			}
+		}
+	}
+}
+
+collection.sortSpeakers = function(speaker1, speaker2){
+	if(speaker1.adjusted_points > speaker2.adjusted_points){
+		return -1;
+	} else if(speaker2.adjusted_points > speaker1.adjusted_points){
+		return 1
+	} else {
+		if(speaker1.total_points > speaker2.total_points){
+			return -1;
+		} else if(speaker2.total_points > speaker1.total_points){
+			return 1
+		} else {
+			return 0;
+		}
+	}
+}
 
 /*
 =========================================

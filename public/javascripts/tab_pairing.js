@@ -42,6 +42,99 @@ pairing.compareTeams = function(team){
 
 }
 
+//called by update records.
+//loops through speaks array and sums them.
+//sets total_speaks and adjusted_speaks
+pairing.updateSpeaks = function(){
+	$.each(collection.teams, function(i){
+		var team = collection.teams.at(i);
+		var speaks = team.get("speaks");
+		var all_points = [];
+
+		var total_points = 0;
+		var adjusted_points = 0;
+		//copy speaker points into another array that we can sort
+		$.each(speaks, function(j, point){
+			all_points.push(point);
+		});
+
+		//if any round has a zero, that means it was a bye. average the other rounds.
+		var division = team.get("division");
+		if(division.get("comp_per_team") == 1){
+			//ld
+			var total = 0;
+			$.each(all_points, function(j, point){
+				total += parseFloat(point);
+			});
+
+			var avg = total / all_points.length;
+			//insert average for any bye rounds
+			$.each(all_points, function(j, point){
+				if(point == 0){
+					all_points[j] = avg;
+				}
+			});
+		} else {
+			//cx or pf. 
+			/*
+			0 John's speaks
+			1 Jack's speaks
+			2 John's speaks
+			3 Jack
+			4 John 
+			5 Jack
+			*/
+
+			var speaker1 = 0;
+			var speaker2 = 0;
+			$.each(all_points, function(j, point){
+				if(j % 2 === 0){
+					speaker1 += parseFloat(point);
+				} else {
+					speaker2 += parseFloat(point)
+				}
+				
+			});
+
+			var speaker1_avg = speaker1 / (all_points.length / 2);
+			var speaker2_avg = speaker2 / (all_points.length / 2);
+
+			//insert average for any bye rounds
+			$.each(all_points, function(j, point){
+				if(j % 2 === 0){
+					if(point == 0){
+						all_points[j] = speaker1_avg;
+					}
+				} else {
+					if(point == 0){
+						all_points[j] = speaker2_avg;
+					}
+				}
+				
+			});
+
+
+		}
+
+		all_points.sort();
+
+		
+
+		//TODO check what high lows means
+		$.each(all_points, function(j, point){
+			total_points += parseFloat(point);
+
+			//array is sorted. to drop high lows, skip first and last
+			if(j < all_points.length - 1 && j > 0){
+				adjusted_points += parseFloat(point);
+			}
+		});
+
+		team.set({"total_points": total_points, adjusted_points: adjusted_points});
+
+	});
+}
+
 //iterates over round collection and sets wins, losses in each team model
 //in the teams collection
 pairing.updateRecords = function(){
@@ -57,7 +150,8 @@ pairing.updateRecords = function(){
 			if(collection.rounds.at(j).getWinner() === collection.teams.at(i)){
 				var new_wins = collection.teams.at(i).get("wins") + 1;
 				collection.teams.at(i).set({wins: new_wins});
-			} else if(collection.rounds.at(j).getLoser() === collection.teams.at(i)){
+			}
+			if(collection.rounds.at(j).getLoser() === collection.teams.at(i)){
 				var new_losses = collection.teams.at(i).get("losses") + 1;
 				collection.teams.at(i).set({losses: new_losses});
 			}
@@ -79,7 +173,7 @@ pairing.updateRecords = function(){
 				collection.teams.at(i).set({"speaks": new_speaks});
 				collection.teams.at(i).set({"ranks": new_ranks});
 			
-			} else if(collection.rounds.at(j).get("team1") === collection.teams.at(i) 
+			} else if(collection.rounds.at(j).get("team1") === collection.teams.at(i)
 				&& collection.rounds.at(j).get("aff") == 1 
 				||collection.rounds.at(j).get("team2") === collection.teams.at(i) 
 				&& collection.rounds.at(j).get("aff") == 0 ){
@@ -133,6 +227,8 @@ pairing.updateRecords = function(){
 		collection.teams.at(i).save();
 
 	}
+
+	pairing.updateSpeaks();
 }
 
 pairing.deleteAllRounds = function(){
@@ -282,8 +378,10 @@ pairing.roundCount = function(round_number){
 	return count;
 };
 
+
 pairing.printRecords = function(division){
 	collection.teams.sort();
+	//
 	$.each(collection.divisions, function(index){
 		var div = collection.divisions.at(index);
 		if(division === div || division === undefined){
@@ -395,8 +493,8 @@ pairing.fixRepeatedByes = function(round_number, division){
 	
 
 	if(bye_round != undefined){
-		console.dbg("bye found: " + bye.get("team_code"));
-		if(pairing.alreadyHadBye(bye, round_number, division) === true){
+		console.dbg("bye found: " + bye_team.get("team_code"));
+		if(pairing.alreadyHadBye(bye_team, round_number, division) === true){
 			//find someone who can debate against bye in bye_round
 			//console.log(bye.get("team_code") + " has already had a bye. Finding valid opponent.");
 			//this code is run after the power match so rounds are in sorted order of most wins to fewest.
@@ -533,8 +631,9 @@ pairing.pairUilPrelim = function(round_number, division){
 		}
 	} catch(e){
 		//show error dialog
+		console.log(e.message);
 		console.log(e);
-		view.showMessageDialog(e);
+		view.showMessageDialog(e.message);
 	}
 
 }
@@ -669,6 +768,7 @@ pairing.pairPrelim = function(round_number, division, options){
 					round.set({team2: team2});
 					round.set({aff: 0});
 					collection.rounds.add(round);
+					round.save();
 					//mark as paired
 					already_paired[team1.id] = true;
 					already_paired[team2.id] = true;
@@ -700,9 +800,9 @@ pairing.pairPrelim = function(round_number, division, options){
 		} else {
 			pairing.setSides(round_number, division);
 		}
-		
-		pairing.pairRooms(round_number, division);
 		pairing.pairJudges(round_number, division);
+		pairing.pairRooms(round_number, division);
+		
 
 	} else { //first round. don't worry about side constraints
 		
@@ -766,6 +866,7 @@ pairing.pairPrelim = function(round_number, division, options){
 				round.set({team1: team1});
 				round.set({team2: team2});
 				collection.rounds.add(round);
+				round.save();
 				//mark as paired
 				already_paired[team1.id] = true;
 				already_paired[team2.id] = true;
@@ -792,8 +893,9 @@ pairing.pairPrelim = function(round_number, division, options){
 	//make sure no team has had more than 1 bye
 	pairing.fixRepeatedByes(round_number, division);
 	pairing.setSides(round_number, division);
-	pairing.pairRooms(round_number, division);
 	pairing.pairJudges(round_number, division);
+	pairing.pairRooms(round_number, division);
+	
 	}
 	
 }
@@ -808,6 +910,7 @@ pairing.pairRemainingTeams = function(round_number, division, unpaired_teams, op
 		console.dbg("creating a bye round because one team was left unpaired.");
 		var round = new model.Round({round_number: parseInt(round_number), division: division, team1: unpaired_teams[0]});
 		collection.rounds.add(round);
+		round.save();
 	} else if (unpaired_teams.length === 2){
 		//2 unpaired teams. find rounds for them
 		console.log("There were " + unpaired_teams.length + " unpaired teams");
@@ -833,6 +936,7 @@ pairing.pairRemainingTeams = function(round_number, division, unpaired_teams, op
 					team2: unpaired_teams[0]
 					});
 				collection.rounds.add(new_round);
+				new_round.save();
 				//update existing round with swap
 				round.set({team1: team2, team2: unpaired_teams[1]});
 				return false;
@@ -847,6 +951,7 @@ pairing.pairRemainingTeams = function(round_number, division, unpaired_teams, op
 					team2: unpaired_teams[1]
 					});
 				collection.rounds.add(new_round);
+				new_round.save();
 				//update existing round with swap
 				round.set({team1: team2, team2: unpaired_teams[0]});
 				return false;
@@ -857,7 +962,7 @@ pairing.pairRemainingTeams = function(round_number, division, unpaired_teams, op
 		});
 	} else {
 		//
-		throw "More than 2 unpaired teams.";
+		throw new Exception("More than 2 unpaired teams.");
 	}
 
 }
@@ -894,70 +999,143 @@ pairing.pairJudges = function(round_number, division){
 	collection.judges.models = _.shuffle(collection.judges.models);
 	//copy judges into working array
 	var paired_judges = [];
+	var paired_judges_flighted = {};
 	//count rounds that we could not find a judge for
 	var no_judge = 0;
 
-	for(var i = 0; i < collection.rounds.length; i++){
-		if(collection.rounds.at(i).get("division") != division 
-			|| collection.rounds.at(i).get("round_number") != round_number){
-			continue;
-		}
-		//don't give byes a judge
-		if(collection.rounds.at(i).get("team1") === undefined ||
-			collection.rounds.at(i).get("team2") === undefined){
-			continue;
-		}
-
-		for(var j = 0; j < collection.judges.length; j++){
-			var judge = collection.judges.at(j);
-			//don't pair judges that have already been placed in a round
-			if(paired_judges.indexOf(judge) != -1){
-				//console.log("judge has already been paired.");
+	if(division.get("flighted_rounds") === true){
+		for(var i = 0; i < collection.rounds.length; i++){
+			if(collection.rounds.at(i).get("division") != division 
+				|| collection.rounds.at(i).get("round_number") != round_number){
 				continue;
 			}
-			//don't pair judges that can't judge this division
-			if(judge.get("divisions").indexOf(division) === -1){
+			//don't give byes a judge
+			if(collection.rounds.at(i).get("team1") === undefined ||
+				collection.rounds.at(i).get("team2") === undefined){
 				continue;
 			}
-			
 
-			if(pairing.canJudge(collection.rounds.at(i).get("team1"), collection.rounds.at(i).get("team2"), judge, round_number, division)){
-				//console.log("successfully paired " + judge.get("name"));
-				collection.rounds.at(i).set({judge: judge});
-				paired_judges.push(judge);
+			for(var j = 0; j < collection.judges.length; j++){
+				var judge = collection.judges.at(j);
+				//don't pair judges that have already been placed in 2 rounds
+				if(paired_judges_flighted[judge.id] >= 2){
+					//console.log("judge has already been paired.");
+					continue;
+				}
+				//don't pair judges that can't judge this division
+				if(judge.get("divisions").indexOf(division) === -1){
+					continue;
+				}
 				
-				break; //successfully paired a judge to this round. go to next round.
-			} else {
-				//console.log("could not pair " + judge.get("name"));
+
+				if(pairing.canJudge(collection.rounds.at(i).get("team1"), collection.rounds.at(i).get("team2"), judge, round_number, division)){
+					//console.log("successfully paired " + judge.get("name"));
+					collection.rounds.at(i).set({judge: judge});
+
+					if(paired_judges_flighted[judge.id] === undefined){
+						paired_judges_flighted[judge.id] = 1;
+						collection.rounds.at(i).set({flight: "A"});
+					} else {
+						paired_judges_flighted[judge.id]++;
+						collection.rounds.at(i).set({flight: "B"});
+					}
+					
+					collection.rounds.at(i).save();
+					break; //successfully paired a judge to this round. go to next round.
+				} else {
+					//console.log("could not pair " + judge.get("name"));
+				}
+
+			}
+
+			//check if we successfully paired a judge
+			if(collection.rounds.at(i).get("team1") != undefined &&
+				collection.rounds.at(i).get("team2") != undefined){
+				//if the round is not a bye and it has no judge
+				if(collection.rounds.at(i).get("judge") === undefined){
+					no_judge++;
+				}
 			}
 
 		}
-
-		//check if we successfully paired a judge
-		if(collection.rounds.at(i).get("team1") != undefined &&
-			collection.rounds.at(i).get("team2") != undefined){
-			//if the round is not a bye and it has no judge
-			if(collection.rounds.at(i).get("judge") === undefined){
-				no_judge++;
+	} else {
+		
+		for(var i = 0; i < collection.rounds.length; i++){
+			if(collection.rounds.at(i).get("division") != division 
+				|| collection.rounds.at(i).get("round_number") != round_number){
+				continue;
 			}
-		}
+			//don't give byes a judge
+			if(collection.rounds.at(i).get("team1") === undefined ||
+				collection.rounds.at(i).get("team2") === undefined){
+				continue;
+			}
 
+			for(var j = 0; j < collection.judges.length; j++){
+				var judge = collection.judges.at(j);
+				//don't pair judges that have already been placed in a round
+				if(paired_judges.indexOf(judge) != -1){
+					//console.log("judge has already been paired.");
+					continue;
+				}
+				//don't pair judges that can't judge this division
+				if(judge.get("divisions").indexOf(division) === -1){
+					continue;
+				}
+				
+
+				if(pairing.canJudge(collection.rounds.at(i).get("team1"), collection.rounds.at(i).get("team2"), judge, round_number, division)){
+					//console.log("successfully paired " + judge.get("name"));
+					collection.rounds.at(i).set({judge: judge});
+					collection.rounds.at(i).save();
+					paired_judges.push(judge);
+					
+					break; //successfully paired a judge to this round. go to next round.
+				} else {
+					//console.log("could not pair " + judge.get("name"));
+				}
+
+			}
+
+			//check if we successfully paired a judge
+			if(collection.rounds.at(i).get("team1") != undefined &&
+				collection.rounds.at(i).get("team2") != undefined){
+				//if the round is not a bye and it has no judge
+				if(collection.rounds.at(i).get("judge") === undefined){
+					no_judge++;
+				}
+			}
+
+		}
 	}
-
 	if(no_judge > 0){
-		tab.warnings.push("Unable to find a judge for " + no_judge + " rounds.");
+		var round = no_judge > 1 ? "rounds" : "round";
+		tab.warnings.push("Unable to find a judge for " + no_judge + " " + round + ".");
 	}
 }
 
-//
+//checks to see if a judge has heard team1 or team2 in a prior round.
+
+//returns true if judge, team1, or team2 is undefined
 pairing.canJudge = function(team1, team2, judge, round_number, division){
+	if(team1 === undefined || team2 === undefined || judge === undefined || round_number == 1){
+		return true;
+	}
 	//check for school affiliations
 	var school1 = team1.get("school");
 	var school2 = team2.get("school");
+
+
 	if(judge.get("school") === school1 || judge.get("school") === school2){
 		return false;
 	}
+	
+
 	for(var i = 0; i < collection.rounds.length; i++){
+
+		if(collection.rounds.at(i).get("round_number") >= round_number){
+			continue;
+		}
 		//check to see if judge has judged the either of the teams before
 		if(collection.rounds.at(i).get("team1") === team1 && collection.rounds.at(i).get("judge") === judge){
 			return false;
@@ -973,117 +1151,187 @@ pairing.canJudge = function(team1, team2, judge, round_number, division){
 		}
 	}
 	
+
 	return true;	
 }
+
+//if round is flighted, must call this after pairing judges
 pairing.pairRooms = function(round_number, division){
-	//put all available rooms into an array.
-	var rooms = [];
-	for(var i = 0; i < collection.rooms.length; i++){
-		if(collection.rooms.at(i).get("division") === division){
-			rooms.push(collection.rooms.at(i));
+
+	//increment every time we cannot pair a room
+	var roomless = 0;
+
+	if(division.get("flighted_rounds") == true){
+		//put all available rooms into an array.
+		var rooms = [];
+		for(var i = 0; i < collection.rooms.length; i++){
+			if(collection.rooms.at(i).get("division") === division && collection.rooms.at(i).get("stop_scheduling") != true){
+				rooms.push(collection.rooms.at(i));
+			}
 		}
-	}
 
-	//minimize room moves by keeping team1 in the same room.
-	if(round_number === 1){
-		//just randomly assign rooms
+		//map judges to rooms
+		var judge_room_map = {};
+		$.each(collection.rounds, function(i){
+			var round = collection.rounds.at(i);
+			//skip rounds without judges
+			if(round.get("judge") === undefined){
+				return true;
+			}
+			//skip irrelevant rounds
+			if(collection.rounds.at(i).get("division") != division 
+					|| collection.rounds.at(i).get("round_number") != round_number){
+					return true;
+			}
 
+			if(judge_room_map[round.get("judge").id] === undefined){
+				//assign this room to this round and this judge
+				if(rooms.length > 0){
+					var room = rooms.pop();
+					judge_room_map[round.get("judge").id] = room;
+					round.set({room: room});
+					round.save();
+				} else {
+					roomless++;
+				}
+				
+			} else {
+				//this judge has already had a room assigned
+				var room = judge_room_map[round.get("judge").id];
+				round.set({room: room});
+				round.save();
+			}
+
+		});
+
+		//
+	} else {
+		
+		
+		//put all available rooms into an array.
+		var rooms = [];
 
 		
-		var room_count = rooms.length;
-		var round_count = 0;
-		//stick a room in every round in this division with the right round number
-		for(var i = 0; i < collection.rounds.length; i++){
-			//only give out rooms to valid rounds
-			if(collection.rounds.at(i).get("division") != division 
-				|| collection.rounds.at(i).get("round_number") != round_number){
-				continue;
+		for(var i = 0; i < collection.rooms.length; i++){
+			if(collection.rooms.at(i).get("division") === division && collection.rooms.at(i).get("stop_scheduling") != true){
+				rooms.push(collection.rooms.at(i));
 			}
-			//don't give byes a room
-			if(collection.rounds.at(i).get("team1") === undefined ||
-				collection.rounds.at(i).get("team2") === undefined){
-				continue;
-			}
-
-			round_count++;
-			if(rooms.length > 0){
-				room = rooms.pop();
-				collection.rounds.at(i).set({room: room});
-			} else {
-				console.dbg("WARNING: Needed another room.")
-			}
-
-
 		}
 
-		if(room_count < round_count){
-			tab.warnings.push("WARNING: Only had " + room_count + " rooms. Needed " + round_count);
-		}
-	} else {
-		//construct associative array of team1's and rooms.
-		var prev_rooms = {};
-		for(var i = 0; i < collection.rounds.length; i++){
-			//only look at previous round in this division
-			if(collection.rounds.at(i).get("division") != division 
-				|| collection.rounds.at(i).get("round_number") != round_number - 1){
-				continue;
-			}
-			//byes don't have rooms to get
-			if(collection.rounds.at(i).get("team1") === undefined ||
-				collection.rounds.at(i).get("team2") === undefined){
-				continue;
-			}
-			var team1_id = collection.rounds.at(i).get("team1").get("id");
-			prev_rooms[team1_id] = collection.rounds.at(i).get("room");
-		}
-		//now dish out rooms based on where team1 was last round
+		//minimize room moves by keeping team1 in the same room.
+		if(round_number === 1){
+			//just randomly assign rooms
 
-		for(var i = 0; i < collection.rounds.length; i++){
-			//only give out rooms to valid rounds
-			if(collection.rounds.at(i).get("division") != division 
-				|| collection.rounds.at(i).get("round_number") != round_number){
-				continue;
-			}
-			//don't give byes a room
-			if(collection.rounds.at(i).get("team1") === undefined ||
-				collection.rounds.at(i).get("team2") === undefined){
-				continue;
-			}
 
-			round_count++;
-			var team1_id = collection.rounds.at(i).get("team1").get("id");
-			var team2_id = collection.rounds.at(i).get("team2").get("id");
-			var room1 = prev_rooms[team1_id];
-			var room2 = prev_rooms[team2_id];
-			if(room1 != undefined && rooms.indexOf(room1) > -1){
-				//team1 stays in same room		
-				var room_index = rooms.indexOf(room1);
-				
-				collection.rounds.at(i).set({room: room1});
-				rooms.splice(room_index, 1);
-				
-				
-			} else if(room2 != undefined && rooms.indexOf(room2) > -1){
-				//team2 stays in same room
-				var room_index = rooms.indexOf(room2);
-				collection.rounds.at(i).set({room: room2});
-				rooms.splice(room_index, 1);
-				
-			} else {
-				//neither team had a previous room.
-				//console.log("neither team had previous room");
-				
+			
+			var room_count = rooms.length;
+			var round_count = 0;
+			//stick a room in every round in this division with the right round number
+			for(var i = 0; i < collection.rounds.length; i++){
+				//only give out rooms to valid rounds
+				if(collection.rounds.at(i).get("division") != division 
+					|| collection.rounds.at(i).get("round_number") != round_number){
+					continue;
+				}
+
+				//don't give byes a room
+				if(collection.rounds.at(i).get("team1") === undefined ||
+					collection.rounds.at(i).get("team2") === undefined){
+					continue;
+				}
+
+				round_count++;
 				if(rooms.length > 0){
-					collection.rounds.at(i).set({room: rooms.pop()});
+					room = rooms.pop();
+					collection.rounds.at(i).set({room: room});
+					collection.rounds.at(i).save();
 				} else {
-					console.log("WARNING: Needed another room");
-				} 
+					roomless++;
+					console.dbg("WARNING: Needed another room.")
+				}
+
+
 			}
 
+			if(room_count < round_count){
+				tab.warnings.push("WARNING: Only had " + room_count + " rooms. Needed " + round_count);
+			}
+		} else {
+			//construct associative array of team1's and rooms.
+			var prev_rooms = {};
+			for(var i = 0; i < collection.rounds.length; i++){
+				//only look at previous round in this division
+				if(collection.rounds.at(i).get("division") != division 
+					|| collection.rounds.at(i).get("round_number") != round_number - 1){
+					continue;
+				}
+				//byes don't have rooms to get
+				if(collection.rounds.at(i).get("team1") === undefined ||
+					collection.rounds.at(i).get("team2") === undefined){
+					continue;
+				}
+				var team1_id = collection.rounds.at(i).get("team1").get("id");
+				prev_rooms[team1_id] = collection.rounds.at(i).get("room");
+			}
+			//now dish out rooms based on where team1 was last round
+
+			for(var i = 0; i < collection.rounds.length; i++){
+				//only give out rooms to valid rounds
+				if(collection.rounds.at(i).get("division") != division 
+					|| collection.rounds.at(i).get("round_number") != round_number){
+					continue;
+				}
+				//don't give byes a room
+				if(collection.rounds.at(i).get("team1") === undefined ||
+					collection.rounds.at(i).get("team2") === undefined){
+					continue;
+				}
+
+				round_count++;
+				var team1_id = collection.rounds.at(i).get("team1").get("id");
+				var team2_id = collection.rounds.at(i).get("team2").get("id");
+				var room1 = prev_rooms[team1_id];
+				var room2 = prev_rooms[team2_id];
+				if(room1 != undefined && rooms.indexOf(room1) > -1){
+					//team1 stays in same room		
+					var room_index = rooms.indexOf(room1);
+					
+					collection.rounds.at(i).set({room: room1});
+					collection.rounds.at(i).save();
+					rooms.splice(room_index, 1);
+					
+					
+				} else if(room2 != undefined && rooms.indexOf(room2) > -1){
+					//team2 stays in same room
+					var room_index = rooms.indexOf(room2);
+					collection.rounds.at(i).set({room: room2});
+					collection.rounds.at(i).save();
+					rooms.splice(room_index, 1);
+					
+				} else {
+					//neither team had a previous room.
+					//console.log("neither team had previous room");
+					
+					if(rooms.length > 0){
+						collection.rounds.at(i).set({room: rooms.pop()});
+						collection.rounds.at(i).save();
+					} else {
+						roomless++;
+						console.log("WARNING: Needed another room");
+					} 
+				}
+
+
+			}
 
 		}
-
 	}
+
+	if(roomless > 0){
+		tab.warnings.push(roomless + " rounds are missing rooms.");
+	}
+	
+
 };
 
 pairing.dedicatedJudges = function(division){
@@ -1146,13 +1394,112 @@ pairing.alreadyPaired = function(round_number, division){
 	return false;
 }
 
-pairing.validateRounds = function(round_number, division){
+
+
+pairing.sendSms = function(round_number, division){
+	
+	var start_time = $("#text_pairings_start").val();
+	var data = [];
+	for(var i =0; i < collection.rounds.length; i++) //collection.rounds.length
+	{
+		if(collection.rounds.at(i).get("round_number") != round_number || collection.rounds.at(i).get("division") != division){
+				continue;
+			}
+
+			if(collection.rounds.at(i).get("aff") == 0){
+				var aff = collection.rounds.at(i).get("team1");
+				if(aff != undefined){
+					aff = aff.get("team_code");
+				}
+					
+				var neg = collection.rounds.at(i).get("team2");
+				if(neg != undefined){
+					neg = neg.get("team_code");
+				}
+					
+				} else {
+					var aff = collection.rounds.at(i).get("team2");
+					if(aff != undefined){
+						aff = aff.get("team_code");
+					}
+						
+					var neg = collection.rounds.at(i).get("team1");
+					if(neg != undefined){
+						neg = neg.get("team_code");
+					}
+				}
+
+			var judge = (collection.rounds.at(i).get("judge") != undefined ? collection.rounds.at(i).get("judge").get("name") : "");
+			var room = (collection.rounds.at(i).get("room") != undefined ? collection.rounds.at(i).get("room").get("name") : "");
+
+			for(var j = 0; j < collection.rounds.at(i).get("team1").get("competitors").length; j++){
+				
+				var phone_number = collection.rounds.at(i).get("team1").get("competitors")[j].phone_number;
+				if(phone_number === undefined){
+					continue;
+				}
+				//skip invalid numbers
+				if(phone_number.length > 9 && phone_number.length < 12){
+
+					data.push(
+						{
+							phone_number: phone_number, message: 
+						
+						'Aff: ' + aff + "\n" +
+						'Neg: ' + neg + "\n" +
+						'Judge: ' + judge + "\n" +
+						'Room: ' + room + "\n" +
+						'Start: ' + start_time
+						}
+					);
+				}
+			}
+
+			for(var j = 0; j < collection.rounds.at(i).get("team2").get("competitors").length; j++){
+
+				var phone_number = collection.rounds.at(i).get("team2").get("competitors")[j].phone_number;
+				//skip invalid numbers
+				if(phone_number.length > 9 && phone_number.length < 12){
+					data.push(
+						{
+							phone_number: phone_number, message: 
+						
+						'Aff: ' + aff + "\n" +
+						'Neg: ' + neg + "\n" +
+						'Judge: ' + judge + "\n" +
+						'Room: ' + room + "\n" +
+						'Start: ' + start_time
+						}
+					);
+				}
+			}
+
+	}
+	//send this as a mass text
+	$.post("/textMass", data, function(res){
+			console.log('Response from server: ' + res.body);
+			con.write(res);
+		});
+	console.log(data);
+
+
+}
+
+/*
+Check for the following problems:
+judges have judged either team before and are from either of the teams' schools
+any round that is not a bye is missing a room
+teams have already debated in a previous round
+a team is on the pairing more than once
+more than one bye
+*/
+pairing.validateRound = function(round_number, division){
 
 	var bye_count = 0;
-	division = collection.getDivisionFromId(division);
 	console.log(division);
+	var teams = {};
 	$.each(collection.rounds, function(i){
-		
+
 		var round = collection.rounds.at(i);
 		var judge = round.get("judge");
 
@@ -1162,56 +1509,54 @@ pairing.validateRounds = function(round_number, division){
 			if(round.get("round_number") != round_number){
 				return true;
 			}
-			
+
 			//checking if judge allowed to judge both teams
-		/*	if(!pairing.canJudge(round.get("team1"), round.get("team2"), round.get("judge"), round_number, division)){
-				tab.warnings.push(round.get("judge") + " already judged");
+			if(!pairing.canJudge(round.get("team1"), round.get("team2"), round.get("judge"), round_number, division)){
+				if(judge != undefined){
+					var judge_name = round.get("judge").get("name")
+				} else {
+					judge_name = "No name";
+				}
+				
+				tab.warnings.push(judge_name + " already judged");
 				return true;
-			}*/
-			
-			//checking if round has a room
-			if(round.get("room") === undefined)
+			}
+
+			//checking if round has a room and is not a bye
+			if(round.get("room") === undefined && (round.get(team1) != undefined || round.get(team2) != undefined))
 			{	
 				tab.warnings.push("No room scheduled");
 				return true;
 			}
-			
+
 			//checking if teams have not debated before
 			if(pairing.alreadyDebated(round.get("team1"), round.get("team2"), round_number))
 			{
 				tab.warnings.push(round.get("team1").get("team_code") + "and" + round.get("team2").get("team_code") + "have already debated");
 				return true;
 			}
-			
+
 			//checking if same team scheduled multiple times in same round
-			var team1 = round.get("team1").get("team_code");
-			var team2 = round.get("team2").get("team_code");
-			var duplicate_team = 0;
-			console.log("team 1: " + team1);
-			$.each(collection.rounds, function(j){
-				
-				var round = collection.rounds.at(j);
-				
-				if((round.get("division") === division) && (round.get("round_number") == round_number) && (team1 === collection.rounds.at(j).get("team1").get("team_code") || team1 === collection.rounds.at(j).get("team2").get("team_code")))
-				{
-					console.log("found!");
-					//tab.warnings.push(team1 + " scheduled more than once in same round");
-					duplicate_team++;
+
+			var team1 = round.get("team1");
+			var team2 = round.get("team2");
+			if(team1 != undefined){
+				if(teams[team1.id] === undefined){
+				teams[team1.id] = 1;
+				} else{
+					teams[team1.id]++;
 				}
-				if((round.get("division") === division) && (round.get("round_number") == round_number) && (team2 === collection.rounds.at(j).get("team1").get("team_code") || team2 === collection.rounds.at(j).get("team2").get("team_code")))
-				{
-					console.log("found!");
-					//tab.warnings.push(team2 + " scheduled more than once in same round");
-					duplicate_team++;
+			}
+
+			if(team2 != undefined){
+				if(teams[team2.id] === undefined){
+				teams[team2.id] = 1;
+				} else{
+					teams[team2.id]++;
 				}
-				if(duplicate_team > 2)
-				{
-					tab.warnings.push(team1 + " or " + team2 + " scheduled more than once in same round");
-					return false;
-				}
-			
-			});
-			
+			}
+
+
 			//checking for more than one BYE
 			if(team1 === "BYE" || team2 === "BYE" )
 			{
@@ -1221,18 +1566,24 @@ pairing.validateRounds = function(round_number, division){
 			{
 				tab.warnings.push("More than 1 bye in same round");
 			}
-			
-			//Show all warnings
-			if(tab.warnings.length > 0){
-				view.showWarningsDialog();
-			}
-			console.log("warnings " + tab.warnings.length);
 
 	});
-	
+
+	//team count is the number of times team with id is on the pairing
+	$.each(teams, function(id, team_count){
+		if(team_count > 1){
+			var team = collection.getTeamFromId(id);
+			
+			if(team != undefined){
+				var team_code = team.get("team_code");
+				tab.warnings.push(team_code + " is on the pairing " + team_count + " times.");
+			}
+			
+		}
+	});
+
 	return false;
 }
-
 
 /*
 =========================================

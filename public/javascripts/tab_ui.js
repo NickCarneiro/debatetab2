@@ -4,10 +4,19 @@
 ui.showMenu = function(menu_item){
 	$(".main_container").hide();
 	$("#" + menu_item + "_container").show();
-	$("#main_menu > li").removeClass("menu_item_selected");
-	$("#main_menu > li").addClass("menu_item");
+	$("#main_menu > div").removeClass("menu_item_selected");
+	$("#main_menu > div").addClass("menu_item");
 	$("#menu_" + menu_item).addClass("menu_item_selected");
 	localStorage.setItem("selected", menu_item);
+
+	//make the height the window height minus the top of the container
+	
+
+	if($("#" + menu_item + "_table").length != 0){
+		var height = $(window).height() - $("#" + menu_item + "_table").position().top - 80;
+		$(".table_container").height(height);
+	}
+	
 	
 }
 
@@ -24,7 +33,7 @@ $(function(){
 	
 	} 
 	//Main Menu Controls
-	$("#main_menu > li").click(function(){
+	$("#main_menu > div").click(function(){
 		//menu item ids are like: menu_judges
 		var menu_item_name = $(this).attr("id").substr(5);
 		//TODO: save menu state in a model so it opens to where you were if browser gets closed
@@ -80,12 +89,17 @@ view.divisionTable = new view.DivisionTable();
 view.judgeTable = new view.JudgeTable(); 
 view.roomTable = new view.RoomTable();  
 view.roundTable = new view.RoundTable();
-view.statsArea = new view.StatsArea();
 
 
+//initialize forms
 
-//restore references is silent so we have to manually render	
-//view.renderAll();
+view.teamForm = new view.TeamForm();
+view.judgeForm = new view.JudgeForm();
+view.roomForm = new view.RoomForm();
+view.schoolForm = new view.SchoolForm();
+view.divisionForm = new view.DivisionForm();
+view.roundForm = new view.RoundForm();
+view.setupScreen = new view.SetupScreen();
 
 /*
 =========================================
@@ -98,39 +112,27 @@ $(function(){
 
 $("#debug_tournament_id").html("Tournament ID: " + '<a href="/tab/'+tab.tournament_id+'">' + tab.tournament_id + '</a>');
 $("#clear_storage").click(function(){
-
-	$.confirm({
-			'title'		: 'Clear localStorage',
-			'message'	: 'You are about to delete ALL LOCAL DATA <br />This will erase the entire tournament! Continue?',
-			'buttons'	: {
-				'Yes'	: {
-					
-					'class'	: 'blue',
-					'action': collection.emptyCollections,
-				},
-				'No'	: {
-					'class'	: 'gray',
-					'action': function(){}	
-				}
+	console.log("asdf");
+	var dialog = $('<div>You are about to delete ALL LOCAL DATA <br />This will erase the entire tournament! Continue?</div>')
+	$( dialog ).dialog({
+		resizable : false,
+		height :190,
+		modal : true,
+		title : 'Delete localStorage',
+		buttons : {
+			"Yes": function() {
+				localStorage.clear();
+				$(this).dialog("close");
 			},
-			
-		});
+			"No": function() {
+				$(this).dialog("close");
+			}
+		}
+	});
+
 	
 });
 
-$("#export_data").click(function(){
-	collection.exportAll();
-});	
-
-$("#import_data").click(function(){
-	var json = $("#import_box").val();
-	collection.import(json);
-});	
-
-$("#import_joy_data").click(function(){
-	var joy_data = $("#import_box").val().trim();
-	collection.importJoyFile(joy_data);
-});	
 
 $("#pair_delete_all_rounds").click(function(){
 	
@@ -151,32 +153,6 @@ $("#pair_delete_all_rounds").click(function(){
 			
 		});
 	
-});
-
-//client-side function call Code for sending a single text
-$("#single_text").click(function(){
-
-	var pNumber = $("#debug_sms_input_phone").val();
-	if(pNumber == '' || pNumber == ' ') {
-		pNumber = ' ';
-		$("#debug_sms_input_phone").val("<Phone Number> for single");
-		con.write("For a single text, enter phone number. There is no default. Not sending msg.");
-		return;
-	}
-
-	var msg = $("#debug_sms_input_message").val();
-	if($.trim(msg) == '') {
-		msg = 'Hello World!';
-	}
-
-	var data = {phone_number: pNumber, message: msg};
-
-	$.post("/text", data, function(res){
-		console.log('Message sent from UI: ' + res.body);
-		con.write(res);
-		$("#debug_sms_input_phone").val("");
-		$("#debug_sms_input_message").val("");
-	});
 });
 
 
@@ -250,36 +226,45 @@ $("#validate_round").click(function(){
 Edit round event bindings
 =========================================
 */	
-$("#edit_round_swap").click(function(){
-	console.log("swapping sides");
-	view.roundTable.swapSides();
+
+$("#send_sms").click(function(){
+	var div_id = $("#rounds_division_select").val();
+	var division = collection.getDivisionFromId(div_id);
+
+	var round_number = $("#rounds_round_number_select").val();
+	$("#sms_confirm_message").text("Send text for " + division.get("division_name") + " and round " + round_number);
+	$( "#sms_confirm" ).dialog({
+				resizable: false,
+				height:250,
+				modal: true,
+				buttons: {
+					"Send": function() {
+						pairing.sendSms(round_number, division);
+						$( this ).dialog( "close" );
+					},
+					Cancel: function() {
+						$( this ).dialog( "close" );
+					}
+				}
+			});
+});
+
+
+$("#print_boxes").click(function(){
+	view.roundTable.printBoxes();
 })
 
-$("#edit_round_cancel").click(function(){
-	$("#edit_round_error").html("");
-	$("#edit_round_dialog").dialog("close");
-});
 
-$("#edit_round_judge").change(function(){
-	view.roundTable.changeJudge();
-});
 
-$("#left_team_select, #right_team_select").live("change", function(){
-	view.roundTable.changeTeam();
-});
 
-$("#edit_round_room").live("change", function(){
-	view.roundTable.changeRoom();
-});
+//grow tables to fill window space after forms
 
-$("#edit_round_save").click(function(){
-	view.roundTable.saveRound();
-});
+/*
+=========================================
+Miscellaneous visual effects
+=========================================
+*/	
 
-$("#edit_round_result").change(function(){
-	view.roundTable.displayWinner()
-
-});
 
 
 });
