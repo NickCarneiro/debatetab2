@@ -303,6 +303,7 @@
     // If the server returns an attributes hash that differs, the model's
     // state will be `set` again.
     save: function(key, value, options) {
+      console.log(this);
       var attrs, current;
       if (_.isObject(key) || key == null) {
         attrs = key;
@@ -319,9 +320,12 @@
         return false;
       }
       var model = this;
+     
       var success = options.success;
       options.success = function(resp, status, xhr) {
+    
         var serverAttrs = model.parse(resp, xhr);
+        //console.log(serverAttrs);
         if (options.wait) serverAttrs = _.extend(attrs || {}, serverAttrs);
         if (!model.set(serverAttrs, options)) return false;
         if (success) {
@@ -1296,22 +1300,37 @@ Backbone.Model.prototype.setByName = function(key, value, options) {
     this.set(setter, options); 
 };
 
-Backbone.Model.prototype.toJSON = function(){
+
+Backbone.toJSONReferences = function(){
   var clone =  _.clone(this.attributes);
+  //we want to copy one more layer deep so we copy array of division references.
+  //_.clone only copies the top layer
+
+
   $.each(clone, function(name, attr){
+    if(attr === undefined){
+      return true;
+    }
     //replace references to models with little objects containing their ids.
     if(attr.cid != undefined && attr.id != undefined){
       //found reference to backbone model.
-      clone[name] = {id: attr.id, dereferenced: true};
+      clone[name] = {id: attr.id};
     } else if(attr instanceof Array){
       //look for models to dereference inside an array.
+      var copy = [];
+
       $.each(attr, function(j, array_attr){
+        //create a copy of the array which still references the array inside this
         if(array_attr.cid != undefined && array_attr.id != undefined){
           //found reference to backbone model.
-          attr[j] = {id: array_attr.id, dereferenced: true};
+          copy.push({id: array_attr.id});
         }
       });
+      
+      clone[name] = copy;
     }
   });
   return clone;
 }
+
+Backbone.Model.prototype.toJSON = Backbone.toJSONReferences;

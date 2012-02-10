@@ -5,6 +5,10 @@
 /*
 Generic styles to be applied generally
 */
+
+.message {
+  display: none;
+}
 body {
 	background: url('/images/bg.png');
 }

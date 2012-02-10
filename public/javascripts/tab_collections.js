@@ -5,18 +5,6 @@ Define Backbone Models
 =========================================
 */	
 
-model.Tournament = Backbone.Model.extend({
-	default: {
-		tournament_name: "Debate Tournament"
-	},
-	initialize: function() {
-		if(this.id === undefined){
-			this.set({
-				id: (new ObjectId()).toString()
-			});
-		}	
-	}
-});
 
 model.Competitor = Backbone.Model.extend({
 	default: {
@@ -43,7 +31,6 @@ model.Team = Backbone.Model.extend({
 	initialize: function() {
 		if(this.id === undefined){
 			this.set({
-				competitors: new collection.Competitors() ,
 				id: (new ObjectId()).toString()
 			});
 		}
@@ -196,11 +183,6 @@ Define Backbone Collections
 =========================================
 */	
 
-collection.Competitors = Backbone.Collection.extend({
-		model: model.Competitor
-});
-
-
 
 collection.Teams = Backbone.Collection.extend({
 	model: model.Team ,
@@ -213,24 +195,17 @@ collection.Teams = Backbone.Collection.extend({
 		  	return pattern.test(data.get("team_code"));
 		}));
 	} ,
-	//keep sorted in descending order of wins
-	//overwrite this to change method of ranking for TFA vs UIL vs NFL or other league rules
-	
-	/*
-	comparator : function(team){
 
-		return team.get("wins") * -1;
-	} ,
-	*/
-	
-	
 	comparator: function(team){
 		return team.get("team_code");
 	},
+
+	localStorage: new Store("Teams") ,
+
+	url: function() {
+		return '/trn/' + tab.tournament_id + '/teams';
+	}
 	
-
-
-	localStorage: new Store("Teams")
 });	
 
 
@@ -248,7 +223,10 @@ collection.Judges = Backbone.Collection.extend({
 		comparator: function(team){
 			return team.get("name");
 		},
-		localStorage: new Store("Judges")
+		localStorage: new Store("Judges") ,
+		url: function() {
+			return '/trn/' + tab.tournament_id + '/judges';
+		}
 });	
 
 collection.Schools = Backbone.Collection.extend({
@@ -261,7 +239,11 @@ collection.Schools = Backbone.Collection.extend({
 		  	return pattern.test(data.get("school_name"));
 		}));
 	} ,
-	localStorage: new Store("Schools")
+	localStorage: new Store("Schools") ,
+
+	url: function() {
+		return '/trn/' + tab.tournament_id + '/schools';
+	}
 });	
 
 collection.Rooms = Backbone.Collection.extend({
@@ -274,12 +256,18 @@ collection.Rooms = Backbone.Collection.extend({
 		  	return pattern.test(data.get("name"));
 		}));
 	} ,
-	localStorage: new Store("Rooms")
+	localStorage: new Store("Rooms") ,
+	url: function() {
+		return '/trn/' + tab.tournament_id + '/rooms';
+	}
 });	
 
 collection.Divisions = Backbone.Collection.extend({
 		model: model.Division ,
-		localStorage: new Store("Divisions")
+		localStorage: new Store("Divisions") ,
+		url: function() {
+			return '/trn/' + tab.tournament_id + '/divisions';
+		}
 });	
 
 collection.Rounds = Backbone.Collection.extend({
@@ -299,6 +287,9 @@ collection.Rounds = Backbone.Collection.extend({
 		comparator: function(round){
 			return round.get("result") === undefined ? -1 : 1;
 		
+		} ,
+		url: function() {
+			return '/trn/' + tab.tournament_id + '/rounds';
 		}
 });	
 
@@ -330,6 +321,7 @@ judges
 
 */
 collection.restoreReferences = function(){
+	console.log("Restoring references");
 	try {
 	//for each collection, restore its references
 	$.each(collection, function(col_name, col){
@@ -345,19 +337,20 @@ collection.restoreReferences = function(){
 			//for each attribute, see if it has an id.
 			$.each(elem.attributes, function(attr_name, attr){
 				//console.log(attr);
-				if(attr != null && attr.id != undefined && (attr.dereferenced == true || attr.dereferenced === "true")){
+
+				if(attr != null && attr.id != undefined){
 					var model = collection.getModelFromId(attr.id);
 					//if we found a model for the id, replace the object copy with the model reference
 					if(model != undefined && typeof model.attributes === "object"){
 						var setmodel = {};
 						setmodel[attr_name] = model;
-						elem.setByName(attr_name, model);
+						elem.setByName(attr_name, model, {silent: true});
 						console.dbg("creating reference from " + col_name + " to " + attr_name);
 					}
 				} else if(attr instanceof Array){ //if we have an array
 					//restore references for each thing in array
 					$.each(attr, function(i, array_attr){
-						if(array_attr.id != undefined && (array_attr.dereferenced == true || array_attr.dereferenced === "true" )){
+						if(array_attr.id != undefined){
 
 							var model = collection.getModelFromId(array_attr.id);
 							//if we found a model for the id, replace the object copy with the model reference
@@ -374,6 +367,7 @@ collection.restoreReferences = function(){
 		});
 
 	});
+
 	} catch(e){
 		console.log(e.message + " " + e.stack);
 	}
@@ -423,6 +417,25 @@ collection.restoreReferences = function(){
 
 }
 
+
+//save every model in every collection
+collection.saveAll = function(){
+	console.log("saving all models");
+	$.each(collection, function(col_name, col){
+		//only do work on collections. The collection namespace also contains function.
+		//skip those with this:
+		if(col instanceof Backbone.Collection === false){
+			return true; //continue
+		}
+		//console.log("checking " + col_name);
+		//for each model in the collection, look for objects in its attributes that should be models.
+		col.forEach(function(elem, index){
+			console.log("elem");
+			console.log(elem);
+			elem.save();
+		});
+	});
+}
 //iterate over every collection, looking for a model with the id
 collection.getModelFromId = function(model_id){
 	var matching_model = undefined;
@@ -481,7 +494,12 @@ collection.exportAll = function(){
 	col.judges = collection.judges;
 	col.rooms = collection.rooms;
 	col.rounds = collection.rounds;
+	var temp = Backbone.Model.prototype.toJSON;
+
+	//TERRIBLE hack to export less data
+	Backbone.Model.prototype.toJSON = Backbone.toJSONReferences;
 	var export_string = JSON.stringify(col);
+	Backbone.Model.prototype.toJSON = temp;
 
 	var uri = 'data:text/plain;charset="UTF-8",' + encodeURIComponent(export_string);
 	window.open(uri, "tournament.json");
@@ -490,6 +508,7 @@ collection.exportAll = function(){
 
 //used to import native JSON format
 collection.importNative = function(json){
+
 	//delete all existing data
 	collection.emptyCollections();
 	localStorage.clear();
@@ -504,8 +523,8 @@ collection.importNative = function(json){
 			//create model
 			var m = new Backbone.Model(col[i]);
 			//push into appropriate collection;
-			collection[index].add(m);
-			m.save();
+			collection[index].add(m, {silent: true});
+			//m.save();
 		}
 	});
 
@@ -628,100 +647,103 @@ collection.deleteModel = function(model){
 }
 
 //deletes EVERYTHING and replaces with joy import
+
+//we don't call .save() because it turns models stored in arrays into dereferenced objects
 collection.importJoyFile = function(joy_file){
-	try {
-		var joy = joy_file.split("\n");
-		if(joy[0] != "Divisions"){
-			return "Not a valid Joy of Tournaments JOT_Debate.txt file.";
-		}
-		//map joy id divisions to our division models
-		var divisions = {}; 
-		var schools = {};
-		
-		collection.emptyCollections();
-
-		var section = "";
-		$.each(joy, function(i, line){
-
-			//keep track of what section we're in
-			if(line === "Divisions"){
-				section = "Divisions";
-				return true;
-			} else if(line === "Schools"){
-				section = "Schools";
-				return true;
-			} else if(line === "Teams"){
-				section = "Teams";
-				return true;
-			} else if(line === "Judges"){
-				section = "Judges";
-				return true;
-			}
-
-			if(section === "Divisions"){
-				var joy_division = collection.parseDivisionLine(line);
-				//console.dbg(joy_division);
-				var division = new model.Division();
-				division.set({division_name: joy_division.name});
-				collection.divisions.add(division);
-				division.save();
-				divisions[joy_division.number] = division;
-			} else if(section === "Schools"){
-				var joy_school = collection.parseSchoolLine(line);
-				//remove "high school" from school name
-				joy_school.name = joy_school.name.replace(/high school/gi, "").trim();
-				var school = new model.School();
-				school.set({school_name: joy_school.name});
-				collection.schools.add(school);
-				school.save();
-				schools[joy_school.number] = school;
-			} else if(section === "Teams"){
-				var joy_team = collection.parseTeamLine(line);
-				var team = new model.Team();
-				team.set({division: divisions[joy_team.division_number], school: schools[joy_team.school_number]});
-				
-				var competitors = [];
-				$.each(joy_team.names, function(i, name){
-					competitors.push({name: name});
-				});
-				team.set({competitors: competitors});
-				//generate team code
-				collection.generateTeamCode(team);
-				collection.teams.add(team);
-				team.save();
-			} else if(section === "Judges"){
-				var joy_judge = collection.parseJudgeLine(line);
-				var judge = new model.Judge();
-				var judge_divisions = [];
-
-				//convert division numbers to actual division model references
-				$.each(joy_judge.division_numbers, function(i, div_num){
-					judge_divisions.push(divisions[div_num]);
-				});
-				judge.set({name: joy_judge.name});
-				judge.set({divisions: judge_divisions});
-				judge.set({school: schools[joy_judge.school_number]});
-				collection.judges.add(judge);
-				judge.save();
-			}
-
-
-		});
-
-		//TODO: 
-		//check competitors per team for each division
-		//check if any teams have duplicate team codes in same division
-
-		$("#import_box").val("");
-		console.dbg("Imported JOT tournament data.");
-		console.dbg("Divisions: " + collection.divisions.length);
-		console.dbg("Schools: " + collection.schools.length);
-		console.dbg("Teams: " + collection.teams.length);
-		console.dbg("Judges: " + collection.judges.length);
-	} catch (e){
-		console.log("Failed to import JOT tournament data.")
-		console.log(e.stack);
+	var joy = joy_file.split("\n");
+	if(joy[0] != "Divisions"){
+		throw new Exception("Not a valid Joy of Tournaments JOT_Debate.txt file.");
 	}
+	//map joy id divisions to our division models
+	var divisions = {}; 
+	var schools = {};
+	
+	collection.emptyCollections();
+
+	var section = "";
+	$.each(joy, function(i, line){
+
+		//keep track of what section we're in
+		if(line === "Divisions"){
+			section = "Divisions";
+			return true;
+		} else if(line === "Schools"){
+			section = "Schools";
+			return true;
+		} else if(line === "Teams"){
+			section = "Teams";
+			return true;
+		} else if(line === "Judges"){
+			section = "Judges";
+			return true;
+		}
+
+		if(section === "Divisions"){
+			var joy_division = collection.parseDivisionLine(line);
+			//console.dbg(joy_division);
+			var division = new model.Division();
+			division.set({division_name: joy_division.name});
+			collection.divisions.add(division);
+			//division.save();
+			divisions[joy_division.number] = division;
+		} else if(section === "Schools"){
+			var joy_school = collection.parseSchoolLine(line);
+			//remove "high school" from school name
+			joy_school.name = joy_school.name.replace(/high school/gi, "").trim();
+			var school = new model.School();
+			school.set({school_name: joy_school.name});
+			collection.schools.add(school);
+			//school.save();
+			schools[joy_school.number] = school;
+		} else if(section === "Teams"){
+			var joy_team = collection.parseTeamLine(line);
+			var team = new model.Team();
+			team.set({division: divisions[joy_team.division_number], school: schools[joy_team.school_number]});
+			
+			var competitors = [];
+			$.each(joy_team.names, function(i, name){
+				competitors.push({name: name});
+			});
+			team.set({competitors: competitors});
+			//generate team code
+			collection.generateTeamCode(team);
+			collection.teams.add(team);
+			//team.save();
+		} else if(section === "Judges"){
+			var joy_judge = collection.parseJudgeLine(line);
+			var judge = new model.Judge();
+			var judge_divisions = [];
+
+			//convert division numbers to actual division model references
+
+			$.each(joy_judge.division_numbers, function(i, div_num){
+				
+				judge_divisions.push(divisions[div_num]);
+			});
+			
+			judge.set({name: joy_judge.name});
+			judge.set({divisions: judge_divisions});
+		
+			judge.set({school: schools[joy_judge.school_number]});
+			collection.judges.add(judge);
+			
+			//judge.save();
+		}
+
+
+	});
+
+	//TODO: 
+	//check competitors per team for each division
+	//check if any teams have duplicate team codes in same division
+
+	$("#import_box").val("");
+	console.dbg("Imported JOT tournament data.");
+	console.dbg("Divisions: " + collection.divisions.length);
+	console.dbg("Schools: " + collection.schools.length);
+	console.dbg("Teams: " + collection.teams.length);
+	console.dbg("Judges: " + collection.judges.length);
+
 }
 
 //parses a line like this:
@@ -764,7 +786,7 @@ collection.parseTeamLine = function(line){
 			//got school number
 			joy_team.school_number = l.substring(1);
 		} else {
-			throw "Unrecognized character in Team line.";
+			throw new Excpetion("Unrecognized character in Team line.");
 		}
 	});
 
@@ -804,7 +826,7 @@ collection.parseDivisionLine = function(line){
 
 collection.parseSchoolLine = function(line){
 	if(line.charAt(0) != "#"){
-		throw "Invalid school line in joy file.";
+		throw new Exception("Invalid school line in joy file.");
 	}
 	var joy_school = {};
 	var section = "numbers";
@@ -910,9 +932,5 @@ collection.judges = new collection.Judges();
 collection.rooms = new collection.Rooms();
 collection.rounds = new collection.Rounds();
 
-
-
-model.tournament = new model.Tournament();
-model.tournament.set({tournament_name: localStorage.getItem("tournament_name") || "Debate Tournament"});
 
 

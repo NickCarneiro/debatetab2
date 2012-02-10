@@ -15,7 +15,8 @@
     , "mime": ">= 1.2.2"
     , "commander": ">= 0.1.0"
     , "clean-css": ">= 0.2.4",
-    "twilio": ">=0.4.0"
+    "twilio": ">=0.4.0",
+    "socket.io": ">=0.8.7"
   },
   "main": "server.js",
   "keywords": ["h5eb", "html5", "express", "boilerplate", "ejs"],

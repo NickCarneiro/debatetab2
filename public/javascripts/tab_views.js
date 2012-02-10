@@ -7,12 +7,19 @@ Define Backbone Views
 
 //utility function to render everything after restoring references
 view.renderAll = function(){
+	console.log("rendering all views");
 	view.divisionTable.render();
 	view.roundTable.render();
 	view.judgeTable.render();
 	view.roomTable.render();
 	view.teamTable.render();
 	view.schoolTable.render();
+
+	view.teamTable.renderDivisionSelect();
+	view.teamTable.render();
+
+	view.roundTable.renderDivisionSelect();
+
 
 }
 
@@ -1061,6 +1068,7 @@ view.SchoolTable = Backbone.View.extend({
 	
 	
 	render: function(){
+		$("#schools_table").html("");
 		_(collection.schools.models).each(function(school){ // in case collection is not empty
         	this.appendSchool(school);
     	}, this);
@@ -1158,6 +1166,7 @@ view.DivisionTable = Backbone.View.extend({
 	} ,
 	
 	render: function(){
+		$("#divisions_table").empty();
 		_(collection.divisions.models).each(function(division){ // in case collection is not empty
         	this.appendDivision(division);
     	}, this);
@@ -1234,12 +1243,22 @@ view.SetupScreen = Backbone.View.extend({
 				var joy_data = $("#import_box").val().trim();
 				collection.importJoyFile(joy_data);
 			}
+			//importing is silent because attempts at rendering 
+			//will fail when references aren't restored.
+			view.renderAll();
+			collection.saveAll();
+			
 			$("#import_data_dialog").dialog("close");
 			//show newly imported teams
 			$("#menu_teams").trigger("click");
 		} catch(e){
-			$("#import_message").text(e.message);
-			e.stack === undefined ? console.log(e.stack) : "";
+			$("#import_message")
+				.text("Tournament data was invalid. Are you sure you selected the proper format above?")
+				.show();
+			console.log(e);
+			if(e.stack != undefined){
+				console.log(e.stack);
+			}
 		}
 		
 	} ,

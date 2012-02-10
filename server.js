@@ -20,6 +20,7 @@ var express = require('express'),
 		cleanCSS = require('clean-css'),
 		app = module.exports = express.createServer();
 		var io = require('socket.io').listen(app);
+		require('./api')(app);
 
 
 /*===========================================================================

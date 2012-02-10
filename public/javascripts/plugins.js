@@ -18,12 +18,6 @@ window.log = function(){
 
 // place any jQuery/helper plugins in here, instead of separate, slower script files.
 
-/**
- * Backbone localStorage Adapter v1.0
- * https://github.com/jeromegn/Backbone.localStorage
- *
- * Date: Sun Aug 14 2011 09:53:55 -0400
- */
 
 /**
  * Backbone localStorage Adapter v1.0
@@ -72,7 +66,8 @@ _.extend(Store.prototype, {
   // Update a model by replacing its copy in `this.data`.
   update: function(model) {
     localStorage.setItem(this.name+"-"+model.id, JSON.stringify(model));
-    if (!_.include(this.records, model.id.toString())) this.records.push(model.id.toString()); this.save();
+    if (!_.include(this.records, model.id.toString())) this.records.push(model.id.toString()); 
+    this.save();
     return model;
   },
 
@@ -99,7 +94,6 @@ _.extend(Store.prototype, {
 // localSync delegate to the model or collection's
 // *localStorage* property, which should be an instance of `Store`.
 Backbone.localSync = function(method, model, options, error) {
-
   // Backwards compatibility with Backbone <= 0.3.3
   if (typeof options == 'function') {
     options = {
@@ -119,6 +113,7 @@ Backbone.localSync = function(method, model, options, error) {
   }
 
   if (resp) {
+    
     options.success(resp);
   } else {
     options.error("Record not found");

@@ -627,8 +627,7 @@ view.TeamForm = Backbone.View.extend({
 					competitors[i-1].phone_number = $(this).val();
 					$(this).val("");
 
-				}
-				
+				}	
 			
 		});
 	
@@ -675,18 +674,27 @@ view.JudgeForm = Backbone.View.extend({
 		//collection.divisions.bind("reset", this.render);
 		//collection.schools.bind("reset", this.render);
 
-		$("#newjudge_school", this.el).append('<option value="no_affiliation">No Affiliation</option>');
-		collection.divisions.each(function(division){ // pre-existing schools
-	    	this.addDivisionCheckbox(division);
-		}, this);
+		
 
-		collection.schools.each(function(school){ // pre-existing schools
-        	this.addSchoolSelect(school);
-    	}, this);
+	
 	} ,
 
 	render: function(model){
 		this.clearEditForm();
+
+		//populate school affiliate dropdown
+		$("#newjudge_school").html("");
+		$("#newjudge_school", this.el).append('<option value="no_affiliation">No Affiliation</option>');
+		collection.schools.each(function(school){ 
+        	this.addSchoolSelect(school);
+    	}, this);
+		   
+		//populate judge checkboxes
+		$("#newjudge_divisions").html("");
+		collection.divisions.each(function(division){ 
+	    	this.addDivisionCheckbox(division);
+		}, this);
+
 		if(model != undefined){
 			this.model = model;
 			$("#newjudge_id").val(this.model.get("id"));

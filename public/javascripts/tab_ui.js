@@ -77,6 +77,7 @@ collection.rounds.fetch({silent:true});
 collection.restoreReferences();	
 
 
+
 /*
 =========================================
 Initialize Backbone Views
@@ -100,6 +101,9 @@ view.schoolForm = new view.SchoolForm();
 view.divisionForm = new view.DivisionForm();
 view.roundForm = new view.RoundForm();
 view.setupScreen = new view.SetupScreen();
+
+view.renderAll();
+
 
 /*
 =========================================
