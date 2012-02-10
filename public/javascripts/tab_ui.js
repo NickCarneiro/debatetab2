@@ -185,6 +185,46 @@ $("#pair_print_pairings").click(function(){
 });
 
 
+$("#save_to_database").click(function(){
+	var tourneyData = {};
+	tourneyData.divisions = collection.divisions;
+	tourneyData.teams = collection.teams;
+	tourneyData.schools = collection.schools;
+	tourneyData.judges = collection.judges;
+	tourneyData.rooms = collection.rooms;
+	tourneyData.rounds = collection.rounds;
+	tourneyData.tourney_id = 12812;	//date of tourney
+	
+	var export_string = JSON.stringify(tourneyData,"",'\t');
+	console.log(export_string);
+	
+	$.post('/saveTourney', {tourneyData: export_string},
+		function(data){
+				
+		
+		});
+
+});
+
+
+$("#get_from_database").click(function(){
+
+	$.get('/getTourney', function(data){
+		
+		collection.import(data);
+		
+	});
+
+});
+
+$("#validate_round").click(function(){
+		
+		round_number = $("#rounds_round_number_select").val();
+		division = $("#rounds_division_select").val();
+		pairing.validateRounds(round_number, division);
+		console.log("clicked");
+});
+
 /*
 =========================================
 Edit round event bindings
@@ -221,7 +261,6 @@ $("#print_boxes").click(function(){
 
 
 
-
 //grow tables to fill window space after forms
 
 /*
@@ -229,6 +268,7 @@ $("#print_boxes").click(function(){
 Miscellaneous visual effects
 =========================================
 */	
+
 
 
 });

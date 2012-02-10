@@ -18,9 +18,11 @@ var express = require('express'),
 		sys = require('util'),
 		mime = require('mime'),
 		cleanCSS = require('clean-css'),
-		app = module.exports = express.createServer();
+		app = module.exports = express.createServer(),
+		db = require('mongojs').connect("mongodb://localhost/test", ["TournamentData"]);
 		var io = require('socket.io').listen(app);
 		require('./api')(app);
+
 
 
 /*===========================================================================
@@ -112,7 +114,7 @@ app.configure('development', function() {
 	var Client = require('twilio').Client,
 	Twiml = require('twilio').Twiml,
 	sys = require('sys'),
-	tClient = new Client('AC89170a4e43fc4a38daed8f055879a20f', 'b6fd343fee0be8aaad34ed8df07ffb3f', 'debatetab.com', {port:3019});
+	tClient = new Client('AC89170a4e43fc4a38daed8f055879a20f', 'b6fd343fee0be8aaad34ed8df07ffb3f', 'debatetab.com', {port:3021});
 
 	var phone = tClient.getPhoneNumber('+15128430409');
 	// code to send MASS texts
@@ -253,6 +255,39 @@ app.get('/', function(req, res) {
 		javascripts: [],
 		stylesheets: []
 	});
+});
+
+app.post('/saveTourney',function(req,res){
+
+		res.send("success");
+		
+		db.TournamentData.find({tourney_id: 12812},function(err,doc){
+			if(doc.length> 0)
+			{
+				db.TournamentData.update({tourney_id: 12812},JSON.parse(req.body.tourneyData));
+			}
+			else
+			{
+				db.TournamentData.insert(JSON.parse(req.body.tourneyData));
+			}
+		});	
+});
+
+app.get('/getTourney',function(req,res){
+
+	db.TournamentData.find({tourney_id: 12812},function(err,doc){
+			
+			if(doc.length> 0)
+			{
+				res.send(doc);
+			}
+			else
+			{
+				res.send("does not exist");
+			}
+		});	
+		
+
 });
 
 /*===========================================================================

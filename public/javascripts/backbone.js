@@ -303,7 +303,6 @@
     // If the server returns an attributes hash that differs, the model's
     // state will be `set` again.
     save: function(key, value, options) {
-      console.log(this);
       var attrs, current;
       if (_.isObject(key) || key == null) {
         attrs = key;

@@ -512,13 +512,17 @@ collection.importNative = function(json){
 	//delete all existing data
 	collection.emptyCollections();
 	localStorage.clear();
-
-	var collections = JSON.parse(json);
+	
+	var collections =(json);
 	//col is plain javascript object containing arrays.
-
+	
 	//create models and push to collections.
-	$.each(collections, function(index, col){
+	delete collections[0]._id;
+	delete collections[0].tourney_id;
+	console.log(collections[0]);
+	$.each(collections[0], function(index, col){
 		console.log("importing " + index);
+		
 		for(var i = 0; i < col.length; i++){
 			//create model
 			var m = new Backbone.Model(col[i]);

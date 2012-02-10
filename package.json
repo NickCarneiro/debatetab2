@@ -1,28 +1,29 @@
 {
-  "name": "Express-EJS-Boilerplate",
-  "description": "HTML5 Express EJS Boilerplate. None of that jade or stylus business. Straight CSS and EJS templating.",
-  "version": "0.0.1",
-  "author": "Nick Carneiro <nickc@trillworks.com>",
-  "contributors": [
-    {"name": "Nick Baugh", "email": "niftylettuce@gmail.com" },
-    {"name": "Nick Carneiro", "email": "nickc@trillworks.com"}
-  ],
-  "dependencies": {
-      "express": ">= 2.4.6"
-    , "ejs": ">= 0.5.0"
-    , "inspect": ">= 0.0.2"
-    , "colors": ">= 0.5.0"
-    , "mime": ">= 1.2.2"
-    , "commander": ">= 0.1.0"
-    , "clean-css": ">= 0.2.4",
-    "twilio": ">=0.4.0",
-    "socket.io": ">=0.8.7"
-  },
-  "main": "server.js",
-  "keywords": ["h5eb", "html5", "express", "boilerplate", "ejs"],
-  "repository": "git://github.com/niftylettuce/html5-express-boilerplate",
-  "bin": { "h5eb": "./bin/h5eb" },
-  "scripts": { "prepublish" : "npm prune" },
-  "engines": { "node": ">= 0.4.9 < 0.7.0" }
+	"name": "DebateTab2",
+	"description": "Registration and tabulation software for speech and debate tournaments.",
+	"version": "0.0.1",
+	"author": "Nick Carneiro <nickc@trillworks.com>",
+	"contributors": [
+		{"name": "Nick Carneiro", "email": "nickc@trillworks.com"},
+		{"name": "Ali Nabi", "email": "alian36@gmail.com"}
+	],
+	"dependencies": {
+		"express": ">= 2.4.6" ,
+		"ejs": ">= 0.5.0" ,
+		"inspect": ">= 0.0.2" ,
+		"colors": ">= 0.5.0" ,
+		"mime": ">= 1.2.2" ,
+		"commander": ">= 0.1.0" ,
+		"clean-css": ">= 0.2.4",
+		"twilio": ">=0.4.0",
+		"socket.io": ">=0.8.7",
+		"mongojs": ">= 0.2.6"
+	},
+	"main": "server.js",
+	"keywords": ["h5eb", "html5", "express", "boilerplate", "ejs"],
+	"repository": "git://github.com/niftylettuce/html5-express-boilerplate",
+	"bin": { "h5eb": "./bin/h5eb" },
+	"scripts": { "prepublish" : "npm prune" },
+	"engines": { "node": ">= 0.4.9 < 0.7.0" }
 }
 

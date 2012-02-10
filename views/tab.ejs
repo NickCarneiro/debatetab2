@@ -126,7 +126,7 @@
 					<label id="lpw_label" for="edit_round_lpw">Low point win: </label><input type="checkbox" id="edit_round_lpw" /> 
 					<div id="selected_winner"></div>
 					<span id="edit_round_error"></span>
-					
+
 				</div>
 		</div>
 
@@ -181,7 +181,7 @@
 		<div id="judges_container" class="main_container hidden span9 block">
 			<div id="judges" class="subcontainer">
 				<div class="top_buttons">
-					<button id="add_judge">Add Judge</button>
+					<button class="btn btn-large" id="add_judge">Add Judge</button>
 				</div>
 				<div id="judge_form" class="input_form dialog">
 					<input id="newjudge_id" type="hidden" value=""/>
@@ -215,7 +215,7 @@
 			<div id="rooms" class="subcontainer">
 		
 				<div class="top_buttons">
-				<button id="add_room">Add Room</button>
+				<button class="btn btn-large" id="add_room">Add Room</button>
 				</div>
 				<div id="room_form" class="input_form dialog">
 					<input id="newroom_id" type="hidden" value=""/>
@@ -242,7 +242,7 @@
 		</div>
 		<div id="schools_container" class="main_container hidden span9 block">
 			<div id="schools" class="subcontainer">
-				<div class="top_buttons"><button id="add_school">Add School</button></div>
+				<div class="top_buttons"><button class="btn btn-large" id="add_school">Add School</button></div>
 				<div id="school_form" class="input_form dialog">
 					
 					<input id="newschool_id" type="hidden" value=""/>
@@ -263,7 +263,7 @@
 		<div id="divisions_container" class="main_container hidden span9 block">
 			<div id="divisions" class="subcontainer">
 			<div class="top_buttons">
-			<button id="add_division">Add Division</button>
+			<button class="btn btn-large" id="add_division">Add Division</button>
 			</div>
 			
 			
@@ -326,6 +326,27 @@
 			</div>
 		</div>
 
+		<div id="debug_container" class="main_container hidden span9 block">
+				<div id="debug" class="subcontainer">
+					<div id="debug_tournament_id"></div>
+					<button class="btn btn-large" id="toggle_debug">Toggle debug</button><br />
+					<h1>Pairing</h1>
+					
+					<button class="btn btn-large" id="pair_print_pairings">Print all pairings</button>
+
+					<h1>LocalStorage </h1>
+					<button class="save_button btn btn-large" id="save_state">Save state</button> <br />
+					<button class="btn btn-large" id="clear_storage">Clear Storage</button>  <br />
+				
+					<h1>SMS</h1>
+					
+					Phone Number: <br /><input type="text" id="debug_sms_input_phone"/><br />
+					Message: <br /> <textarea id="debug_sms_input_message"></textarea><br />
+					<button class="btn btn-large" id="single_text">Send Single Text</button> <br /><br />
+
+				</div>
+		</div>
+		
 		<div id="settings_container" class="main_container hidden span9 block">
 			<div id="setup" class="subcontainer">
 				<div class="top_buttons">
@@ -358,31 +379,7 @@
 				</div>
 			</div>
 		</div>
-		<div id="debug_container" class="main_container hidden span9 block">
-				<div id="debug" class="subcontainer">
-					<div id="debug_tournament_id"></div>
-					<button id="toggle_debug">Toggle debug</button><br />
-					<h1>Pairing</h1>
-					
-					<button id="pair_print_pairings">Print all pairings</button>
-
-					<h1>LocalStorage </h1>
-					<button class="save_button" id="save_state">Save state</button> <br />
-					<button id="clear_storage">Clear Storage</button>  <br />
-				
-					<h1>SMS</h1>
-					
-					Phone Number: <br /><input type="text" id="debug_sms_input_phone"/><br />
-					Message: <br /> <textarea id="debug_sms_input_message"></textarea><br />
-					<button id="single_text">Send Single Text</button> <br /><br />
-				
-					
-					
-				</div>
-		</div>
-
-		
-
+	
 		
 		
 </div>
