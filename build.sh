@@ -9,6 +9,7 @@ cat public/javascripts/jquery.tmpl.js \
 	public/javascripts/underscore.js \
 	public/javascripts/backbone.js \
 	public/javascripts/plugins.js \
+	public/javascripts/backbone.io.js \
 	public/javascripts/tab_main.js \
 	public/javascripts/tab_collections.js \
 	public/javascripts/tab_pairing.js \

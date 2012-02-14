@@ -988,7 +988,7 @@ view.SchoolForm = Backbone.View.extend({
 			modal: true,
 			buttons: {
 				"Save": {
-					text: "Add School",
+					text: "Save",
 					click: function(){
 						view.schoolForm.addSchool();
 					},
@@ -1027,7 +1027,6 @@ view.SchoolForm = Backbone.View.extend({
 		{
 			
 			var school = collection.getSchoolFromId(id);
-			console.log(school);
 			school.set({
 			
 				school_name: school_name

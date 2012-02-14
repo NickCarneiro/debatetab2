@@ -69,7 +69,7 @@ Load localStorage into Collections
 //note: calling fetch runs the constructors of the models.
 collection.teams.fetch({silent:true});
 collection.divisions.fetch({silent:true});
-collection.schools.fetch({silent:true});
+collection.schools.fetch();
 collection.judges.fetch({silent:true});
 collection.rooms.fetch({silent:true});
 collection.rounds.fetch({silent:true});

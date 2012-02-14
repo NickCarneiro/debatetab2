@@ -122,9 +122,10 @@ Backbone.localSync = function(method, model, options, error) {
 
 // Override 'Backbone.sync' to default to localSync, 
 // the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
+/*
 Backbone.ajaxSync = Backbone.sync;
 Backbone.sync = Backbone.localSync;
-
+*/
 
 
 /*

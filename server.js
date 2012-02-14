@@ -19,9 +19,21 @@ var express = require('express'),
 		mime = require('mime'),
 		cleanCSS = require('clean-css'),
 		app = module.exports = express.createServer(),
-		db = require('mongojs').connect("mongodb://localhost/test", ["TournamentData"]);
-		var io = require('socket.io').listen(app);
-		require('./api')(app);
+		$ = require("cheerio");
+		app.cheerio = $;
+		var mongoose = require("mongoose");
+		var Models = require("./tab_models");
+		var backboneio = require("backbone.io");
+		
+		var school_backend = backboneio.createBackend();
+		var School = mongoose.model('School', Models.School);
+		school_backend.use(backboneio.middleware.mongooseStore(School));
+		
+		mongoose.connect('mongodb://localhost/test');
+		backboneio.listen(app, { schools: school_backend });
+
+
+
 
 
 
@@ -73,12 +85,17 @@ app.configure('development', function() {
 		'jquery.tmpl.js',
 		'jquery-ui-1.8.17.custom.min.js', 
 		'bootstrap.js',
-		'socket.io.js' ,
+		
+		
 		'underscore.js', 
 		'backbone.js', 
+		
 		'plugins.js',
 		'tab_main.js', 
+		'socket.io.js' ,
+		'backbone.io.js' ,
 		'tab_collections.js', 
+
 		'tab_pairing.js', 
 		'tab_views.js', 
 		'tab_views_forms.js',

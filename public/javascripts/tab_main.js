@@ -5,8 +5,6 @@ Author: Nick Carneiro
 =====
 */
 
-
-
 var tab = {
 	debug: false,
 	warnings: [],

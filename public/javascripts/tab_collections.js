@@ -240,6 +240,12 @@ collection.Schools = Backbone.Collection.extend({
 		}));
 	} ,
 	localStorage: new Store("Schools") ,
+	backend: "schools" ,
+	initialize: function() {
+	    this.bindBackend();
+	} ,
+
+
 
 	url: function() {
 		return '/trn/' + tab.tournament_id + '/schools';
@@ -923,18 +929,6 @@ collection.sortSpeakers = function(speaker1, speaker2){
 		}
 	}
 }
-
-/*
-=========================================
-Initialize Backbone Collections
-=========================================
-*/	
-collection.divisions = new collection.Divisions();
-collection.teams = new collection.Teams();
-collection.schools = new collection.Schools();
-collection.judges = new collection.Judges();
-collection.rooms = new collection.Rooms();
-collection.rounds = new collection.Rounds();
 
 
 
