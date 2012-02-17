@@ -99,8 +99,8 @@ view.RoundForm = Backbone.View.extend({
 			neg = round.get("team1");
 		}
 
-		var aff_id = aff === undefined ? -1 : aff.get("id");
-		var neg_id = neg === undefined ? -1 : neg.get("id");
+		var aff_id = aff === undefined ? -1 : aff.id;
+		var neg_id = neg === undefined ? -1 : neg.id;
 		
 		//draw left side of form (aff)
 		var competitors = aff === undefined ? undefined : aff.get("competitors");
@@ -157,9 +157,9 @@ view.RoundForm = Backbone.View.extend({
 		
 
 		//select correct room and judge from dropdowns
-		var judge_id = round.get("judge") === undefined ? "-1" : round.get("judge").get("id");
+		var judge_id = round.get("judge") === undefined ? "-1" : round.get("judge").id;
 		$("#edit_round_judge").val(judge_id);
-		var room_id = round.get("room") === undefined ? "-1" : round.get("room").get("id");
+		var room_id = round.get("room") === undefined ? "-1" : round.get("room").id;
 		$("#edit_round_room").val(room_id);
 		//populate result box
 		
@@ -213,14 +213,14 @@ view.RoundForm = Backbone.View.extend({
 			if(collection.rooms.at(i).get("division") != division){
 				continue;
 			}
-			$("#edit_round_room").append('<option value="'+collection.rooms.at(i).get("id")+'">'
+			$("#edit_round_room").append('<option value="'+collection.rooms.at(i).id+'">'
 				+ collection.rooms.at(i).get("name") +'</option>');
 
 		}
 
 		for(var i = 0; i < collection.judges.length; i++){
 			
-			$("#edit_round_judge").append('<option value="'+collection.judges.at(i).get("id")+'">'
+			$("#edit_round_judge").append('<option value="'+collection.judges.at(i).id+'">'
 				+ collection.judges.at(i).get("name") +'</option>');
 
 		}
@@ -240,10 +240,10 @@ view.RoundForm = Backbone.View.extend({
 				continue;
 			}
 
-			$("#left_team_select").append('<option value="'+collection.teams.at(i).get("id")+'">'
+			$("#left_team_select").append('<option value="'+collection.teams.at(i).id+'">'
 				+ collection.teams.at(i).get("team_code") +'</option>');
 
-			$("#right_team_select").append('<option value="'+collection.teams.at(i).get("id")+'">'
+			$("#right_team_select").append('<option value="'+collection.teams.at(i).id+'">'
 			+ collection.teams.at(i).get("team_code") +'</option>');
 		}
 
@@ -464,9 +464,9 @@ view.TeamForm = Backbone.View.extend({
 		if(model != undefined){
 			this.model = model;
 		
-			$("#newteam_id").val(this.model.get("id"));
-			$("#newteam_division").val(this.model.get("division").get("id"));
-			$("#newteam_school").val(this.model.get("school").get("id")); 	
+			$("#newteam_id").val(this.model.id);
+			$("#newteam_division").val(this.model.get("division").id);
+			$("#newteam_school").val(this.model.get("school").id); 	
 			$("#newteam_name").val(this.model.get("team_code"));
 			$("#newteam_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
 			$("#newteam_competitors").html('');
@@ -565,7 +565,7 @@ view.TeamForm = Backbone.View.extend({
 		collection.divisions.each( 
 			function(division){
 
-				if(division.get("id") == division_id){
+				if(division.id == division_id){
 
 					comp_per_team = division.get("comp_per_team");
 				}
@@ -659,7 +659,6 @@ view.TeamForm = Backbone.View.extend({
 		
 		var team = new model.Team();
 			team.set({
-				id: (new ObjectId).toString(),
 				team_code: team_code,
 				school: school,
 				competitors: competitors,
@@ -708,9 +707,9 @@ view.JudgeForm = Backbone.View.extend({
 
 		if(model != undefined){
 			this.model = model;
-			$("#newjudge_id").val(this.model.get("id"));
+			$("#newjudge_id").val(this.model.id);
 			$("#new_judge_name").val(this.model.get("name"));
-			$("#newjudge_school").val(this.model.get("school") === undefined ? "no_affiliation" : this.model.get("school").get("id")); 	
+			$("#newjudge_school").val(this.model.get("school") === undefined ? "no_affiliation" : this.model.get("school").id); 	
 			
 			var div = this.model.get("divisions");
 			
@@ -738,7 +737,7 @@ view.JudgeForm = Backbone.View.extend({
 			modal: true,
 			buttons: {
 				"Save": {
-					text: "Add Judge",
+					text: "Save",
 					click: function(){
 						view.judgeForm.addJudge();
 					},
@@ -832,7 +831,6 @@ view.JudgeForm = Backbone.View.extend({
 		var judge = new model.Judge();
 		judge.set({
 			
-			id: (new ObjectId).toString(),
 			name: judge_name,
 			school: school,
 			divisions: divisions,
@@ -866,9 +864,9 @@ view.RoomForm = Backbone.View.extend({
 		
 		if(model != undefined){	
 			this.model = model;
-			$("#newroom_id").val(this.model.get("id"));
+			$("#newroom_id").val(this.model.id);
 			$("#newroom_name").val(this.model.get("name"));
-			$("#newroom_division").val((this.model.get("division").get("id")));
+			$("#newroom_division").val((this.model.get("division").id));
 			$("#newroom_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
 		}
 		$("#room_form").dialog({
@@ -877,7 +875,7 @@ view.RoomForm = Backbone.View.extend({
 			modal: true,
 			buttons: {
 				"Save": {
-					text: "Add Room",
+					text: "Save",
 					click: function(){
 						view.roomForm.addRoom();
 					},
@@ -931,7 +929,6 @@ view.RoomForm = Backbone.View.extend({
 
 		
 		if(id.length > 0){
-			
 			var room = collection.getRoomFromId(id);
 			room.set({
 				
@@ -942,9 +939,7 @@ view.RoomForm = Backbone.View.extend({
 		});
 		}else{
 		
-		var room = new model.Room();
-		room.set({
-			id: (new ObjectId).toString(),
+		var room = new model.Room({
 			name: room_name, 
 			division: division,
 			stop_scheduling: stop_scheduling
@@ -977,7 +972,7 @@ view.SchoolForm = Backbone.View.extend({
 			this.model = model;
 
 			//populate form with existing values
-			$("#newschool_id").val(this.model.get("id"));
+			$("#newschool_id").val(this.model.id);
 			$("#newschool_name").val(this.model.get("school_name"));
 
 
@@ -1025,7 +1020,6 @@ view.SchoolForm = Backbone.View.extend({
 		
 		if(id.length > 0)
 		{
-			
 			var school = collection.getSchoolFromId(id);
 			school.set({
 			
@@ -1034,11 +1028,9 @@ view.SchoolForm = Backbone.View.extend({
 			});
 		}
 		else {
-
 			var school = new model.School();
 			school.set({
 			
-				id		   : (new ObjectId).toString(),
 				school_name: school_name
 			
 			});
@@ -1068,7 +1060,7 @@ view.DivisionForm = Backbone.View.extend({
 			this.model = model;
 		
 			//populate form with existing values
-			$("#newdiv_id").val(this.model.get("id"));
+			$("#newdiv_id").val(this.model.id);
 			$("#newdiv_division_name").val(this.model.get("division_name"));
 			$("#newdiv_comp_per_team").val(this.model.get("comp_per_team"));
 			$("#newdiv_flighted_rounds").attr("checked", this.model.get("flighted_rounds"));
@@ -1082,7 +1074,7 @@ view.DivisionForm = Backbone.View.extend({
 			modal: true,
 			buttons: {
 				"Save": {
-					text: "Add Division",
+					text: "Save",
 					click: function(){
 						view.divisionForm.addDivision();
 						$(this).dialog("close");
@@ -1154,9 +1146,7 @@ view.DivisionForm = Backbone.View.extend({
 
 		//check if we are modifying an existing division or created a new one
 		var id = $("#newdiv_id").val();
-		console.log(id);
 		if(id.length > 0){
-			console.log("updating existing model");
 			//update existing model
 			var division = collection.getDivisionFromId(id);
 			division.set({
@@ -1171,10 +1161,8 @@ view.DivisionForm = Backbone.View.extend({
 
 		});
 		} else {
-			console.log("creating new model");
 			var division = new model.Division();
 			division.set({
-			id				: (new ObjectId).toString(),
 			division_name	: division_name,
 			comp_per_team	: comp_per_team,
 			flighted_rounds	: flighted_rounds,

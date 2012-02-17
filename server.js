@@ -25,12 +25,25 @@ var express = require('express'),
 		var Models = require("./tab_models");
 		var backboneio = require("backbone.io");
 		
+		//set up backends for each collection
 		var school_backend = backboneio.createBackend();
 		var School = mongoose.model('School', Models.School);
 		school_backend.use(backboneio.middleware.mongooseStore(School));
+
+		var division_backend = backboneio.createBackend();
+		var Division = mongoose.model('Division', Models.Division);
+		division_backend.use(backboneio.middleware.mongooseStore(Division));
+
+		var room_backend = backboneio.createBackend();
+		var Room = mongoose.model('Room', Models.Room);
+		room_backend.use(backboneio.middleware.mongooseStore(Room));
+
+		var judge_backend = backboneio.createBackend();
+		var Judge = mongoose.model('Judge', Models.Judge);
+		judge_backend.use(backboneio.middleware.mongooseStore(Judge));
 		
 		mongoose.connect('mongodb://localhost/test');
-		backboneio.listen(app, { schools: school_backend });
+		backboneio.listen(app, { schools: school_backend, divisions: division_backend, rooms: room_backend, judges: judge_backend });
 
 
 

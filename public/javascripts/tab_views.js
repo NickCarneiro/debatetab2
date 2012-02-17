@@ -39,10 +39,10 @@ view.DivisionOption = Backbone.View.extend({
 	} ,
 	render: function(){
 		//associate data element "id" with ObjectId in case we want to use this later
-		$(this.el).data("id", this.model.get("id"));
+		$(this.el).data("id", this.model.id);
 		//set the value attr to the ObjectId
 		//This will be read by jQuery to figure out which division was selected
-		$(this.el).attr("value", this.model.get("id"));
+		$(this.el).attr("value", this.model.id);
 		$(this.el).html(this.model.get("division_name"));
 		return this; //required for chainable call, .render().el ( in appendTeam)
 	} ,
@@ -68,10 +68,10 @@ view.SchoolOption = Backbone.View.extend({
 	} ,
 	render: function(){
 		//associate data element "id" with ObjectId in case we want to use this later
-		$(this.el).data("id", this.model.get("id"));
+		$(this.el).data("id", this.model.id);
 		//set the value attr to the ObjectId
 		//This will be read by jQuery to figure out which division was selected
-		$(this.el).attr("value", this.model.get("id"));
+		$(this.el).attr("value", this.model.id);
 		$(this.el).html(this.model.get("school_name"));
 		return this; //required for chainable call, .render().el ( in appendTeam)
 	} ,
@@ -267,11 +267,11 @@ view.DivisionCheckbox = Backbone.View.extend({
 	} ,
 	render: function(){
 		//associate data element "id" with ObjectId in case we want to use this later
-		$(this.el).data("id", this.model.get("id"));
+		$(this.el).data("id", this.model.id);
 		//set the value attr to the ObjectId
 		//This will be read by jQuery to figure out which division was selected
-		$(this.el).attr("value", this.model.get("id"));
-		$(this.el).data("division_id", this.model.get("id"));
+		$(this.el).attr("value", this.model.id);
+		$(this.el).data("division_id", this.model.id);
 		$(this.el).html('<input class="division_list" type="checkbox" /> ' + this.model.get("division_name"));
 		return this; //required for chainable call, .render().el ( in appendTeam)
 	} ,
@@ -324,20 +324,30 @@ view.Judge = Backbone.View.extend({
 		
 	} ,
 	render: function(){
-		var divisions = this.model.get("divisions");
-		var div_string = "";
-		for(var i = 0; i < divisions.length; i++){
-			var div = "";
-			if(divisions[i] != undefined){
-				div = divisions[i].get("division_name");
-			}
+		try {
 			
-			div_string = div_string + div + " ";
-		}
-		var school = this.model.get("school") === undefined ? "None" : this.model.get("school").get("school_name");
+			
+			var divisions = this.model.get("divisions");
+			var div_string = "";
+			for(var i = 0; i < divisions.length; i++){
+				var div = "";
+				if(divisions[i] != undefined){
+					div = divisions[i].get("division_name");
+				}
+				
+				div_string = div_string + div + " ";
+			}
+			var school = this.model.get("school") === undefined ? "None" : this.model.get("school").get("school_name");
 
-		$(this.el).html('<td class="name row">' + this.model.get("name") + '</td><td class="row">'+ school +'</td><td class="row">' + div_string + '</td><td class="remove"><button>Remove</button></td>');
-		return this; //required for chainable call, .render().el ( in appendJudge)
+			$(this.el).html('<td class="name row">' + this.model.get("name") + '</td><td class="row">'+ school +'</td><td class="row">' + div_string + '</td><td class="remove"><button>Remove</button></td>');
+		} catch(e) {
+		 	console.log(e.stack())
+		}
+		finally {
+			
+		
+			return this; //required for chainable call, .render().el ( in appendJudge)
+		}
 	} ,
 	unrender: function(){
 		$(this.el).remove();
@@ -363,6 +373,7 @@ view.JudgeTable = Backbone.View.extend({
 
 		collection.judges.bind("reset", this.render, this);
 		collection.schools.bind("reset", this.render, this);
+		collection.schools.bind("change", this.render, this);
 		collection.divisions.bind("reset", this.render, this);
 
 		
@@ -446,12 +457,18 @@ view.Room = Backbone.View.extend({
 		});
 	} ,
 	render: function(){
+		try {
 		var division = this.model.get("division");
-		var division_name = division ? division.get("division_name") : "No Room Name";
+
+		var division_name = (division === undefined) ? "No division" : division ? division.get("division_name") : "No Division Assigned";
 		$(this.el).html('<td class="name">' + this.model.get("name") + '</td>' +
 			' <td>' + division_name + '</td>' +
 			'<td class="remove"><button>Remove</button></td>');
-		return this; //required for chainable call, .render().el ( in appendRoom)			.get("division_name")
+		} catch(e){
+			console.log(e.stack);
+		} finally {
+			return this;
+		}
 	} ,
 	unrender: function(){
 		$(this.el).remove();
@@ -532,10 +549,10 @@ view.RoomOption = Backbone.View.extend({
 	} ,
 	render: function(){
 		//associate data element "id" with ObjectId in case we want to use this later
-		$(this.el).data("id", this.model.get("id"));
+		$(this.el).data("id", this.model.id);
 		//set the value attr to the ObjectId
 		//This will be read by jQuery to figure out which division was selected
-		$(this.el).attr("value", this.model.get("id"));
+		$(this.el).attr("value", this.model.id);
 		$(this.el).html(this.model.get("school_name"));
 		return this; //required for chainable call, .render().el ( in appendTeam)
 	} ,

@@ -294,6 +294,8 @@
       options.success = function(resp, status, xhr) {
         if (!model.set(model.parse(resp, xhr), options)) return false;
         if (success) success(model, resp);
+
+        
       };
       options.error = Backbone.wrapError(options.error, model, options);
       return (this.sync || Backbone.sync).call(this, 'read', this, options);
@@ -324,7 +326,6 @@
       options.success = function(resp, status, xhr) {
     
         var serverAttrs = model.parse(resp, xhr);
-        //console.log(serverAttrs);
         if (options.wait) serverAttrs = _.extend(attrs || {}, serverAttrs);
         if (!model.set(serverAttrs, options)) return false;
         if (success) {
@@ -332,10 +333,13 @@
         } else {
           model.trigger('sync', model, resp, options);
         }
+
+         
       };
       options.error = Backbone.wrapError(options.error, model, options);
       var method = this.isNew() ? 'create' : 'update';
       var xhr = (this.sync || Backbone.sync).call(this, method, this, options);
+     
       if (options.wait) this.set(current, silentOptions);
       return xhr;
     },
@@ -389,7 +393,8 @@
 
     // A model is new if it has never been saved to the server, and lacks an id.
     isNew: function() {
-      return this.id == null;
+      return this.get("updated") === undefined;
+
     },
 
     // Call this method to manually fire a `"change"` event for this model and
@@ -1299,7 +1304,7 @@ Backbone.Model.prototype.setByName = function(key, value, options) {
     this.set(setter, options); 
 };
 
-
+Backbone.newMap = {};
 Backbone.toJSONReferences = function(){
   var clone =  _.clone(this.attributes);
   //we want to copy one more layer deep so we copy array of division references.

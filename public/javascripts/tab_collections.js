@@ -16,8 +16,8 @@ model.Competitor = Backbone.Model.extend({
 });
 
 model.Team = Backbone.Model.extend({
+	idAttribute: "_id",
 	default: {
-		id			: null ,
 		team_code	: "default team_code" ,
 		division	: null , //reference to division
 		school	: null , //reference to school
@@ -31,47 +31,41 @@ model.Team = Backbone.Model.extend({
 	initialize: function() {
 		if(this.id === undefined){
 			this.set({
-				id: (new ObjectId()).toString()
+				_id: (new ObjectId()).toString()
 			});
 		}
+		this.set({tournament_id: tab.tournament_id});
 		
 	} 
 });
 
 model.School = Backbone.Model.extend({
-	default: {
-		id: null,
-		school_name: "DEFAULT_SCHOOL_NAME",
-		division: null
-
-	} ,
+	idAttribute: "_id" ,
 	initialize: function() {
 		if(this.id === undefined){
 			this.set({
-				id: (new ObjectId()).toString()
+				_id: (new ObjectId()).toString()
 			});
 		}
+
+		this.set({tournament_id: tab.tournament_id});
 	}
 });
 
 model.Room = Backbone.Model.extend({
-	default: {
-		id: null,
-		school_name: "DEFAULT_ROOM_NAME",
-		division: null,
-		name: null
-
-	} ,
+	idAttribute: "_id" ,
 	initialize: function() {
 		if(this.id === undefined){
 			this.set({
-				id: (new ObjectId()).toString()
+				_id: (new ObjectId()).toString()
 			});
 		}
+		this.set({tournament_id: tab.tournament_id});
 	}
 });
 
 model.Judge = Backbone.Model.extend({
+	idAttribute: "_id" ,
 	default: {
 		id			: null,
 		name		: null,
@@ -80,9 +74,10 @@ model.Judge = Backbone.Model.extend({
 	initialize: function() {
 		if(this.id === undefined){
 			this.set({
-				id: (new ObjectId()).toString()
+				_id: (new ObjectId()).toString()
 			});
 		}	
+		this.set({tournament_id: tab.tournament_id});
 	}
     
 });
@@ -90,6 +85,7 @@ model.Judge = Backbone.Model.extend({
 
 
 model.Round = Backbone.Model.extend({
+	idAttribute: "_id" ,
 	default: {
 		division	: null, //ref to division
 		team1		: null, //reference to team1 in teams collection
@@ -116,9 +112,10 @@ model.Round = Backbone.Model.extend({
 	initialize: function(){
 		if(this.id === undefined){
 			this.set({
-			id: (new ObjectId()).toString()
+			_id: (new ObjectId()).toString()
 			});
 		}	
+		this.set({tournament_id: tab.tournament_id});
 	},
 
 	//returns winning team, false if no winner
@@ -154,6 +151,7 @@ model.Round = Backbone.Model.extend({
 
 
 model.Division = Backbone.Model.extend({
+	idAttribute: "_id" ,
 	default: {
 		id				: null ,
 		division_name	: "VCX" ,  //eg: VCX, NLD
@@ -171,9 +169,10 @@ model.Division = Backbone.Model.extend({
 		
 		if(this.id === undefined){
 			this.set({
-				id: new ObjectId().toString()
+				_id: new ObjectId().toString()
 			});
 		}
+		this.set({tournament_id: tab.tournament_id});
 	}
 });
 
@@ -224,6 +223,10 @@ collection.Judges = Backbone.Collection.extend({
 			return team.get("name");
 		},
 		localStorage: new Store("Judges") ,
+		backend: "judges",
+		initialize: function() {
+		    this.bindBackend();
+		} ,
 		url: function() {
 			return '/trn/' + tab.tournament_id + '/judges';
 		}
@@ -245,7 +248,9 @@ collection.Schools = Backbone.Collection.extend({
 	    this.bindBackend();
 	} ,
 
-
+	comparator: function(team){
+		return team.get("school_name");
+	},
 
 	url: function() {
 		return '/trn/' + tab.tournament_id + '/schools';
@@ -254,6 +259,10 @@ collection.Schools = Backbone.Collection.extend({
 
 collection.Rooms = Backbone.Collection.extend({
 	model: model.Room ,
+	backend: "rooms" ,
+	initialize: function() {
+	    this.bindBackend();
+	} ,
 	search : function(letters){
 		if(letters == "") return this;
 
@@ -271,6 +280,10 @@ collection.Rooms = Backbone.Collection.extend({
 collection.Divisions = Backbone.Collection.extend({
 		model: model.Division ,
 		localStorage: new Store("Divisions") ,
+		backend: "divisions" ,
+		initialize: function() {
+		    this.bindBackend();
+		} ,
 		url: function() {
 			return '/trn/' + tab.tournament_id + '/divisions';
 		}
@@ -339,13 +352,30 @@ collection.restoreReferences = function(){
 		//console.log("checking " + col_name);
 		//for each model in the collection, look for objects in its attributes that should be models.
 		col.forEach(function(elem, index){
-			
 			//for each attribute, see if it has an id.
 			$.each(elem.attributes, function(attr_name, attr){
-				//console.log(attr);
+				//restore references for strings containing ids and objects containing string ids
+				if(attr instanceof Array){ //if we have an array
+					//restore references for each thing in array
+					$.each(attr, function(i, array_attr){
+							var model = undefined;
+							if(array_attr.id != undefined){
+								model = collection.getModelFromId(array_attr.id);
+							} else if(array_attr.length != undefined) {
+								model = collection.getModelFromId(array_attr);
+							}
+							
+							//if we found a model for the id, replace the object copy with the model reference
+							if(model != undefined && typeof model.attributes === "object"){
+								attr[i] = model;
 
-				if(attr != null && attr.id != undefined){
-					var model = collection.getModelFromId(attr.id);
+								console.dbg("creating array reference from " + col_name + " array to " + attr_name);
+							}
+						
+					});
+				}
+				else if(attr != null && attr_name != "_id" ){
+					var model = collection.getModelFromId(attr);
 					//if we found a model for the id, replace the object copy with the model reference
 					if(model != undefined && typeof model.attributes === "object"){
 						var setmodel = {};
@@ -353,21 +383,7 @@ collection.restoreReferences = function(){
 						elem.setByName(attr_name, model, {silent: true});
 						console.dbg("creating reference from " + col_name + " to " + attr_name);
 					}
-				} else if(attr instanceof Array){ //if we have an array
-					//restore references for each thing in array
-					$.each(attr, function(i, array_attr){
-						if(array_attr.id != undefined){
-
-							var model = collection.getModelFromId(array_attr.id);
-							//if we found a model for the id, replace the object copy with the model reference
-							if(model != undefined && typeof model.attributes === "object"){
-								attr[i] = model;
-
-								console.dbg("creating array reference from " + col_name + " array to " + attr_name);
-							}
-						}
-					});
-				}
+				} 
 			})
 
 		});
@@ -378,9 +394,15 @@ collection.restoreReferences = function(){
 		console.log(e.message + " " + e.stack);
 	}
 
+	collection.restoreValues();
+
+}
+
 	//convert results, round numbers, sides back to integers. 
 	//stop scheduling to boolean
 	//convert speaker points back to floats
+collection.restoreValues = function(){
+
 	$.each(collection.rounds, function(i){
 		var round = collection.rounds.at(i);
 		var round_number = round.get("round_number");
@@ -420,9 +442,53 @@ collection.restoreReferences = function(){
 			division.set({flighted_rounds: true});
 		}
 	})
-
 }
 
+//restore references before attributes object from server is turned back into a model
+//called from backbone.io.js
+collection.restore = function(elem){
+	//for each attribute, see if it has an id.
+	$.each(elem, function(attr_name, attr){
+
+		//try to turn strings into models
+		if(attr instanceof Array){ //if we have an array
+			//restore references for each thing in array
+			$.each(attr, function(i, array_attr){
+					var model = undefined;
+					if(array_attr.id != undefined){
+						model = collection.getModelFromId(array_attr.id);
+					} else if(array_attr.length != undefined) {
+						model = collection.getModelFromId(array_attr);
+					}
+					
+					//if we found a model for the id, replace the object copy with the model reference
+					if(model != undefined && typeof model.attributes === "object"){
+						attr[i] = model;
+
+					}
+				
+			});
+		}
+		else if(attr.length != undefined && attr_name != "_id"){
+			var model = collection.getModelFromId(attr);
+			//if we found a model for the id, replace the object copy with the model reference
+			if(model != undefined && typeof model.attributes === "object"){
+				var setmodel = {};
+				setmodel[attr_name] = model;
+				elem[attr_name] = model;
+			}
+		}
+	})
+};
+
+collection.prepareForMongoose = function(obj){
+	$.each(obj, function(attr_name, attr){
+		if(attr.id != undefined){
+			//replace object containing id with string.
+			obj[attr_name] = attr.id;
+		}
+	});
+}
 
 //save every model in every collection
 collection.saveAll = function(){

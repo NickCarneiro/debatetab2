@@ -66,16 +66,25 @@ Load localStorage into Collections
 =========================================
 */	
 
+collection.countDownLatch = 4
+collection.decLatch = function(){
+	collection.countDownLatch--;
+	if(collection.countDownLatch === 0){
+		console.log("All collections fetched. Restoring references.");
+		collection.restoreReferences();
+		view.renderAll();
+	}
+}
 //note: calling fetch runs the constructors of the models.
-collection.teams.fetch({silent:true});
-collection.divisions.fetch({silent:true});
-collection.schools.fetch();
-collection.judges.fetch({silent:true});
-collection.rooms.fetch({silent:true});
-collection.rounds.fetch({silent:true});
+collection.teams.fetch({silent:true, success: collection.decLatch});
+collection.divisions.fetch({silent: true, success: collection.decLatch});
+collection.schools.fetch({silent: true, success: collection.decLatch});
+collection.judges.fetch({silent:true, success: collection.decLatch});
+collection.rooms.fetch({silent:true, success: collection.decLatch});
+collection.rounds.fetch({silent:true, success: collection.decLatch});
 
-collection.restoreReferences();	
-
+//we need to get all models from the server, then restore references for everything. 
+//Fetch calls are asynchronous.
 
 
 /*
