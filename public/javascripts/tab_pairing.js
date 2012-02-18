@@ -763,12 +763,11 @@ pairing.pairPrelim = function(round_number, division, options){
 				if(pairing.prelimRoundValid(team1, team2)){
 					
 					//put both teams in round
-					var round = new model.Round({division: division, round_number: parseInt(round_number)});
+					var round = new model.Round({division: division, round_number: parseInt(round_number), judge: undefined});
 					round.set({team1: team1});
 					round.set({team2: team2});
 					round.set({aff: 0});
 					collection.rounds.add(round);
-					round.save();
 					//mark as paired
 					already_paired[team1.id] = true;
 					already_paired[team2.id] = true;
@@ -803,6 +802,7 @@ pairing.pairPrelim = function(round_number, division, options){
 		pairing.pairJudges(round_number, division);
 		pairing.pairRooms(round_number, division);
 		
+
 
 	} else { //first round. don't worry about side constraints
 		
@@ -862,11 +862,10 @@ pairing.pairPrelim = function(round_number, division, options){
 			if(pairing.prelimRoundValid(team1, team2)){
 				
 				//put both teams in round
-				var round = new model.Round({division: division, round_number: parseInt(round_number)});
+				var round = new model.Round({division: division, round_number: parseInt(round_number), judge: undefined});
 				round.set({team1: team1});
 				round.set({team2: team2});
 				collection.rounds.add(round);
-				round.save();
 				//mark as paired
 				already_paired[team1.id] = true;
 				already_paired[team2.id] = true;
@@ -908,9 +907,8 @@ pairing.pairRemainingTeams = function(round_number, division, unpaired_teams, op
 	} else if(unpaired_teams.length === 1){
 		//if it's just one team, give it a bye
 		console.dbg("creating a bye round because one team was left unpaired.");
-		var round = new model.Round({round_number: parseInt(round_number), division: division, team1: unpaired_teams[0]});
+		var round = new model.Round({round_number: parseInt(round_number), division: division, team1: unpaired_teams[0], judge: undefined});
 		collection.rounds.add(round);
-		round.save();
 	} else if (unpaired_teams.length === 2){
 		//2 unpaired teams. find rounds for them
 		console.log("There were " + unpaired_teams.length + " unpaired teams");
@@ -933,10 +931,10 @@ pairing.pairRemainingTeams = function(round_number, division, unpaired_teams, op
 				var new_round = new model.Round({round_number: parseInt(round_number), 
 					division: division,
 					team1: team1,
-					team2: unpaired_teams[0]
+					team2: unpaired_teams[0],
+					judge: undefined
 					});
 				collection.rounds.add(new_round);
-				new_round.save();
 				//update existing round with swap
 				round.set({team1: team2, team2: unpaired_teams[1]});
 				return false;
@@ -948,10 +946,10 @@ pairing.pairRemainingTeams = function(round_number, division, unpaired_teams, op
 				var new_round = new model.Round({round_number: parseInt(round_number), 
 					division: division,
 					team1: team1,
-					team2: unpaired_teams[1]
+					team2: unpaired_teams[1],
+					judge: undefined
 					});
 				collection.rounds.add(new_round);
-				new_round.save();
 				//update existing round with swap
 				round.set({team1: team2, team2: unpaired_teams[0]});
 				return false;
@@ -1040,7 +1038,6 @@ pairing.pairJudges = function(round_number, division){
 						collection.rounds.at(i).set({flight: "B"});
 					}
 					
-					collection.rounds.at(i).save();
 					break; //successfully paired a judge to this round. go to next round.
 				} else {
 					//console.log("could not pair " + judge.get("name"));
@@ -1087,7 +1084,6 @@ pairing.pairJudges = function(round_number, division){
 				if(pairing.canJudge(collection.rounds.at(i).get("team1"), collection.rounds.at(i).get("team2"), judge, round_number, division)){
 					//console.log("successfully paired " + judge.get("name"));
 					collection.rounds.at(i).set({judge: judge});
-					collection.rounds.at(i).save();
 					paired_judges.push(judge);
 					
 					break; //successfully paired a judge to this round. go to next round.
@@ -1190,7 +1186,6 @@ pairing.pairRooms = function(round_number, division){
 					var room = rooms.pop();
 					judge_room_map[round.get("judge").id] = room;
 					round.set({room: room});
-					round.save();
 				} else {
 					roomless++;
 				}
@@ -1199,7 +1194,6 @@ pairing.pairRooms = function(round_number, division){
 				//this judge has already had a room assigned
 				var room = judge_room_map[round.get("judge").id];
 				round.set({room: room});
-				round.save();
 			}
 
 		});
@@ -1244,7 +1238,6 @@ pairing.pairRooms = function(round_number, division){
 				if(rooms.length > 0){
 					room = rooms.pop();
 					collection.rounds.at(i).set({room: room});
-					collection.rounds.at(i).save();
 				} else {
 					roomless++;
 					console.dbg("WARNING: Needed another room.")
@@ -1297,7 +1290,6 @@ pairing.pairRooms = function(round_number, division){
 					var room_index = rooms.indexOf(room1);
 					
 					collection.rounds.at(i).set({room: room1});
-					collection.rounds.at(i).save();
 					rooms.splice(room_index, 1);
 					
 					
@@ -1305,7 +1297,6 @@ pairing.pairRooms = function(round_number, division){
 					//team2 stays in same room
 					var room_index = rooms.indexOf(room2);
 					collection.rounds.at(i).set({room: room2});
-					collection.rounds.at(i).save();
 					rooms.splice(room_index, 1);
 					
 				} else {
@@ -1314,7 +1305,6 @@ pairing.pairRooms = function(round_number, division){
 					
 					if(rooms.length > 0){
 						collection.rounds.at(i).set({room: rooms.pop()});
-						collection.rounds.at(i).save();
 					} else {
 						roomless++;
 						console.log("WARNING: Needed another room");

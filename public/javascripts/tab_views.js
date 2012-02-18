@@ -840,6 +840,7 @@ view.RoundTable = Backbone.View.extend({
 		$("#rounds_table").hide();
 		$("#pairing_indicator").show('fast', function(){
 			pairing.pairUilPrelim(round_number, division);
+			collection.saveThis(collection.rounds);
 			$("#pairing_indicator").hide();
 			$("#rounds_table").show();
 		});

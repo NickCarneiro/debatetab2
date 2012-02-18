@@ -18,9 +18,7 @@ var express = require('express'),
 		sys = require('util'),
 		mime = require('mime'),
 		cleanCSS = require('clean-css'),
-		app = module.exports = express.createServer(),
-		$ = require("cheerio");
-		app.cheerio = $;
+		app = module.exports = express.createServer();
 		var mongoose = require("mongoose");
 		var Models = require("./tab_models");
 		var backboneio = require("./backbone.io");

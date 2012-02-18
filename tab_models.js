@@ -12,7 +12,9 @@ exports.Round = new Schema({
 	id			: ObjectId,
 	division	: ObjectId,
 	round_number	: Number,
-	result		: String
+	result		: String,
+	judge     : ObjectId,
+	room	:	ObjectId
 });
 
 exports.Room = new Schema({

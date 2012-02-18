@@ -522,6 +522,14 @@ collection.saveAll = function(){
 		});
 	});
 }
+
+//save every model in THIS collection
+collection.saveThis = function(col){
+	col.forEach(function(elem, index){
+		
+		elem.save();
+	});
+};
 //iterate over every collection, looking for a model with the id
 collection.getModelFromId = function(model_id){
 	var matching_model = undefined;
