@@ -42,6 +42,7 @@ $(function(){
 		
 	});
 
+
 	//dialogs
 	$(".dialog").hide();
 
@@ -66,7 +67,7 @@ Load localStorage into Collections
 =========================================
 */	
 
-collection.countDownLatch = 4
+collection.countDownLatch = 6
 collection.decLatch = function(){
 	collection.countDownLatch--;
 	if(collection.countDownLatch === 0){

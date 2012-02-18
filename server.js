@@ -41,9 +41,22 @@ var express = require('express'),
 		var judge_backend = backboneio.createBackend();
 		var Judge = mongoose.model('Judge', Models.Judge);
 		judge_backend.use(backboneio.middleware.mongooseStore(Judge));
+
+		var team_backend = backboneio.createBackend();
+		var Team = mongoose.model('Team', Models.Team);
+		team_backend.use(backboneio.middleware.mongooseStore(Team));
+
+		var round_backend = backboneio.createBackend();
+		var Round = mongoose.model('Round', Models.Round);
+		round_backend.use(backboneio.middleware.mongooseStore(Round));
 		
 		mongoose.connect('mongodb://localhost/test');
-		backboneio.listen(app, { schools: school_backend, divisions: division_backend, rooms: room_backend, judges: judge_backend });
+		backboneio.listen(app, { schools: school_backend, 
+			divisions: division_backend, 
+			rooms: room_backend, 
+			judges: judge_backend,
+			teams: team_backend,
+			rounds: round_backend });
 
 
 

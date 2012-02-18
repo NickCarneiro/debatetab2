@@ -458,8 +458,11 @@ view.Room = Backbone.View.extend({
 	} ,
 	render: function(){
 		try {
+		if(typeof this.model != Backbone.Model){
+			throw new Exception("Could not render room. No valid room model attached.");
+		}
 		var division = this.model.get("division");
-
+		
 		var division_name = (division === undefined) ? "No division" : division ? division.get("division_name") : "No Division Assigned";
 		$(this.el).html('<td class="name">' + this.model.get("name") + '</td>' +
 			' <td>' + division_name + '</td>' +
@@ -1145,7 +1148,12 @@ view.Division = Backbone.View.extend({
 			title : 'Delete Division',
 			buttons : {
 				"Yes": function() {
-					collection.deleteDivision(division);
+					try {
+						collection.deleteDivision(division);
+					}
+					catch(e){
+						console.log(e.stack);
+					}
 					$(this).dialog("close");
 				},
 				"No": function() {

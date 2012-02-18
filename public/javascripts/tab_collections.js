@@ -200,7 +200,10 @@ collection.Teams = Backbone.Collection.extend({
 	},
 
 	localStorage: new Store("Teams") ,
-
+	backend: "teams",
+	initialize: function() {
+		this.bindBackend();
+	} ,
 	url: function() {
 		return '/trn/' + tab.tournament_id + '/teams';
 	}
@@ -225,7 +228,7 @@ collection.Judges = Backbone.Collection.extend({
 		localStorage: new Store("Judges") ,
 		backend: "judges",
 		initialize: function() {
-		    this.bindBackend();
+			this.bindBackend();
 		} ,
 		url: function() {
 			return '/trn/' + tab.tournament_id + '/judges';
@@ -292,6 +295,10 @@ collection.Divisions = Backbone.Collection.extend({
 collection.Rounds = Backbone.Collection.extend({
 		model: model.Round ,
 		localStorage: new Store("Rounds"),
+		backend: "rounds",
+		initialize: function() {
+			this.bindBackend();
+		} ,
 		filterRounds: function(round_number, division){
 			return _(this.filter(function(data){
 				
@@ -450,6 +457,9 @@ collection.restore = function(elem){
 	//for each attribute, see if it has an id.
 	$.each(elem, function(attr_name, attr){
 
+		if(attr == null){
+			return true;
+		}
 		//try to turn strings into models
 		if(attr instanceof Array){ //if we have an array
 			//restore references for each thing in array
@@ -469,21 +479,26 @@ collection.restore = function(elem){
 				
 			});
 		}
-		else if(attr.length != undefined && attr_name != "_id"){
+		else if(typeof attr === "string" && attr_name != "_id"){
 			var model = collection.getModelFromId(attr);
 			//if we found a model for the id, replace the object copy with the model reference
 			if(model != undefined && typeof model.attributes === "object"){
-				var setmodel = {};
-				setmodel[attr_name] = model;
 				elem[attr_name] = model;
 			}
+		} else {
+			//console.log("else: " + attr_name);
 		}
 	})
+
 };
 
 collection.prepareForMongoose = function(obj){
 	$.each(obj, function(attr_name, attr){
-		if(attr.id != undefined){
+		if(attr == null){
+			
+			return true;
+		} else if(attr.id != undefined){
+			
 			//replace object containing id with string.
 			obj[attr_name] = attr.id;
 		}
@@ -502,8 +517,7 @@ collection.saveAll = function(){
 		//console.log("checking " + col_name);
 		//for each model in the collection, look for objects in its attributes that should be models.
 		col.forEach(function(elem, index){
-			console.log("elem");
-			console.log(elem);
+			
 			elem.save();
 		});
 	});
@@ -585,7 +599,7 @@ collection.importNative = function(json){
 	collection.emptyCollections();
 	localStorage.clear();
 	
-	var collections =(json);
+	var collections = json;
 	//col is plain javascript object containing arrays.
 	
 	//create models and push to collections.
@@ -613,15 +627,26 @@ collection.importNative = function(json){
 
 
 collection.emptyCollections = function(){
-	collection.divisions.reset();
-	collection.teams.reset();
-	collection.schools.reset();
-	collection.judges.reset();
-	collection.rooms.reset();
-	collection.rounds.reset();
+	collection.emptyCollection(collection.divisions);
+	collection.emptyCollection(collection.teams);
+	collection.emptyCollection(collection.rounds);
+	collection.emptyCollection(collection.judges);
+	collection.emptyCollection(collection.rooms);
+	collection.emptyCollection(collection.schools);
 	localStorage.clear();
 }
 
+//destroy all models in a collection silently
+collection.emptyCollection = function(collection){
+	var ids = []
+	collection.each(function(model){
+		ids.push(model.id);
+	});
+
+	$.each(ids, function(i, model_id){
+		collection.get(model_id).destroy({silent: true});
+	});
+}
 collection.teamsInDivision = function(division){
 	var teamcount = 0;
 	for(var i = 0; i < collection.teams.length; i++){
@@ -674,6 +699,7 @@ collection.generateTeamCode = function(team){
 
 //delete all references to a division and then delete the division itself
 collection.deleteDivision = function(division){
+
 	//delete associated rooms
 	collection.rooms.each(function(room){
 		if(room.get("division") === division){

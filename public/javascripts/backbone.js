@@ -1312,7 +1312,7 @@ Backbone.toJSONReferences = function(){
 
 
   $.each(clone, function(name, attr){
-    if(attr === undefined){
+    if(attr === undefined || attr == null){
       return true;
     }
     //replace references to models with little objects containing their ids.
