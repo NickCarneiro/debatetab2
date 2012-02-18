@@ -458,16 +458,17 @@ view.Room = Backbone.View.extend({
 	} ,
 	render: function(){
 		try {
-		if(typeof this.model != Backbone.Model){
-			throw new Exception("Could not render room. No valid room model attached.");
-		}
-		var division = this.model.get("division");
-		
-		var division_name = (division === undefined) ? "No division" : division ? division.get("division_name") : "No Division Assigned";
-		$(this.el).html('<td class="name">' + this.model.get("name") + '</td>' +
-			' <td>' + division_name + '</td>' +
-			'<td class="remove"><button>Remove</button></td>');
+			if(! this.model instanceof Backbone.Model){
+				throw new Exception("Could not render room. No valid room model attached.");
+			}
+			var division = this.model.get("division");
+			
+			var division_name = (division === undefined) ? "No division" : division ? division.get("division_name") : "No Division Assigned";
+			$(this.el).html('<td class="name">' + this.model.get("name") + '</td>' +
+				' <td>' + division_name + '</td>' +
+				'<td class="remove"><button>Remove</button></td>');
 		} catch(e){
+			console.log(e.message);
 			console.log(e.stack);
 		} finally {
 			return this;
@@ -879,7 +880,6 @@ view.RoundTable = Backbone.View.extend({
 	} ,
 
 	renderRoundNumberSelect: function(){
-		
 		$("#rounds_round_number_select").empty();
 		//show round options for selected division
 		var div_id = $("#rounds_division_select").val();
@@ -887,10 +887,14 @@ view.RoundTable = Backbone.View.extend({
 		if(div == undefined){
 			return;
 		}
-		if(div.get("schedule") != undefined){
-			for(var i = 0; i < div.get("schedule").length; i++){
-				this.appendRoundNumberOption(div.get("schedule")[i].round_number);
+		if(div.get("prelims") != undefined){
+			for(var i = 0; i < div.get("prelims"); i++){
+				this.appendRoundNumberOption(i + 1);
 			}
+		} else {
+			//show dialog about setting up division
+			view.showMessageDialog("You must configure this division in the Divisions tab before you can put rounds in it.");
+			//todo: pulse the divisions tab.
 		}
 
 		this.filterDivisions();
@@ -1297,14 +1301,22 @@ view.SetupScreen = Backbone.View.extend({
 
 });
 
+					
+
 view.showMessageDialog = function(message){
 	$("#message_dialog_message").text(message);
-	$("#message_dialog").dialog({ buttons: [
-	    {
-	        text: "Ok",
-	        click: function() { $(this).dialog("close"); }
-	    }
-	] });
+	$("#message_dialog").dialog(
+		{ 
+			buttons: {
+
+				"Save" : {
+					text: "OK" ,
+					click: function() { $(this).dialog("close"); } ,
+					class: "btn btn-large"
+				}
+			}
+		}	
+	);
 }
 
 //called to show a list of nonfatal warnings, like not having enough rooms.
