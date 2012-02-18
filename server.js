@@ -23,7 +23,7 @@ var express = require('express'),
 		app.cheerio = $;
 		var mongoose = require("mongoose");
 		var Models = require("./tab_models");
-		var backboneio = require("backbone.io");
+		var backboneio = require("./backbone.io");
 		
 		//set up backends for each collection
 		var school_backend = backboneio.createBackend();
