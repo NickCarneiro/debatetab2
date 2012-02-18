@@ -107,6 +107,7 @@ view.TeamTable = Backbone.View.extend({
 		collection.schools.bind("reset", this.render, this);
 
 		collection.divisions.bind("add", this.renderDivisionSelect, this);
+		collection.divisions.bind("sync", this.render, this);
 		this.renderDivisionSelect();
 		this.render();
 		
@@ -375,7 +376,7 @@ view.JudgeTable = Backbone.View.extend({
 		collection.schools.bind("reset", this.render, this);
 		collection.schools.bind("change", this.render, this);
 		collection.divisions.bind("reset", this.render, this);
-
+		collection.divisions.bind("sync", this.render, this);
 		
 
     	
@@ -497,13 +498,14 @@ view.RoomTable = Backbone.View.extend({
 		collection.rooms.bind("add", this.appendRoom);
 		collection.rooms.bind("reset", this.render, this);
 		collection.divisions.bind("reset", this.render);
+		collection.divisions.bind("sync", this.render);
 		this.render();
 		
 	} ,
 	
 	render: function(){
 		$("#newroom_division").empty();
-		$("#room_table").empty();
+		$("#rooms_table").empty();
 		_(collection.rooms.models).each(function(room){ // in case collection is not empty
         	this.appendRoom(room);
     	}, this);
