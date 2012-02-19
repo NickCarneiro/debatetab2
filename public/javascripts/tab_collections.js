@@ -493,6 +493,7 @@ collection.restore = function(elem){
 };
 
 collection.prepareForMongoose = function(obj){
+	console.log(obj);
 	$.each(obj, function(attr_name, attr){
 		if(attr == null){
 			
@@ -803,7 +804,6 @@ collection.importJoyFile = function(joy_file){
 			var school = new model.School();
 			school.set({school_name: joy_school.name});
 			collection.schools.add(school);
-			//school.save();
 			schools[joy_school.number] = school;
 		} else if(section === "Teams"){
 			var joy_team = collection.parseTeamLine(line);
@@ -815,10 +815,9 @@ collection.importJoyFile = function(joy_file){
 				competitors.push({name: name});
 			});
 			team.set({competitors: competitors});
-			//generate team code
+						//generate team code
 			collection.generateTeamCode(team);
 			collection.teams.add(team);
-			//team.save();
 		} else if(section === "Judges"){
 			var joy_judge = collection.parseJudgeLine(line);
 			var judge = new model.Judge();
@@ -837,7 +836,6 @@ collection.importJoyFile = function(joy_file){
 			judge.set({school: schools[joy_judge.school_number]});
 			collection.judges.add(judge);
 			
-			//judge.save();
 		}
 
 

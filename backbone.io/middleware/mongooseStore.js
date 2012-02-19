@@ -13,7 +13,7 @@ module.exports = function(Model) {
 				console.log("creating model");
 				console.log(req.model);
 				Model.create(req.model, callback);
-
+				
 			},
 			
 			read: function() {

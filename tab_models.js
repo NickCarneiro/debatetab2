@@ -57,7 +57,7 @@ exports.Team = new Schema({
 
 	stop_scheduling	: Boolean , //true if team drops out of tournament 
 								//and needs to be taken off pairing.
-	members		: Array
+	competitors : [{}]
 });
 
 exports.Division = new Schema({

@@ -460,8 +460,9 @@ view.TeamForm = Backbone.View.extend({
 	    	this.addSchoolSelect(school);
 		}, this);
 
-
+		//if we're editing an existing team, fill in its info
 		if(model != undefined){
+	
 			this.model = model;
 		
 			$("#newteam_id").val(this.model.id);
@@ -470,14 +471,38 @@ view.TeamForm = Backbone.View.extend({
 			$("#newteam_name").val(this.model.get("team_code"));
 			$("#newteam_stop_scheduling").prop("checked", this.model.get("stop_scheduling"));
 			$("#newteam_competitors").html('');
+			var comp_per_team = this.model.get("division").get("comp_per_team") || 1;
 			//TODO populate competitor names and phone numbers here
 			var competitors = this.model.get("competitors");
-			for(var i = 0; i < competitors.length; i++){
-				$("#newteam_competitors").append('Name: <input class="newteam_competitor" type="text" value="' + competitors[i].name + '"/> <br />');
-				var phone_number = competitors[i].phone_number || "";
-				$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" value="' + phone_number + '"/> <br /> <br />');
+			if(competitors.length > 0){
+				
+			
+				for(var i = 0; i < competitors.length; i++){
+					$("#newteam_competitors").append('Name: <input class="newteam_competitor" type="text" value="' 
+						+ competitors[i].name + '"/> <br />');
+					var phone_number = competitors[i].phone_number || "";
+					$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" value="' 
+						+ phone_number + '"/> <br /> <br />');
+				}
+
+			} else {
+				for(var i = 0; i < comp_per_team; i++){
+					$("#newteam_competitors").append('Name: <input class="newteam_competitor" type="text" value="' 
+						+ '"/> <br />');
+					$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" value="' 
+						+'"/> <br /> <br />');
+				}
 			}
 
+		//else, we are creating a new team. still want to render competitor boxes.
+		} else {
+			var comp_per_team = this.model.get("division").get("comp_per_team") || 1;
+			for(var i = 0; i < comp_per_team; i++){
+				$("#newteam_competitors").append('Name: <input class="newteam_competitor" type="text" value="' 
+					+ '"/> <br />');
+				$("#newteam_competitors").append('Phone: <input class="competitor_phone" type="text" value="' 
+					+ '"/> <br /> <br />');
+			}
 		}
 		$("#team_form").dialog({
 			width: 300,
@@ -642,9 +667,8 @@ view.TeamForm = Backbone.View.extend({
 			
 		});
 	
-		
 	if(id.length > 0){
-		
+		//update existing team
 		var team = collection.getTeamFromId(id);
 			team.set({
 				team_code: team_code,
@@ -654,9 +678,10 @@ view.TeamForm = Backbone.View.extend({
 				stop_scheduling: stop_scheduling
 			});
 		
-		}
-		else{
-		
+	}
+	//add new team
+	else {
+	
 		var team = new model.Team();
 			team.set({
 				team_code: team_code,
@@ -666,10 +691,12 @@ view.TeamForm = Backbone.View.extend({
 				stop_scheduling: stop_scheduling
 		});
 		collection.teams.add(team);
-		}
-		
-		team.save();
-		
+	}
+	
+	console.log("before save");
+	console.log(team);
+	team.save();
+	
 	}
 });
 

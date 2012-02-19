@@ -1328,6 +1328,9 @@ Backbone.toJSONReferences = function(){
         if(array_attr.cid != undefined && array_attr.id != undefined){
           //found reference to backbone model.
           copy.push({id: array_attr.id});
+          //we also want to copy arrays of competitor objects. (not models)
+        } else if(array_attr instanceof Object){
+            copy.push(array_attr)
         }
       });
       

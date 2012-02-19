@@ -659,6 +659,8 @@ view.RoundTable = Backbone.View.extend({
 	events: {
 		
 		"click #pair_round_button" : "pairRoundConfirm",
+		"click #pair_judge_button" : "pairJudgesConfirm",
+		"click #pair_rooms_button" : "pairRoomsConfirm",
 		"click #print_ballots_button" : "printBallots",
 		"click #print_pairings_button" : "printPairings",
 		"change #rounds_division_select" : "renderRoundNumberSelect",
@@ -844,8 +846,6 @@ view.RoundTable = Backbone.View.extend({
 			$("#pairing_indicator").hide();
 			$("#rounds_table").show();
 		});
-		
-		
 	},
 	pairRoundConfirm: function(){
 		
@@ -880,6 +880,26 @@ view.RoundTable = Backbone.View.extend({
 		}
 
 		
+	} ,
+
+	pairJudgesConfirm: function(){
+		this.pairJudges();
+	} ,
+	pairRoomsConfirm: function(){
+		this.pairRooms();
+	} ,
+	pairJudges: function(){
+		var div_id = $("#rounds_division_select").val();
+		var division = collection.getDivisionFromId(div_id);
+		var round_number = parseInt($("#rounds_round_number_select").val());
+		pairing.pairJudges(round_number, division);
+	} ,
+
+	pairRooms: function(){
+		var div_id = $("#rounds_division_select").val();
+		var division = collection.getDivisionFromId(div_id);
+		var round_number = parseInt($("#rounds_round_number_select").val());
+		pairing.pairRooms(round_number, division);
 	} ,
 
 	renderRoundNumberSelect: function(){
