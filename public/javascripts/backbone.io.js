@@ -23,8 +23,7 @@
 				};
 
 				//turns object containing id into a string containing id.
-				console.log("before preparing");
-				console.log(req.model);
+			
 				collection.prepareForMongoose(req.model);
 				backend.socket.emit('sync', req, function(err, resp) {
 					if (err) {

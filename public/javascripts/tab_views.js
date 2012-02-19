@@ -660,7 +660,7 @@ view.RoundTable = Backbone.View.extend({
 		
 		"click #pair_round_button" : "pairRoundConfirm",
 		"click #pair_judge_button" : "pairJudgesConfirm",
-		"click #pair_rooms_button" : "pairRoomsConfirm",
+		"click #pair_room_button" : "pairRoomsConfirm",
 		"click #print_ballots_button" : "printBallots",
 		"click #print_pairings_button" : "printPairings",
 		"change #rounds_division_select" : "renderRoundNumberSelect",

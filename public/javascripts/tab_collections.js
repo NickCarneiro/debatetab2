@@ -493,7 +493,6 @@ collection.restore = function(elem){
 };
 
 collection.prepareForMongoose = function(obj){
-	console.log(obj);
 	$.each(obj, function(attr_name, attr){
 		if(attr == null){
 			
