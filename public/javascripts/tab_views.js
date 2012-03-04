@@ -160,15 +160,17 @@ view.TeamTable = Backbone.View.extend({
 		this.clearView();
 		//populate table
 		var division_id = $("#teams_division_select").val();
+		var	teams_total = 0;
 		var division = collection.getDivisionFromId(division_id);
 		_(collection.teams.models).each(function(team){ // for pre-existing teams
 			
 			if(team.get("division") === division){
 				this.appendTeam(team);
+				teams_total = teams_total + 1;
 			}
         	
     	}, this);
-
+		$("#teams_total").text(teams_total);
 	} ,
 	showEditForm: function(){
 		//populate form with existing values

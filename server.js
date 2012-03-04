@@ -65,7 +65,7 @@ var express = require('express'),
 	SETTINGS
 ============================================================================= */
 
-var port = 3003,
+var port = 3002,
 		cacheAge = 60000 * 60 * 24 * 365,
 		logs = {
 			set: false,
@@ -155,7 +155,7 @@ app.configure('development', function() {
 	var Client = require('twilio').Client,
 	Twiml = require('twilio').Twiml,
 	sys = require('sys'),
-	tClient = new Client('AC89170a4e43fc4a38daed8f055879a20f', 'b6fd343fee0be8aaad34ed8df07ffb3f', 'debatetab.com', {port:3021});
+	tClient = new Client('AC89170a4e43fc4a38daed8f055879a20f', 'b6fd343fee0be8aaad34ed8df07ffb3f', 'debatetab.com', {port:3022});
 
 	var phone = tClient.getPhoneNumber('+15128430409');
 	// code to send MASS texts

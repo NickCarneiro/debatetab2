@@ -256,6 +256,14 @@ input.division_list{
   display: inline-block;
 
 }
+#teams_total{
+	display: inline-block;
+}
+
+#team_stats{
+	display: inline-block;
+	margin: 0px 0px 0px 100px;
+}
 
 /*
 .btn-group a{
