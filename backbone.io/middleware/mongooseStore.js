@@ -10,8 +10,6 @@ module.exports = function(Model) {
 				var now = new Date();
 				var jsonDate = now.toJSON();
 				req.model.updated = jsonDate;
-				console.log("creating model");
-				console.log(req.model);
 				Model.create(req.model, callback);
 				
 			},
@@ -25,7 +23,6 @@ module.exports = function(Model) {
 			},
 			
 			update: function() {
-				console.log("creating model");
 				console.log(req.model);
 				var model = {};
 				for (var key in req.model) {
@@ -40,7 +37,6 @@ module.exports = function(Model) {
 			},
 			
 			delete: function() {
-				console.log("delete!!");
 				Model.remove({ _id: req.model._id }, function(err) {
 					if (err) return next(err);
 					res.end(req.model);

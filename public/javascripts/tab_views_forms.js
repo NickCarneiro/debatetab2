@@ -452,11 +452,12 @@ view.TeamForm = Backbone.View.extend({
 	} ,
 
 	render: function(model){
+		this.clearEditForm();
 		//populate form
-		_(collection.divisions.models).each(function(division){ // pre-existing divisions
+		collection.divisions.each(function(division){ // pre-existing divisions
 	    	this.addDivSelect(division);
 		}, this);
-		_(collection.schools.models).each(function(school){ // pre-existing schools
+		collection.schools.each(function(school){ // pre-existing schools
 	    	this.addSchoolSelect(school);
 		}, this);
 
@@ -496,7 +497,12 @@ view.TeamForm = Backbone.View.extend({
 
 		//else, we are creating a new team. still want to render competitor boxes.
 		} else {
-			var comp_per_team = this.model.get("division").get("comp_per_team") || 1;
+			var division_id = $("#newteam_division").val();
+			var division = collection.getDivisionFromId(division_id);
+			console.log("division: " + division.get("division_name") + " comp per team: " + division.get("comp_per_team"));
+			var comp_per_team = division.get("comp_per_team") || 1;
+			//clear competitors area
+			$("#newteam_competitors").html("");
 			for(var i = 0; i < comp_per_team; i++){
 				$("#newteam_competitors").append('Name: <input class="newteam_competitor" type="text" value="' 
 					+ '"/> <br />');
@@ -610,8 +616,8 @@ view.TeamForm = Backbone.View.extend({
 
 	clearEditForm: function(){
 		$("#newteam_id").val("");
-		//$("#newteam_division").val("");
-		//$("#newteam_school").val("");
+		$("#newteam_division").html("");
+		$("#newteam_school").html("");
 		$("#newteam_competitors").find("input").val("");
 		$("#newteam_name").val("");
 	} ,

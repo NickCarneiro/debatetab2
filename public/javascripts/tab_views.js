@@ -667,7 +667,8 @@ view.RoundTable = Backbone.View.extend({
 		"change #rounds_round_number_select" : "filterDivisions",
 		
 		"click #add_round_button": "addEmptyRound",
-		"click #validate_round": "validateRound"
+		"click #validate_round": "validateRound",
+		"click #powermatch_report": "powermatchReport"
 	
 
 	} ,
@@ -687,7 +688,9 @@ view.RoundTable = Backbone.View.extend({
 		this.render();
 		
 	} ,
-
+	powermatchReport: function(){
+		//todo show powermatch report
+	} ,
 	validateRound: function(){
 		
 		var div_id = $("#rounds_division_select").val();
@@ -1099,9 +1102,7 @@ view.School = Backbone.View.extend({
 view.SchoolTable = Backbone.View.extend({
 	el: $("#schools") , // attaches `this.el` to an existing element.
 	events: {
-		"click #add_school": "showEditForm" ,
-		"keyup #schools_search": "search"
-	
+		"click #add_school": "showEditForm"
 	} ,
 
 	initialize: function(){
