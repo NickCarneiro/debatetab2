@@ -34,6 +34,7 @@ exports.listen = function(server, backends, options) {
                     callback(err, result);
 
                     if (!err && req.method !== 'read') {
+                        //only emit events to clients running the same tournament
                         socket.broadcast.emit('synced', req.method, result);
                     }
                 });
